@@ -18,6 +18,7 @@ import ReactApexChart from 'react-apexcharts';
 import { useState,useEffect } from 'react';
 import { batteryData } from './Apicalling';
 import CircularProgress from '@mui/material/CircularProgress';
+import Thermal from './Thermal';
 // import { WMSData } from './Wms';
 
 // import BarChart from "react-bar-chart";
@@ -1350,7 +1351,8 @@ console.log(totaldaysumvalue)
       <div class="card-body">
       <h5 class="card-title"> <b style={{color:"black"}}>Thermal Storage</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/></h5> 
         <hr/>
-        <Line data={data} options={optionsdata} />
+        {/* <Line data={data} options={optionsdata} /> */}
+        <Thermal />
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
         <b style={{color:"black"}}>Cooling Energy:</b>
           <br/>
