@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import axios from 'axios';
 import Chart from 'react-apexcharts';
 import Card from 'react-bootstrap/Card';
+import { colors } from '@mui/material';
 
 
 const Thermal = () => {
@@ -36,7 +37,7 @@ const Thermal = () => {
       series :
           [{
               name : "power",
-              data : averageenergy.map((val)=>val)  
+              data : averageenergy.map((val)=>val.toFixed(2))  
           }],
   
           options: {
@@ -63,6 +64,7 @@ const Thermal = () => {
             dataLabels: {
               enabled: false,
             },
+            colors:["#4c4d49"],
             yaxis: {
               title: {
                 text: 'kW',
@@ -70,11 +72,32 @@ const Thermal = () => {
             },
             xaxis : {
               title : {text:"Time in Hour"},
-              categories :resultkeys.map((val)=>val)  
+              categories :resultkeys.map((val)=>val),
+              colors:"white"
             },
               labels: {
                 rotate: 0
-              }
+              },
+                   tooltip: {
+        enabled: true,
+        theme: 'dark',
+        style: {
+          background: '#222',
+          color: '#fff'
+        }
+            },
+            fill: {
+              opacity: 0.5,
+              type: 'gradient',
+              gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 100]
+              },
+            
+              colors: ['#0000FF']
+            },
             }
           }
   

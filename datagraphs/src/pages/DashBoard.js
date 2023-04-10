@@ -19,6 +19,9 @@ import { useState,useEffect } from 'react';
 import { batteryData } from './Apicalling';
 import CircularProgress from '@mui/material/CircularProgress';
 import Thermal from './Thermal';
+
+//import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
+// import { Zoom, ZoomButtons } from "recharts-plugin-zoom";
 // import { WMSData } from './Wms';
 
 // import BarChart from "react-bar-chart";
@@ -51,7 +54,7 @@ ChartJS.register(
   Filler,
   zoomPlugin
 );
-ChartJS.register(ArcElement, Tooltip, Legend);
+// ChartJS.register(ArcElement, Tooltip, Legend);
 
 
 
@@ -668,13 +671,16 @@ console.log(totaldaysumvalue)
           const prpercentage=rooftopPR*100
           const wheeledinsolarprpercentage=WheeledinsolarPR*100
 
-           values.push(gridvalue,totalrooftopgeneration,totalDeisel,totalsolargeneration)
+           values.push(gridvalue,totalrooftopgeneration,totalsolargeneration,totalDeisel)
+           console.log(values)
+
 
 
       //-------------------battery calculation----------------------
       const batteryStaus=[]
       const timeStamp=[]
       const Status=[]
+      const batteryresultdata=[]
 
       for(let i=0;i<battery.length;i+=15){
         if(battery[i].batteryStatus==="IDLE"){
@@ -689,6 +695,7 @@ console.log(totaldaysumvalue)
           timeStamp.push(timeString)
 
           Status.push(battery[i].batteryStatus)
+          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":'0',"timeStamp":timeString})
 
           
 
@@ -704,6 +711,7 @@ console.log(totaldaysumvalue)
           const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
+          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toString(),"timeStamp":timeString})
         }
         else if(battery[i].batteryStatus==="CHG"){
           batteryStaus.push(battery[i].chargingAVG)
@@ -716,6 +724,7 @@ console.log(totaldaysumvalue)
           const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
+          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toString(),"timeStamp":timeString})
 
         }
 
@@ -725,6 +734,7 @@ console.log(totaldaysumvalue)
       console.log(timeStamp)
       var time=timeStamp.map((res)=>res.split(",")[1])
       console.log(time)
+      console.log(batteryresultdata)
 
     //   var apexcharts = {
     //     series: [{ 
@@ -792,8 +802,8 @@ console.log(totaldaysumvalue)
 
     var apexcharts = {
       series: [{ 
-        name: "Battery Status",
-        data: batteryStaus.map((val)=>val)
+        name:"battery Status",
+        data: batteryresultdata.map((val)=>val.batteryEnergy)
       }],
     
       options: {
@@ -807,17 +817,18 @@ console.log(totaldaysumvalue)
         stroke: {
           curve: 'straight'
         },
-        colors: ['	#008000', '	#00FF00'], // Red for positive values, green for negative values
+        colors: ['blue', '	#00FF00'], // Red for positive values, green for negative values
         // colors: ({ value }) => {
         //   return value < 0 ? ['#00ff00'] : ['#ff0000'];
         // },
         xaxis: {
-          categories: timeStamp.map((time) => time),
+          categories: batteryresultdata.map((time) => time.timeStamp),
           labels: {
             style: {
               colors: 'white' // set the x-axis label color to red
             }
-          }
+          },
+          title : {text:"Time in 15min"},
         },
         fill: {
           opacity: 0.5,
@@ -953,7 +964,8 @@ console.log(totaldaysumvalue)
               toolbar: {
                 show: true
               },
-              labels: ["Grid", "Rooftop","Diesel","wheeled_in_solar"],
+              labels: ["Grid", "Rooftop","wheeled_in_solar","Diesel"],
+              //"wheeled_in_solar"
               
               plotOptions: {
                 pie: {
@@ -971,7 +983,8 @@ console.log(totaldaysumvalue)
               //     return [name, val.toFixed(1) + '%']
               //   }
               // },
-              colors: ['darkblue', '#FFAE42', '#546E7A', '#FF5349'],
+              colors: ['#1fc270', '#FFAE42','#FF5349', '#546E7A'],
+              //
               legend: {
                 show: true,
                 position:"top",
@@ -1232,6 +1245,25 @@ console.log(totaldaysumvalue)
   };
   // setBatterygraph(batterystate)
 
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active) {
+      return (
+        <div className="custom-tooltip">
+          <p className="label">{`Time: ${batteryresultdata.timeStamp}`}</p>
+          <p className="value">{`Value: ${batteryresultdata.batteryEnergy}`}</p>
+        </div>
+      );
+    }
+  
+    return null;
+  };
+  
+  const formatXAxis = (tickItem) => {
+    return tickItem;
+  };
+  
+
       
 
   return (
@@ -1242,7 +1274,7 @@ console.log(totaldaysumvalue)
     <div class="card" style={{width:"auto",marginTop:"20px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}} >
       <div class="card-body" >
         <div > 
-        <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Building Consumption</b> <span style={{textAlign:"end",color:'black'}}>31-03-2023</span> </h5>  
+        <h5 class="card-title" style={{textAlign:"left",color:"black"}}><b>Building Consumption</b> <span style={{textAlign:"end",color:'black'}}>06-04-2023</span> </h5>  
         </div>
         
        
@@ -1252,13 +1284,13 @@ console.log(totaldaysumvalue)
 <ReactApexChart options={state.options} series={state.series} type="pie" width={350}/>
 {/* <br/> */}
 <div className='card-text' style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',boxshadow:'5px 10px' }}> 
-<span style={{color:"black"}}><b>Wheeled in solar </b>:</span> <span style={{color:"yellow"}}>{totalwheeledinsolar} kWh </span>&nbsp;&nbsp;&nbsp;
+<span style={{color:"black"}}><b>Wheeled in solar </b>:</span> <span style={{color:"yellow"}}>{Math.trunc(totalsolargeneration)} kWh </span>&nbsp;&nbsp;&nbsp;
 <span style={{color:"black"}}><b>Diesel </b>:</span><span style={{color:"yellow"}}>{totalDeisel} kWh </span>
 
 <br/>
-<span style={{color:"black"}}><b>Rooftop</b>: </span><span style={{color:"yellow"}}>{totalrooftop} kWh</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style={{color:"black"}}><b>Rooftop</b>: </span><span style={{color:"yellow"}}>{totalrooftopgeneration} kWh</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-<span style={{color:"black"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{ totalEnergy} kWh</span>
+<span style={{color:"black"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{Math.trunc(gridvalue)} kWh</span>
 {/* totalEnergy, */}
 
 </div>
@@ -1272,7 +1304,7 @@ console.log(totaldaysumvalue)
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'100px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> 
         <hr/>
-        <p style={{textAlign:"end",color:"black"}}>31-03-2023</p>
+        <p style={{textAlign:"end",color:"black"}}>06-04-2023</p>
         <GaugeChart 
           id="gauge-chart5"
           nrOfLevels={10}
@@ -1315,7 +1347,7 @@ console.log(totaldaysumvalue)
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5>
         <hr/>
-        <p style={{textAlign:"end",color:"black"}}>31-03-2023</p>
+        <p style={{textAlign:"end",color:"black"}}>06-04-2023</p>
         <GaugeChart 
            id="gauge-chart5"
           nrOfLevels={10}
@@ -1387,9 +1419,9 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4" style={{marginTop:"30px"}}>
     <div class="card" style={{height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"wheat",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
+      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
         <hr/>
-        {/* <Line data={batterychart} options={optionsdata}/> */}
+        {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/> */}
         <div id="chart2"> 
    {
       apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='300px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
@@ -1399,6 +1431,68 @@ console.log(totaldaysumvalue)
   
    </div>
    {/* <Line data={data} options={optionsdata}/> */}
+   {/* <ResponsiveContainer width="100%" height="300px">
+        <LineChart
+          width={300}
+          height={100}
+          data={batteryresultdata}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="timeStamp" />
+          <YAxis yAxisId="left" />
+          <YAxis yAxisId="right" orientation="right" />
+          <Tooltip />
+          <Legend />
+          <Line yAxisId="left" type="monotone" dataKey="batteryEnergy" stroke="red" activeDot={{ r: 8 }}  />
+        </LineChart>
+      </ResponsiveContainer> */}
+
+{/* 
+        <LineChart
+          width={480} height={250} 
+          data={batteryresultdata}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="timeStamp" />
+          <YAxis yAxisId="left" />
+          <YAxis yAxisId="right" orientation="right" />
+          <Tooltip />
+          <Legend />
+          <Line yAxisId="left" type="monotone" dataKey="batteryEnergy" stroke="red" activeDot={{ r: 8 }}  />
+        </LineChart> */}
+{/* 
+<AreaChart width={400} height={250} data={batteryresultdata}
+  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+  <defs>
+    <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+       <stop offset="55%" stopColor="#00C0F0" stopOpacity={0.7}/>
+      <stop offset="40%" stopColor="#32cd32" stopOpacity={0.7}/>
+    </linearGradient>
+  </defs>
+  <XAxis dataKey="timeStamp" tickFormatter={formatXAxis}/>
+  <YAxis />
+  <CartesianGrid strokeDasharray="3 3" />
+  <Tooltip />
+  <Area type="monotone" dataKey="batteryEnergy" stroke="#000080" fillOpacity={3} fill="url(#colorUv)" activeDot={{ r: 4 }} />
+  
+   
+</AreaChart> */}
+
+   
+
+
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
         <b style={{color:"black"}}>Cooling Energy:</b>
           <br/>
@@ -1472,4 +1566,9 @@ export default DashBoard
 
 
   
+
+
+
+
+
 

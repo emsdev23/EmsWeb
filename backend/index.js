@@ -150,7 +150,7 @@ emptyArray.forEach(obj => {
         const date = new Date(timestamp)
        const localTimeString = date.toLocaleString();
 
-        minresult.push({'chargingAVG':chargingEnergyAvg,"dischargingAVG":dischargingenergy,"batteryStatus":batterystaus,"timestamp":timestamp,"pack_usable_soc":packSoc})
+        minresult.push({'chargingAVG':chargingEnergyAvg,"dischargingAVG":dischargingenergy,"batteryStatus":batterystaus,"timestamp":localTimeString,"pack_usable_soc":packSoc})
     }
   });
 
@@ -166,18 +166,32 @@ emptyArray.forEach(obj => {
 
   
   const finalresult=[]
+  const calculated=[]
   for (let i = 1; i < minresult.length; i++) {
-    const current = minresult[i];
-    const previous = minresult[i - 1];
-    const chargingDiff = current.chargingAVG - previous.chargingAVG;
-    const dischargingDiff = current.dischargingAVG - previous.dischargingAVG;
-    const timestamp=minresult[i].timestamp
-    const packSocVal=minresult[i].pack_usable_soc
-    const batteryStatus=minresult[i].batteryStatus
-    finalresult.push({'chargingEnergy':chargingDiff,'dischargingEnergy':dischargingDiff,"timestamp":timestamp,"pack_usable_soc":packSocVal,"batteryStatus":batteryStatus})
+    const minituesdata=minresult.slice(i,i+15)
+
+      const call=minresult.slice(i,i+15).reduce(
+        (accumulator, currentValue) => accumulator+currentValue.dischargingAVG,
+        0
+      );
+      //const avg=call/minituesdata.length
+      console.log(minituesdata.length)
+
+    finalresult.push(minituesdata)
+    calculated.push(call)
+
+    // const current = minresult[i];
+    // const previous = minresult[i - 1];
+    // const chargingDiff = current.chargingAVG - previous.chargingAVG;
+    // const dischargingDiff = current.dischargingAVG - previous.dischargingAVG;
+    // const timestamp=minresult[i].timestamp
+    // const packSocVal=minresult[i].pack_usable_soc
+    // const batteryStatus=minresult[i].batteryStatus
+    // finalresult.push({'chargingEnergy':chargingDiff,'dischargingEnergy':dischargingDiff,"timestamp":timestamp,"pack_usable_soc":packSocVal,"batteryStatus":batteryStatus})
     // console.log(`Charging difference: ${chargingDiff}`);
     // console.log(`Discharging difference: ${dischargingDiff}`);
   }
+  //console.log(calculated)
   res.send(minresult)
   //res.send(finalresult)
 

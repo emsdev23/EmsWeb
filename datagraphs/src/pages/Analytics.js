@@ -584,53 +584,56 @@ function Analytics() {
 
 
   return (
+    <div style={{display:'flex',marginTop:'50px'}}> 
+      <h1>work in progress..................</h1>
+    </div>
    
   
-  <div class='datagraph' style={{marginTop:'50px'}}>
-      {/* <div> 
-      <b style={{color:"black"}}>startDate :</b> &nbsp;<input type='date' value={start} onChange={handleChange} />&nbsp; &nbsp;
-   <b style={{color:"black"}}>endtDate :</b>&nbsp; <input  type='date' value={end} onChange={handleChange}/>
-      </div> */}
-      <br/>
-    <Grid sx={{ flexGrow: 1 }} container spacing={2} >
-   <Grid item xs={12} sm={6} >
-   <div id="chart" > 
-    {
-     linedata?<ReactApexChart options={linedata.options} series={linedata.series} type="line"/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+//   <div class='datagraph' style={{marginTop:'50px'}}>
+//       {/* <div> 
+//       <b style={{color:"black"}}>startDate :</b> &nbsp;<input type='date' value={start} onChange={handleChange} />&nbsp; &nbsp;
+//    <b style={{color:"black"}}>endtDate :</b>&nbsp; <input  type='date' value={end} onChange={handleChange}/>
+//       </div> */}
+//       <br/>
+//     <Grid sx={{ flexGrow: 1 }} container spacing={2} >
+//    <Grid item xs={12} sm={6} >
+//    <div id="chart" > 
+//     {
+//      linedata?<ReactApexChart options={linedata.options} series={linedata.series} type="line"/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
-   }
-   </div>
-   <br/>
+//    }
+//    </div>
+//    <br/>
 
-   </Grid>
-   <Grid item xs={12} sm={6} >
-   <div id="chart2"> 
-   {
-      chartData?<ReactApexChart options={chartData.options} series={chartData.series} type="line"/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+//    </Grid>
+//    <Grid item xs={12} sm={6} >
+//    <div id="chart2"> 
+//    {
+//       chartData?<ReactApexChart options={chartData.options} series={chartData.series} type="line"/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
-   }
+//    }
   
-   </div>
-   </Grid>
+//    </div>
+//    </Grid>
    
-   <br/>
-   <div id="date"> 
+//    <br/>
+//    <div id="date"> 
    
-   </div>
-   </Grid>
+//    </div>
+//    </Grid>
 
-   {/* <div style={{width:"300",height:"200px",marginTop:'40px'}}> 
-    {
-      linedata?<ReactApexChart options={linedata.options} series={linedata.series} type="line"/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+//    {/* <div style={{width:"300",height:"200px",marginTop:'40px'}}> 
+//     {
+//       linedata?<ReactApexChart options={linedata.options} series={linedata.series} type="line"/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
-    }
+//     }
   
 
-   </div> */}
+//    </div> */}
    
- </div>
+//  </div>
 
     
   )
