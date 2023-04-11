@@ -10,7 +10,7 @@ import Grid from '@mui/material/Grid';
 import { Link } from "react-router-dom";
 import GaugeChart from "react-gauge-chart";
 import { PieChart } from 'react-minimal-pie-chart'; 
-import { Line} from 'react-chartjs-2';
+//import { Line} from 'react-chartjs-2';
 import {Pie} from 'react-chartjs-2';
 import * as BsIcons from 'react-icons/bs';
 import axios from 'axios';
@@ -20,40 +20,40 @@ import { batteryData } from './Apicalling';
 import CircularProgress from '@mui/material/CircularProgress';
 import Thermal from './Thermal';
 
-//import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
+import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 // import { Zoom, ZoomButtons } from "recharts-plugin-zoom";
 // import { WMSData } from './Wms';
 
 // import BarChart from "react-bar-chart";
 import './DashBoard.css'
 import { fontSize } from '@mui/system';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  ArcElement
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+//   Filler,
+//   ArcElement
   
-} from 'chart.js';
-import zoomPlugin from 'chartjs-plugin-zoom';
+// } from 'chart.js';
+// import zoomPlugin from 'chartjs-plugin-zoom';
 
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  zoomPlugin
-);
+// ChartJS.register(
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+//   Filler,
+//   zoomPlugin
+// );
 // ChartJS.register(ArcElement, Tooltip, Legend);
 
 
@@ -223,10 +223,19 @@ const values=[]
       setGrid(dataresponse)
     })
   }
+  // piedata()
+  //   batterydata()
+  //   WMSData()
+  //   solarfunction()
+  //   sensorfunction()
+  //   meterfunction()
+  //   acmeterenergyfunction()
+  //   gridfunction()
 
 
 
-  useEffect(()=>{
+
+  useEffect(()=>{ 
     piedata()
     batterydata()
     WMSData()
@@ -235,9 +244,29 @@ const values=[]
     meterfunction()
     acmeterenergyfunction()
     gridfunction()
+
+    const interval = setInterval(() => {
+      piedata();
+      batterydata();
+      WMSData();
+      solarfunction();
+      sensorfunction();
+      meterfunction();
+      acmeterenergyfunction();
+      gridfunction();
+      console.log("running every 5min ............")
+  }, 5 * 60 * 1000);
+
+
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+   },[])
+    
+   
+
  
-  },[])
- 
+
   
   console.log(piechartdata)
   console.log(wmsData)
@@ -358,10 +387,12 @@ for (let i = 0; i < meter.length; i++) {
 
 
 
+
 const totalgeneration= differenceValue.reduce((accumulator, currentValue) => {
   return accumulator + currentValue;
 }, 0);
 const totalsolargeneration=(totalgeneration*1000)
+console.log(differenceValue)
 //-----------------------end of calculation---------------------------------------
 
 
@@ -668,6 +699,7 @@ console.log(totaldaysumvalue)
           // pr% calculation values
           const WheeledinsolarPR= totalsolargeneration/((totalwmsirradiation/60000)* 2008.36)
           const rooftopPR=totalrooftopgeneration/((totalsensordata/4000)*1075.8)
+
           const prpercentage=rooftopPR*100
           const wheeledinsolarprpercentage=WheeledinsolarPR*100
 
@@ -1422,14 +1454,14 @@ console.log(totaldaysumvalue)
       <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
         <hr/>
         {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/> */}
-        <div id="chart2"> 
+        {/* <div id="chart2"> 
    {
       apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='300px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
    }
   
-   </div>
+   </div> */}
    {/* <Line data={data} options={optionsdata}/> */}
    {/* <ResponsiveContainer width="100%" height="300px">
         <LineChart
@@ -1472,7 +1504,7 @@ console.log(totaldaysumvalue)
           <Legend />
           <Line yAxisId="left" type="monotone" dataKey="batteryEnergy" stroke="red" activeDot={{ r: 8 }}  />
         </LineChart> */}
-{/* 
+
 <AreaChart width={400} height={250} data={batteryresultdata}
   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
   <defs>
@@ -1485,10 +1517,10 @@ console.log(totaldaysumvalue)
   <YAxis />
   <CartesianGrid strokeDasharray="3 3" />
   <Tooltip />
-  <Area type="monotone" dataKey="batteryEnergy" stroke="#000080" fillOpacity={3} fill="url(#colorUv)" activeDot={{ r: 4 }} />
+  <Area type="monotone" dataKey="batteryEnergy"  fillOpacity={3} fill="url(#colorUv)" activeDot={{ r: 4 }} />
   
    
-</AreaChart> */}
+</AreaChart>
 
    
 
