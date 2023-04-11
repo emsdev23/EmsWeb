@@ -663,7 +663,78 @@ emptyArray.forEach(obj => {
              res.send(output)
         })
 
-        
+
+        let k = 0
+app.get("/thermalalert",(req,res)=>{
+    unprocesseddata.query(`select polledTime,tsStoredWaterTemperature/100 as tsStored,tsOutletBDPvalveStatus,tsOutletADPvalveStatus,HValve from thermalStorageMQTTReadings where Date(polledTime)=curdate() order by polledTime;`,function(err,queryres){
+        if(err){
+            console.log(err)
+        }
+        else{
+            data = JSON.parse(JSON.stringify(queryres))
+
+            for (let i=0; i<data.length;i++){
+                const polledtime = data[i].polledTime
+                const time = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
+                const timeinmin = time.substring(11,16)
+                const date= new Date(polledtime)
+                const local=date.toLocaleString()
+                const timar = local.split(',')
+                const storedwatertemp = data[i].tsStored
+                const outBDP = data[i].tsOutletBDPvalveStatus
+                const outADP = data[i].tsOutletADPvalveStatus
+                const hvalve = data[i].HValve
+                
+
+                const transporter = nodemailer.createTransport({
+                    host: 'smtp.office365.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                      user: 'ganeshr@tenet.res.in',
+                      pass: 'Ganesh3110#'
+                    }
+                  })
+                  
+
+                // console.log(storedwatertemp,outADP,outBDP,hvalve,time)
+                //&&
+                // (data[i-5].tsOutletBDPvalveStatus == 0 && data[i-5].tsOutletADPvalveStatus == 0 && data[i-5].HValve == 0)
+
+                if (timeinmin>"00:10") {
+                    if ((data[i].tsOutletBDPvalveStatus == 0 && data[i].tsOutletADPvalveStatus == 0 && data[i].HValve == 0) &&
+                        (data[i-6].tsOutletBDPvalveStatus == 1 && data[i-6].tsOutletADPvalveStatus == 1 && data[i-6].HValve == 1) ){
+                            if (data[i].tsStored < 15){
+                                k=k +1
+                            }
+                            if (k===5){
+                                    k = 0
+                                    // console.log("Alert Name : ","Thermal Storage turned off prior to temperature limit")
+                                    // console.log("Message : ","Thermal Storage temperature needs to reach 14°C to be turned off.")
+                                    // console.log("Temperature is",storedwatertemp+"°C since",time)
+                                    const mailOptions = {
+                                        from: 'ganeshr@tenet.res.in',
+                                        to: 'ganeshkalyan506@gmail.com',
+                                        subject: 'Thermal Storage turned off prior to temperature limit',
+                                        html: `<h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
+                                               <h2>Temperature is ${storedwatertemp}°C since ${timar[1]}</h2> `
+                                      }
+                                      transporter.sendMail(mailOptions, function(error, info) {
+                                        if (error) {
+                                          console.log(error);
+                                        } else {
+                                            console.log("Temperature is",storedwatertemp+"°C since",timar[1])
+                                            res.send(`Temperature is ${storedwatertemp}°C since ${timar[1]}`)
+                                        }
+                                      })
+                            }
+                    }
+                }
+            }
+        }
+    })
+})
+
 
 
 
