@@ -119,8 +119,8 @@ const Thermal = () => {
         // </Card>
         <div> 
         <Chart type='area'
-            height = {270}
-            width={400}
+            height = {"200%"}
+            width={"100%"}
             series = {graph.series}
             options = {graph.options}
             />
