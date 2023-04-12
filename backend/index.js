@@ -687,6 +687,7 @@ app.get("/thermalalert",(req,res)=>{
                 const outBDP = data[i].tsOutletBDPvalveStatus
                 const outADP = data[i].tsOutletADPvalveStatus
                 const hvalve = data[i].HValve
+                const timestamp = new Date(time)
                 
 
                 const transporter = nodemailer.createTransport({
@@ -712,6 +713,8 @@ app.get("/thermalalert",(req,res)=>{
                             }
                             if (k===5){
                                     k = 0
+                                    var curr = new Date(Date.now())
+                                    var currenttime = new Date(moment.tz(curr, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))
                                     // console.log("Alert Name : ","Thermal Storage turned off prior to temperature limit")
                                     // console.log("Message : ","Thermal Storage temperature needs to reach 14°C to be turned off.")
                                     // console.log("Temperature is",storedwatertemp+"°C since",time)
@@ -722,15 +725,17 @@ app.get("/thermalalert",(req,res)=>{
                                         html: `<h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
                                                <h2>Temperature is ${storedwatertemp}°C since ${timar[1]}</h2> `
                                       }
-                                      transporter.sendMail(mailOptions, function(error, info) {
-                                        if (error) {
-                                          console.log(error);
-                                        } else {
-                                            console.log("Temperature is",storedwatertemp+"°C since",timar[1])
-                                            res.send(`Temperature is ${storedwatertemp}°C since ${timar[1]}`)
-                                        }
-                                      })
+                                      if((Math.abs(currenttime-timestamp)/1000/60)<15){
+                                        transporter.sendMail(mailOptions, function(error, info) {
+                                            if (error) {
+                                            console.log(error);
+                                            } else {
+                                                console.log("Temperature is",storedwatertemp+"°C since",timar[1])
+                                                res.send(`Temperature is ${storedwatertemp}°C since ${timar[1]}`)
+                                            }
+                                        })
                             }
+                        }
                     }
                 }
             }
