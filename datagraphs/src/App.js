@@ -29,6 +29,7 @@ import swal from 'sweetalert';
 function App() {
   const url="http://localhost:5000/PeakDemand"
   const thermalAlert="http://localhost:5000/thermalalert"
+  const outlettemp ="http://localhost:5000/outletTemparature"
 
   const PeakDemand=()=>{
     axios.get(url).then((res)=>{
@@ -84,13 +85,47 @@ function App() {
   } 
 
   
-  thermalAlerts()
+  
+
+  const OutletTemp=()=>{
+    axios.get(outlettemp).then((res)=>{
+      const dataResponse=res.data
+    //   toast.warning(dataResponse, {
+    //     position: toast.POSITION.CENTER_CENTER
+    // });
+    swal({
+      title: "Alert",
+      text: `${dataResponse} '\u{1F600}'`,
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+      background: 'darkblue'
+    }).then(() => {
+      // This function will be called after the user closes the alert swal popup
+      swal({
+        title: "mail Send Successfully",
+        text: "please check the mail.........",
+        icon: "success",
+      });
+    });
+  }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
+  
+
+
+
+
 
   useEffect(()=>{
     setInterval(()=>{
-      PeakDemand()
+    OutletTemp()
+    PeakDemand()
+    thermalAlerts()
      
-    },6000)
+    },300000)
   })
 
   return (
