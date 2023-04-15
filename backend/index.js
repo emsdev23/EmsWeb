@@ -690,6 +690,10 @@ app.get("/thermalalert",(req,res)=>{
                 const outBDP = data[i].tsOutletBDPvalveStatus
                 const outADP = data[i].tsOutletADPvalveStatus
                 const hvalve = data[i].HValve
+                const timestamp = new Date(time)
+                var curr = new Date(Date.now())
+                var currenttime = new Date(moment.tz(curr, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))
+                // const
                 
 
                 const transporter = nodemailer.createTransport({
@@ -821,6 +825,36 @@ app.get("/outletTemparature",async(req,res)=>{
     })
     
 })
+
+
+ //controlls post request
+ app.post('/controlls', function (req, res) {
+    const now = new Date();
+const formattedDate = now.toLocaleString('en-US', { 
+  year: 'numeric', 
+  month: '2-digit', 
+  day: '2-digit', 
+  hour: '2-digit', 
+  minute: '2-digit', 
+  second: '2-digit', 
+  hour12: false
+}).replace(',', '');
+console.log(formattedDate);
+
+    const { functioncode, starttime,endtime,capacity } = req.body;
+    console.log(req.body.functioncode)
+    const sql = 'INSERT INTO EMSUPSbatterycontrolls (functioncode, starttime,endtime,capacity) VALUES (?, ?, ?, ?)';
+    con.query(sql, [functioncode, starttime,endtime,capacity], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send(error);
+        }
+        else{
+            console.log(results)
+            res.status(200).send('parameter  added successfully!');
+        }
+        //return 
+    });
+});
 
 
 
