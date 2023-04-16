@@ -1454,14 +1454,14 @@ console.log(totaldaysumvalue)
       <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
         <hr/>
         {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/> */}
-        {/* <div id="chart2"> 
+        <div id="chart2"> 
    {
       apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='300px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
    }
   
-   </div> */}
+   </div>
    {/* <Line data={data} options={optionsdata}/> */}
    {/* <ResponsiveContainer width="100%" height="300px">
         <LineChart
@@ -1505,7 +1505,7 @@ console.log(totaldaysumvalue)
           <Line yAxisId="left" type="monotone" dataKey="batteryEnergy" stroke="red" activeDot={{ r: 8 }}  />
         </LineChart> */}
 
-<AreaChart width={400} height={250} data={batteryresultdata}
+{/* <AreaChart width={400} height={250} data={batteryresultdata}
   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
   <defs>
     <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
@@ -1520,7 +1520,7 @@ console.log(totaldaysumvalue)
   <Area type="monotone" dataKey="batteryEnergy"  fillOpacity={3} fill="url(#colorUv)" activeDot={{ r: 4 }} />
   
    
-</AreaChart>
+</AreaChart> */}
 
    
 
