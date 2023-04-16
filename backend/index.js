@@ -150,7 +150,7 @@ emptyArray.forEach(obj => {
         const date = new Date(timestamp)
        const localTimeString = date.toLocaleString();
 
-        minresult.push({'chargingAVG':chargingEnergyAvg,"dischargingAVG":dischargingenergy,"batteryStatus":batterystaus,"timestamp":localTimeString,"pack_usable_soc":packSoc})
+        minresult.push({'chargingAVG':chargingEnergyAvg,"dischargingAVG":dischargingenergy,"batteryStatus":batterystaus,"timestamp":date,"pack_usable_soc":packSoc})
     }
   });
 
@@ -843,7 +843,7 @@ console.log(formattedDate);
 
     const { functioncode, starttime,endtime,capacity } = req.body;
     console.log(req.body.functioncode)
-    const sql = 'INSERT INTO EMSUPSbatterycontrolls (functioncode, starttime,endtime,capacity) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO EMSUPSbatterycontrolls_new (functioncode, starttime,endtime,capacity) VALUES (?, ?, ?, ?)';
     con.query(sql, [functioncode, starttime,endtime,capacity], function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
