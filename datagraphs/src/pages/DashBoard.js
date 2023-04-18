@@ -19,6 +19,7 @@ import { useState,useEffect } from 'react';
 import { batteryData } from './Apicalling';
 import CircularProgress from '@mui/material/CircularProgress';
 import Thermal from './Thermal';
+import ForestIcon from '@mui/icons-material/Forest';
 
 import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 // import { Zoom, ZoomButtons } from "recharts-plugin-zoom";
@@ -1347,7 +1348,7 @@ console.log(totaldaysumvalue)
   </div>
 
   <div class="col-sm-4" >
-    <div class="card" style={{width:"auto",height:"450px",marginTop:"20px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{width:"auto",height:"480px",marginTop:"20px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'100px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> 
         <hr/>
@@ -1372,14 +1373,14 @@ console.log(totaldaysumvalue)
         <br/>
 
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }} >
-         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow"}}>{Math.trunc(totalsolargeneration)}</span>
+         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow",marginLeft:"80px"}}>{Math.trunc(totalsolargeneration)}</span>
           <br/>
-          <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
+          <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow",marginLeft:"105px"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
           <br/>
-          <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow"}}>{WISspecificyeild}</span>
+          <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow",marginLeft:"30px"}}>{WISspecificyeild}</span>
 
           <br/>
-          <b style={{color:"black"}}>Irradiation (kWh/m2)</b>: <span style={{color:"yellow"}}>{(totalwmsirradiation/60000).toFixed(2)}</span>
+          <b style={{color:"black"}}>Irradiation (kWh/m2)</b>: <span style={{color:"yellow",marginLeft:"50px"}}>{(totalwmsirradiation/60000).toFixed(2)}</span>
           
         </div>
         
@@ -1390,7 +1391,7 @@ console.log(totaldaysumvalue)
 
 
   <div class="col-sm-4" style={{marginTop:"20px"}}>
-    <div class="card"  style={{width:"auto", height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card"  style={{width:"auto", height:"480px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5>
         <hr/>
@@ -1408,15 +1409,15 @@ console.log(totaldaysumvalue)
           
         />
         <br/>
-      
+        <br/>
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-         <b style={{color:"black"}}>Generation (kWh)</b>:<span style={{color:"yellow"}}>{totalrooftopgeneration}</span>
+         <b style={{color:"black"}}>Generation (kWh)</b>:<span style={{color:"yellow",marginLeft:"75px"}}>{totalrooftopgeneration}</span>
          <br/>
-         <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow"}}>{Math.trunc(prpercentage)}%</span>
+         <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow",marginLeft:"93px"}}>{Math.trunc(prpercentage)}%</span>
          <br/>
          <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow"}}>{RTSspecificyeild}</span>
          <br/>
-         <b style={{color:"black"}}>Irradiation (kWh/m2)</b>:<span style={{color:"yellow"}}>{(totalsensordata/4000).toFixed(2)} </span>
+         <b style={{color:"black"}}>Irradiation (kWh/m2)</b>:<span style={{color:"yellow",marginLeft:"50px"}}>{(totalsensordata/4000).toFixed(2)} </span>
 
         </div>
        
@@ -1444,26 +1445,25 @@ console.log(totaldaysumvalue)
     </div>
   </div>
 
-  <div class="col-sm-4" style={{marginTop:"30px" }}>
-    <div class="card" style={{width:"auto",height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+  <div class="col-sm-4">
+    <div class="card"  style={{width:"auto", height:"450px",marginTop:"30px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:'black'}}> Zn Air Battery</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
+        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>Co2 Reduction</b></h4>
         <hr/>
-        <Line data={data} options={optionsdata}/>
-        {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
-    
+        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
+        <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
+        <br/>
+        <h4 style={{textAlign:"center",color:"black"}}><h4>{co2}</h4>tCO2/MWh</h4>
+        <br/>
+        <ForestIcon color="black" fontSize="5.1em"/>
         
-        <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-          <b style={{color:'black'}}> No.Of cycles: </b>
-          <br/>
-          <b style={{color:'black'}}>Charging Energy:</b>
-          <br/>
-          <b style={{color:'black'}}>Discharging Energy:</b>
-
-        </div>
+        
       </div>
     </div>
   </div>
+
+
+  
 
   <div class="col-sm-4" style={{marginTop:"30px"}}>
     <div class="card" style={{height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
@@ -1551,20 +1551,26 @@ console.log(totaldaysumvalue)
       </div>
     </div>
   </div>
-  <div class="col-sm-4">
-    <div class="card"  style={{width:"auto", height:"320px",marginTop:"30px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+  <div class="col-sm-4" style={{marginTop:"30px" }}>
+    <div class="card" style={{width:"auto",height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>Co2 Reduction</b></h4>
+      <h5 class="card-title"><b style={{color:'black'}}> Zn Air Battery</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
         <hr/>
-        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
-        <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
-        <br/>
-        <h4 style={{textAlign:"center",color:"black"}}><h4>{co2}</h4>tCO2/MWh</h4>
+        <Line data={data} options={optionsdata}/>
+        {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
+    
         
-        
+        <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
+          <b style={{color:'black'}}> No.Of cycles: </b>
+          <br/>
+          <b style={{color:'black'}}>Charging Energy:</b>
+          <br/>
+          <b style={{color:'black'}}>Discharging Energy:</b>
+
+        </div>
       </div>
     </div>
-  </div>
+  </div> 
 
    <div class="col-sm-4"  style={{marginTop:"30px"}}>
      <div class="card" style={{width:"auto", height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
