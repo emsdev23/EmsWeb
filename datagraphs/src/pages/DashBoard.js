@@ -710,13 +710,16 @@ console.log(totaldaysumvalue)
 
       //-------------------battery calculation----------------------
       const batteryStaus=[]
+      const currentupsStatus=[]
       const timeStamp=[]
       const Status=[]
+      const packSoc=[]
       const batteryresultdata=[]
 
-      for(let i=0;i<battery.length;i+=15){
+      for(let i=0;i<battery.length;i+=60){
         if(battery[i].batteryStatus==="IDLE"){
           batteryStaus.push(0)
+          currentupsStatus.push(battery[i].batteryStatus)
           const date = new Date(battery[i].timestamp);
           let hours = date.getHours();
           const minutes = date.getMinutes();
@@ -727,6 +730,7 @@ console.log(totaldaysumvalue)
           timeStamp.push(timeString)
 
           Status.push(battery[i].batteryStatus)
+          packSoc.push(Math.trunc(battery[i].pack_usable_soc))
           batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":'0',"timeStamp":timeString})
 
           
@@ -734,6 +738,7 @@ console.log(totaldaysumvalue)
         }
         else if(battery[i].batteryStatus==="DCHG"){
           batteryStaus.push(battery[i].dischargingAVG)
+          currentupsStatus.push(battery[i].batteryStatus)
           const date = new Date(battery[i].timestamp);
           let hours = date.getHours();
           const minutes = date.getMinutes();
@@ -743,11 +748,13 @@ console.log(totaldaysumvalue)
           const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
+          packSoc.push(Math.trunc(battery[i].pack_usable_soc))
           batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toString(),"timeStamp":timeString})
         }
         else if(battery[i].batteryStatus==="CHG"){
           batteryStaus.push(battery[i].chargingAVG)
           const date = new Date(battery[i].timestamp);
+          currentupsStatus.push(battery[i].batteryStatus)
           let hours = date.getHours();
           const minutes = date.getMinutes();
           const ampm = hours >= 12 ? 'pm' : 'am';
@@ -756,6 +763,7 @@ console.log(totaldaysumvalue)
           const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
+          packSoc.push(Math.trunc(battery[i].pack_usable_soc))
           batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toString(),"timeStamp":timeString})
 
         }
@@ -965,6 +973,11 @@ console.log(totaldaysumvalue)
     
     
     // };
+
+
+    //co2 reduction calculation
+    const co2=(((Math.trunc(totalsolargeneration)+totalrooftopgeneration)/1000)*0.81).toFixed(2)
+
 
     
 
@@ -1315,14 +1328,16 @@ console.log(totaldaysumvalue)
         
 <ReactApexChart options={state.options} series={state.series} type="pie" width={350}/>
 {/* <br/> */}
-<div className='card-text' style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',boxshadow:'5px 10px' }}> 
-<span style={{color:"black"}}><b>Wheeled in solar </b>:</span> <span style={{color:"yellow"}}>{Math.trunc(totalsolargeneration)} kWh </span>&nbsp;&nbsp;&nbsp;
-<span style={{color:"black"}}><b>Diesel </b>:</span><span style={{color:"yellow"}}>{totalDeisel} kWh </span>
+<div className='card-text' style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',boxshadow:'5px 10px' }}>
+  <h4 style={{textAlign:'center',color:"black"}}><b>Energy in kWh</b></h4> 
+<span style={{color:"black"}}><b>Wheeled in solar </b>:</span> <span style={{color:"yellow"}}>{Math.trunc(totalsolargeneration)}  </span>&nbsp;&nbsp;&nbsp;
+<span style={{color:"black"}}><b>Diesel </b>:</span><span style={{color:"yellow"}}>{totalDeisel}  </span>
 
 <br/>
-<span style={{color:"black"}}><b>Rooftop</b>: </span><span style={{color:"yellow"}}>{totalrooftopgeneration} kWh</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style={{color:"black",marginRight:"47px"}}><b>Rooftop </b> </span><span style={{color:"black"}}>:</span><span style={{color:"yellow"}}>{totalrooftopgeneration}</span>
 
-<span style={{color:"black"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{Math.trunc(gridvalue)} kWh</span>
+
+<span style={{color:"black",marginLeft:"40px"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{Math.trunc(gridvalue)}</span>
 {/* totalEnergy, */}
 
 </div>
@@ -1343,7 +1358,7 @@ console.log(totaldaysumvalue)
           arcsLength={[0.3, 0.3, 0.3,0.3,0.3]}
           colors={["#FF0000","#FF4500","#f9bd00","#9bf400","#008000"]}
           arcWidth={0.3}
-          percent={WheeledinsolarPR}
+          percent={(WheeledinsolarPR).toFixed(2)}
           needleColor="black" 
           arcPadding={0.02}
           textColor="black"
@@ -1357,7 +1372,7 @@ console.log(totaldaysumvalue)
         <br/>
 
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }} >
-         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow"}}>{(totalsolargeneration).toFixed(2)}</span>
+         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow"}}>{Math.trunc(totalsolargeneration)}</span>
           <br/>
           <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
           <br/>
@@ -1386,13 +1401,14 @@ console.log(totaldaysumvalue)
           colors={["#FF0000","#FF4500","#f9bd00","#9bf400","#008000"]}
           arcsLength={[0.3, 0.3, 0.3,0.3,0.3]}
           arcWidth={0.3}
-          percent={rooftopPR}
+          percent={(rooftopPR).toFixed(2)}
           needleColor="black"
           textColor="black"
           style={{width:"100",height:"100",alignItems:"center"}}
           
         />
         <br/>
+      
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
          <b style={{color:"black"}}>Generation (kWh)</b>:<span style={{color:"yellow"}}>{totalrooftopgeneration}</span>
          <br/>
@@ -1403,6 +1419,7 @@ console.log(totaldaysumvalue)
          <b style={{color:"black"}}>Irradiation (kWh/m2)</b>:<span style={{color:"yellow"}}>{(totalsensordata/4000).toFixed(2)} </span>
 
         </div>
+       
       </div>
     </div>
   </div>
@@ -1526,9 +1543,9 @@ console.log(totaldaysumvalue)
 
 
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
-        <b style={{color:"black"}}>Cooling Energy:</b>
+        <b style={{color:"black"}}>Pack Soc:  {currentupsStatus[currentupsStatus.length-1]}---{packSoc[packSoc.length-1]}% </b>
           <br/>
-          <b style={{color:"black"}}>Temparature:</b>
+          {/* <b style={{color:"black"}}>Temparature:</b> */}
 
         </div>
       </div>
@@ -1537,10 +1554,14 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4">
     <div class="card"  style={{width:"auto", height:"320px",marginTop:"30px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title" style={{textAlign:"center "}}>Co2 Reduction</h5>
+        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>Co2 Reduction</b></h4>
         <hr/>
-        <p class="card-text">Daily Reduction in Emission:</p>
-        <p> tonnes on CO2</p>
+        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
+        <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
+        <br/>
+        <h4 style={{textAlign:"center",color:"black"}}><h4>{co2}</h4>tCO2/MWh</h4>
+        
+        
       </div>
     </div>
   </div>
@@ -1548,7 +1569,7 @@ console.log(totaldaysumvalue)
    <div class="col-sm-4"  style={{marginTop:"30px"}}>
      <div class="card" style={{width:"auto", height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
        <div class="card-body">
-         <h5 class="card-title" style={{textAlign:"center "}}>Peak Shavings  </h5>
+         <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Peak Shavings</b>  </h5>
          
          <hr/>
          <p class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}>Cost saved (in Rs)</p>
@@ -1563,14 +1584,14 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4"  style={{marginTop:"30px"}}>
     <div class="card" style={{width:"auto", height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title">Wheeled In Wind <span style={{color:"wheat",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5>
+        <h5 class="card-title"><b style={{color:'black'}}> Wheeled In Wind</b> <span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5>
         <hr/>
         <GaugeChart 
           id="gauge-chart3"
           nrOfLevels={12}
           colors={["red","green"]}
           arcWidth={0.3}
-          percent={0.10/2}
+          percent={0}
           textColor={'white'}
           style={{width:"fit-content",height:"100",justifyItems:"center"}}
           
