@@ -843,7 +843,7 @@ console.log(formattedDate);
 
     const { functioncode, starttime,endtime,capacity } = req.body;
     console.log(req.body.functioncode)
-    const sql = 'INSERT INTO EMSUPSbatterycontrolls_new (functioncode, starttime,endtime,capacity) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO EMSUPSbatterycontrol (functioncode, starttime,endtime,capacity) VALUES (?, ?, ?, ?)';
     con.query(sql, [functioncode, starttime,endtime,capacity], function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
@@ -855,6 +855,28 @@ console.log(formattedDate);
         //return 
     });
 });
+
+
+
+app.post('/instantaneous', function (req, res) {
+
+
+
+    const { functioncode} = req.body;
+    console.log(req.body.functioncode)
+    const sql = 'INSERT INTO instaneousups (function) VALUES (?)';
+    con.query(sql, [functioncode], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send(error);
+        }
+        else{
+            console.log(results)
+            res.status(200).send('parameter  added successfully!');
+        }
+        //return 
+    });
+});
+
 
 
 
