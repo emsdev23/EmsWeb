@@ -73,24 +73,37 @@ function Control() {
 
   const instantaneousSubmit = (event) => {
     event.preventDefault();
-    console.log(chargeOrDischarge,onOrOff)
-    if(chargeOrDischarge==="charge" && onOrOff==="on"){
-      console.log("1")
+    try {
+      const response =  axios.post("http://localhost:5000/instantaneous", onOrOff);
+      //const result=response.data
+      setChargeOrDischarge('');
+      setOnOrOff('');
+      swal({
+        title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
+        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      //console.log(formattedData)
     }
-    else if(chargeOrDischarge==="charge" && onOrOff==="off"){
-      console.log("2")
+    // console.log(chargeOrDischarge,onOrOff)
+    // if(chargeOrDischarge==="charge" && onOrOff==="on"){
+    //   console.log("1")
+    // }
+    // else if(chargeOrDischarge==="charge" && onOrOff==="off"){
+    //   console.log("2")
 
-    }
-    else if(chargeOrDischarge==="discharge" && onOrOff==="on"){
-      console.log("3")
+    // }
+    // else if(chargeOrDischarge==="discharge" && onOrOff==="on"){
+    //   console.log("3")
 
-    }
-    else if(chargeOrDischarge==="discharge" && onOrOff==="off"){
-      console.log("4")
+    // }
+    // else if(chargeOrDischarge==="discharge" && onOrOff==="off"){
+    //   console.log("4")
 
-    }
-    setChargeOrDischarge('');
-    setOnOrOff('');
+    // }
+  
 
     // Make HTTP POST request to server
     // fetch('/api/submit-form', {
@@ -211,8 +224,8 @@ function Control() {
       <label class="input-group-text" for="inputGroupSelect01">On/Off:</label>
   <select class="form-select" id="inputGroupSelect01" value={onOrOff} onChange={handleOnOrOffChange}>
   <option value="">Function Code</option>
-        <option value="on">ON</option>
-        <option value="off">OF</option>
+        <option value={1}>ON</option>
+        <option value={2}>OF</option>
   </select>
   </div>
       <br/>
