@@ -3,6 +3,7 @@ import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import axios from 'axios';
 import swal from 'sweetalert';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 function Control() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,19 @@ function Control() {
     endtime: "",
     capacity: "",
   });
+
+  const [chargeOrDischarge, setChargeOrDischarge] = useState('');
+  const [onOrOff, setOnOrOff] = useState('');
+
+  const handleChargeOrDischargeChange = (event) => {
+    setChargeOrDischarge(event.target.value);
+  };
+
+  const handleOnOrOffChange = (event) => {
+    setOnOrOff(event.target.value);
+  };
+
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,8 +51,8 @@ function Control() {
           capacity: "",
         });
         swal({
-          title: "Details added to DB",
-          text: result,
+          title: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+          //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
           icon: "success",
         });
       } catch (error) {
@@ -57,8 +71,54 @@ function Control() {
     });
   };
 
+  const instantaneousSubmit = (event) => {
+    event.preventDefault();
+    console.log(chargeOrDischarge,onOrOff)
+    if(chargeOrDischarge==="charge" && onOrOff==="on"){
+      console.log("1")
+    }
+    else if(chargeOrDischarge==="charge" && onOrOff==="off"){
+      console.log("2")
+
+    }
+    else if(chargeOrDischarge==="discharge" && onOrOff==="on"){
+      console.log("3")
+
+    }
+    else if(chargeOrDischarge==="discharge" && onOrOff==="off"){
+      console.log("4")
+
+    }
+    setChargeOrDischarge('');
+    setOnOrOff('');
+
+    // Make HTTP POST request to server
+    // fetch('/api/submit-form', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ name, email }),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //   // Reset form values
+    //   setName('');
+    //   setEmail('');
+    // })
+    // .catch(error => {
+    //   console.error('Error submitting form:', error);
+    // });
+  };
+ 
+
+  
+
   return (
     <>
+    <div> 
+
+   
       <div >
         <h1 style={{textAlign:'center'}}><b>UPS Battery Controll</b></h1>
       </div>
@@ -75,8 +135,7 @@ function Control() {
           <option value={2}>DCHG</option>
   </select>
   </div>
-  &nbsp;
-  &nbsp;
+  <br/>
         
 
         <div style={{width:"300px"}}>
@@ -89,9 +148,7 @@ function Control() {
            
         />
         </div>
-        &nbsp;
-        &nbsp;
-        
+      <br/>
 
         <div style={{width:"300px"}}> 
         <DateTime
@@ -103,8 +160,7 @@ function Control() {
           style={{width:"300px"}}
         />
         </div>
-        &nbsp;
-        &nbsp;
+        <br/>
         
         {/* <div class="mb-3">
         <input
@@ -128,10 +184,48 @@ function Control() {
           style={{width:"300px"}}
         />
   </div>
-  &nbsp;
-  &nbsp;
+  <br/>
   <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>
+
   </form>
+  <br/>
+  <br/>
+
+  <form onSubmit={instantaneousSubmit}> 
+  <div class="row">
+  <div class="col-sm-6">
+    <div class="cards">
+      <div class="card-body">
+        <h5 class="card-title">Battery Charge</h5>
+
+         <div class="input-group mb-3"  style={{width:"400px"}}>
+      <label class="input-group-text" for="inputGroupSelect01">Charge/Discharge</label>
+  <select class="form-select" id="inputGroupSelect01" value={chargeOrDischarge} onChange={handleChargeOrDischargeChange}>
+  <option value="">Function Code</option>
+        <option value="charge">Charge</option>
+        <option value="discharge">Discharge</option>
+  </select>
+  </div>
+        <br/>
+       <div class="input-group mb-3"  style={{width:"400px"}}>
+      <label class="input-group-text" for="inputGroupSelect01">On/Off:</label>
+  <select class="form-select" id="inputGroupSelect01" value={onOrOff} onChange={handleOnOrOffChange}>
+  <option value="">Function Code</option>
+        <option value="on">ON</option>
+        <option value="off">OF</option>
+  </select>
+  </div>
+      <br/>
+
+      <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+  
+  </div>
+
     </>
   );
 }
