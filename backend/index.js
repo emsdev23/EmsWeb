@@ -862,10 +862,10 @@ app.post('/instantaneous', function (req, res) {
 
 
 
-    const { functioncode} = req.body;
+    const { functioncode,batterystatus} = req.body;
     console.log(req.body.functioncode)
-    const sql = 'INSERT INTO instantaneousups (function) VALUES (?)';
-    con.query(sql, functioncode, function (error, results, fields) {
+    const sql = 'INSERT INTO instantaneous_ups (functioncode,batterystatus) VALUES (?,?)';
+    con.query(sql, [functioncode,batterystatus], function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
         }

@@ -10,7 +10,7 @@ import Grid from '@mui/material/Grid';
 import { Link } from "react-router-dom";
 import GaugeChart from "react-gauge-chart";
 import { PieChart } from 'react-minimal-pie-chart'; 
-//import { Line} from 'react-chartjs-2';
+import { Line} from 'react-chartjs-2';
 import {Pie} from 'react-chartjs-2';
 import * as BsIcons from 'react-icons/bs';
 import axios from 'axios';
@@ -21,40 +21,40 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Thermal from './Thermal';
 import ForestIcon from '@mui/icons-material/Forest';
 
-import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
+//import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 // import { Zoom, ZoomButtons } from "recharts-plugin-zoom";
 // import { WMSData } from './Wms';
 
 // import BarChart from "react-bar-chart";
 import './DashBoard.css'
 import { fontSize } from '@mui/system';
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-//   Filler,
-//   ArcElement
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement
   
-// } from 'chart.js';
+} from 'chart.js';
 // import zoomPlugin from 'chartjs-plugin-zoom';
 
 
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-//   Filler,
-//   zoomPlugin
-// );
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  
+);
 // ChartJS.register(ArcElement, Tooltip, Legend);
 
 
@@ -1455,7 +1455,11 @@ console.log(totaldaysumvalue)
         <br/>
         <h4 style={{textAlign:"center",color:"black"}}><h4>{co2}</h4>tCO2/MWh</h4>
         <br/>
-        <ForestIcon color="black" fontSize="5.1em"/>
+        <div style={{color:'black',height:'900px'}}> 
+        <ForestIcon size={200}/>
+
+        </div>
+        
         
         
       </div>
@@ -1552,7 +1556,7 @@ console.log(totaldaysumvalue)
     </div>
   </div>
   <div class="col-sm-4" style={{marginTop:"30px" }}>
-    <div class="card" style={{width:"auto",height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{width:"auto",height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
       <h5 class="card-title"><b style={{color:'black'}}> Zn Air Battery</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
         <hr/>
@@ -1573,7 +1577,7 @@ console.log(totaldaysumvalue)
   </div> 
 
    <div class="col-sm-4"  style={{marginTop:"30px"}}>
-     <div class="card" style={{width:"auto", height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+     <div class="card" style={{width:"auto", height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
        <div class="card-body">
          <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Peak Shavings</b>  </h5>
          
@@ -1588,7 +1592,7 @@ console.log(totaldaysumvalue)
 
   
   <div class="col-sm-4"  style={{marginTop:"30px"}}>
-    <div class="card" style={{width:"auto", height:"320px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{width:"auto", height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title"><b style={{color:'black'}}> Wheeled In Wind</b> <span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5>
         <hr/>

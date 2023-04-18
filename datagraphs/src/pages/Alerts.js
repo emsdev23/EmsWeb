@@ -4,6 +4,9 @@ import Table from 'react-bootstrap/Table';
 function Alerts() {
   return (
     <div>
+      <div> 
+        
+      </div>
      
     <Table striped bordered hover variant="dark"  style={{marginTop:"50px"}}>
       <thead>

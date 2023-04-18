@@ -13,16 +13,21 @@ function Control() {
     capacity: "",
   });
 
-  const [chargeOrDischarge, setChargeOrDischarge] = useState('');
-  const [onOrOff, setOnOrOff] = useState('');
+  const [insformData,setInsformData]=useState({
+    functioncode:"",
+    batterystatus:""
 
-  const handleChargeOrDischargeChange = (event) => {
-    setChargeOrDischarge(event.target.value);
-  };
+  })
+  // const [chargeOrDischarge, setChargeOrDischarge] = useState('');
+  // const [functioncode, setFunctioncode] = useState('');
 
-  const handleOnOrOffChange = (event) => {
-    setOnOrOff(event.target.value);
-  };
+  // const handleChargeOrDischargeChange = (event) => {
+  //   setChargeOrDischarge(event.target.value);
+  // };
+
+  // const handleOnOrOffChange = (event) => {
+  //   setFunctioncode(event.target.value);
+  // };
 
   
 
@@ -42,7 +47,7 @@ function Control() {
       dangerMode: false,
     }).then(()=>{
       try {
-        const response =  axios.post("http://localhost:5000/controlls", formattedData);
+        const response =  axios.post("http://localhost:5000/controlls",formattedData);
         const result=response.data
         setFormData({
           functioncode: "",
@@ -73,33 +78,138 @@ function Control() {
 
   const instantaneousSubmit = (event) => {
     event.preventDefault();
+   const insformatedData={
+    functioncode: Number(insformData.functioncode),
+    batterystatus:insformData.batterystatus
+
+   }
+
+   if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===1){
+    insformatedData.functioncode=1
     try {
-      const response =  axios.post("http://localhost:5000/instantaneous", onOrOff);
+      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
       //const result=response.data
-      setChargeOrDischarge('');
-      setOnOrOff('');
-      swal({
-        title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
-        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-        icon: "success",
-      });
+      setInsformData({
+        functioncode:"",
+        batterystatus:""
+
+      })
+      console.log(insformatedData)
+      // swal({
+      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
+      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+      //   icon: "success",
+      // });
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
     }
-    // console.log(chargeOrDischarge,onOrOff)
-    // if(chargeOrDischarge==="charge" && onOrOff==="on"){
-    //   console.log("1")
+    console.log(insformatedData.functioncode)
+   }
+   else if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===2){
+    insformatedData.functioncode=2
+    try {
+      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      //const result=response.data
+      setInsformData({
+        functioncode:"",
+        batterystatus:""
+
+      })
+      console.log(insformatedData)
+      // swal({
+      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
+      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+      //   icon: "success",
+      // });
+    } catch (error) {
+      console.error(error);
+      //console.log(formattedData)
+    }
+    console.log(insformatedData.functioncode)
+   
+
+   }
+   else if(insformatedData.batterystatus==="discharge" && insformatedData.functioncode===1){
+    insformatedData.functioncode=3
+    try {
+      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      //const result=response.data
+      setInsformData({
+        functioncode:"",
+        batterystatus:""
+
+      })
+      console.log(insformatedData)
+      // swal({
+      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
+      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+      //   icon: "success",
+      // });
+    } catch (error) {
+      console.error(error);
+      //console.log(formattedData)
+    }
+    console.log(insformatedData.functioncode)
+    console.log(insformatedData.functioncode)
+
+   }
+   else if(insformatedData.batterystatus==="discharge" && insformatedData.functioncode===2){
+    insformatedData.functioncode=4
+    try {
+      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      //const result=response.data
+      setInsformData({
+        functioncode:"",
+        batterystatus:""
+
+      })
+      console.log(insformatedData)
+      // swal({
+      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
+      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+      //   icon: "success",
+      // });
+    } catch (error) {
+      console.error(error);
+      //console.log(formattedData)
+    }
+    console.log(insformatedData.functioncode)
+    console.log(insformatedData.functioncode)
+
+   }
+    // try {
+    //   const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+    //   //const result=response.data
+    //   setInsformData({
+    //     functioncode:"",
+    //     chargeOrDischarge:""
+
+    //   })
+    //   console.log(typeof(functioncode))
+    //   // swal({
+    //   //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
+    //   //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+    //   //   icon: "success",
+    //   // });
+    // } catch (error) {
+    //   console.error(error);
+    //   //console.log(formattedData)
     // }
-    // else if(chargeOrDischarge==="charge" && onOrOff==="off"){
+   
+    // console.log(chargeOrDischarge,onOrOff)
+    // if(chargeOrDischarge==="charge" && functioncode==="on"){
+     
+    // }
+    // else if(chargeOrDischarge==="charge" && functioncode==="off"){
     //   console.log("2")
 
     // }
-    // else if(chargeOrDischarge==="discharge" && onOrOff==="on"){
+    // else if(chargeOrDischarge==="discharge" && functioncode==="on"){
     //   console.log("3")
 
     // }
-    // else if(chargeOrDischarge==="discharge" && onOrOff==="off"){
+    // else if(chargeOrDischarge==="discharge" && functioncode==="off"){
     //   console.log("4")
 
     // }
@@ -122,6 +232,8 @@ function Control() {
     // .catch(error => {
     //   console.error('Error submitting form:', error);
     // });
+    console.log(insformatedData)
+    
   };
  
 
@@ -213,7 +325,7 @@ function Control() {
 
          <div class="input-group mb-3"  style={{width:"400px"}}>
       <label class="input-group-text" for="inputGroupSelect01">Charge/Discharge</label>
-  <select class="form-select" id="inputGroupSelect01" value={chargeOrDischarge} onChange={handleChargeOrDischargeChange}>
+  <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) => setInsformData({ ...insformData, batterystatus: e.target.value })}>
   <option value="">Function Code</option>
         <option value="charge">Charge</option>
         <option value="discharge">Discharge</option>
@@ -222,7 +334,7 @@ function Control() {
         <br/>
        <div class="input-group mb-3"  style={{width:"400px"}}>
       <label class="input-group-text" for="inputGroupSelect01">On/Off:</label>
-  <select class="form-select" id="inputGroupSelect01" value={onOrOff} onChange={handleOnOrOffChange}>
+  <select class="form-select" id="inputGroupSelect01" value={insformData.functioncode} onChange={(e) => setInsformData({ ...insformData, functioncode: e.target.value })}>
   <option value="">Function Code</option>
         <option value={1}>ON</option>
         <option value={2}>OF</option>
