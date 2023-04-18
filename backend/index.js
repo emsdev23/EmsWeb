@@ -864,8 +864,8 @@ app.post('/instantaneous', function (req, res) {
 
     const { functioncode} = req.body;
     console.log(req.body.functioncode)
-    const sql = 'INSERT INTO instaneousups (function) VALUES (?)';
-    con.query(sql, [functioncode], function (error, results, fields) {
+    const sql = 'INSERT INTO instantaneousups (function) VALUES (?)';
+    con.query(sql, functioncode, function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
         }
