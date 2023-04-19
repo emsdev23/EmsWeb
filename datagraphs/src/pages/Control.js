@@ -1,9 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import axios from 'axios';
 import swal from 'sweetalert';
+import { batteryData } from './Apicalling';
 import Dropdown from 'react-bootstrap/Dropdown';
+import { TiBatteryHigh } from "react-icons/ti";
+import {TiBatteryLow} from "react-icons/ti"
+import {TiBatteryFull} from "react-icons/ti"
+import {FaBatteryEmpty} from "react-icons/fa"
+
+
+
+
+
 
 function Control() {
   const [formData, setFormData] = useState({
@@ -18,6 +28,79 @@ function Control() {
     batterystatus:""
 
   })
+  const [batterydata,setBatterydata]=useState([])
+
+  const batteryurl="http://localhost:5000/battery"
+
+
+//  function batteryData() {
+//     return axios.get(batteryurl)
+//       .then(response => {
+//         // Process the data here
+//         return response.data;
+//       })
+//       .catch(error => {
+//         console.error(error);
+//       });
+//   }
+
+  const batteryData=()=>{
+    axios.get(batteryurl).then((res)=>{
+      const dataResponse=res.data
+      setBatterydata(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
+  // batteryData()
+
+  useEffect(()=>{
+    // setInterval(()=>{},30000)
+      batteryData()
+    
+   
+  })
+
+  //console.log(batterydata)
+ const packSoc=[]
+ const currentStatus=[]
+ const CHG=[]
+ const chgtime=[]
+ const DCHG=[]
+ const dscgtime=[]
+
+  for(let i=0;i<batterydata.length;i++){
+    packSoc.push(batterydata[i].pack_usable_soc)
+    currentStatus.push(batterydata[i].batteryStatus)
+    if(batterydata[i].batteryStatus==="CHG"){
+      CHG.push((batterydata[i].chargingAVG).toFixed(2))
+      chgtime.push(batterydata[i].timestamp)
+     
+    }
+    if(batterydata[i].batteryStatus==="DCHG"){
+      DCHG.push((batterydata[i].dischargingAVG).toFixed(2))
+      dscgtime.push(batterydata[i].timestamp)
+     
+    }
+}
+
+
+const val=CHG[CHG.length - 1]
+const time=chgtime[chgtime.length-1]
+const date = new Date(time);
+const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+const formattedTimestamp = date.toLocaleString('en-US', options);
+console.log(formattedTimestamp.split(",")[1])
+
+const distime=dscgtime[dscgtime.length-1]
+const disdate = new Date(distime);
+const disoptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+const disformattedTimestamp = disdate.toLocaleString('en-US', options);
+
+// const date = time.toLocaleString()
+
   // const [chargeOrDischarge, setChargeOrDischarge] = useState('');
   // const [functioncode, setFunctioncode] = useState('');
 
@@ -69,6 +152,9 @@ function Control() {
     
   };
 
+ 
+  
+
   const handleDateTimeChange = (moment, name) => {
     setFormData({
       ...formData,
@@ -95,11 +181,11 @@ function Control() {
 
       })
       console.log(insformatedData)
-      // swal({
-      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
-      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-      //   icon: "success",
-      // });
+      swal({
+        title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge ON ":"battery set to discharge mode",
+        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+        icon: "success",
+      });
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
@@ -117,11 +203,11 @@ function Control() {
 
       })
       console.log(insformatedData)
-      // swal({
-      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
-      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-      //   icon: "success",
-      // });
+      swal({
+        title:insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
+        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+        icon: "success",
+      });
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
@@ -141,11 +227,11 @@ function Control() {
 
       })
       console.log(insformatedData)
-      // swal({
-      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
-      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-      //   icon: "success",
-      // });
+      swal({
+        title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
+        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+        icon: "success",
+      });
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
@@ -165,11 +251,11 @@ function Control() {
 
       })
       console.log(insformatedData)
-      // swal({
-      //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
-      //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-      //   icon: "success",
-      // });
+      swal({
+        title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
+        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+        icon: "success",
+      });
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
@@ -235,6 +321,8 @@ function Control() {
     console.log(insformatedData)
     
   };
+
+  //console.log(packSoc)
  
 
   
@@ -245,17 +333,45 @@ function Control() {
 
    
       <div >
-        <h1 style={{textAlign:'center'}}><b>UPS Battery Controll</b></h1>
+        <h1 style={{textAlign:'center'}}><b>UPS Battery Control</b></h1>
       </div>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'row' }}>
+      <br/>
+      <br/>
+
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+      <div style={{ display: 'inline-block' }}>
+    <div class="card">
+      <div class="card-body">
+        <h3> Pack SoC(%): <b>{packSoc[packSoc.length-1]}</b></h3>
+        <h3>Current Status:<b>{currentStatus[currentStatus.length-1]}</b></h3>
+        <div style={{width:'400px'}}> 
+        {
+          packSoc[packSoc.length-1] >=30 ? <TiBatteryFull size ={100} width="100"/>:<TiBatteryLow size={100} width="100"/>
+        }
+
+      
+        </div>
+        
+        <h3>Last Charge: <span style={{color:"red"}}>{(val)} </span><span>{formattedTimestamp}</span></h3>
+        <p></p>
+        <h3>Last Discharge:  <span style={{color:"red"}}>{DCHG[DCHG.length-1]} </span><span>{disformattedTimestamp}</span></h3>
+        <h1></h1>
+      </div>
+    </div>
+  </div>
+
+      <div style={{ display: 'inline-block',marginLeft:"100px" }}>
+    <div class="card" >
+      <div class="card-body">
+      <form onSubmit={handleSubmit} >
       &nbsp;
         &nbsp;
         
-      <div class="input-group mb-3"  style={{width:"300px"}}>
+      <div class="input-group mb-3"  style={{width:"350px"}}>
       <label class="input-group-text" for="inputGroupSelect01">Options</label>
   <select class="form-select" id="inputGroupSelect01" value={formData.functioncode} onChange={(e) => setFormData({ ...formData, functioncode: e.target.value })}>
-  <option value="">Function Code</option>
-          <option value={0}>IDEL</option>
+  <option value="">Status</option>
+          <option value={0}>IDLE</option>
           <option value={1}>CHG</option>
           <option value={2}>DCHG</option>
   </select>
@@ -263,7 +379,7 @@ function Control() {
   <br/>
         
 
-        <div style={{width:"300px"}}>
+        <div style={{width:"350px"}}>
         <DateTime
            inputProps={{ placeholder: "Start Time" }}
            value={formData.starttime}
@@ -275,7 +391,7 @@ function Control() {
         </div>
       <br/>
 
-        <div style={{width:"300px"}}> 
+        <div style={{width:"350px"}}> 
         <DateTime
           inputProps={{ placeholder: "End Time" }}
           value={formData.endtime}
@@ -306,17 +422,21 @@ function Control() {
           value={formData.capacity}
           onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
           placeholder="Capacity"
-          style={{width:"300px"}}
+          style={{width:"350px"}}
         />
   </div>
   <br/>
   <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>
 
   </form>
-  <br/>
-  <br/>
 
-  <form onSubmit={instantaneousSubmit}> 
+      </div>
+    </div>
+  </div>
+  <div style={{ display: 'inline-block',marginLeft:"100px" }}>
+    <div class="card">
+      <div class="card-body">
+      <form onSubmit={instantaneousSubmit}> 
   <div class="row">
   <div class="col-sm-6">
     <div class="cards">
@@ -326,7 +446,7 @@ function Control() {
          <div class="input-group mb-3"  style={{width:"400px"}}>
       <label class="input-group-text" for="inputGroupSelect01">Charge/Discharge</label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) => setInsformData({ ...insformData, batterystatus: e.target.value })}>
-  <option value="">Function Code</option>
+  <option value="">Status</option>
         <option value="charge">Charge</option>
         <option value="discharge">Discharge</option>
   </select>
@@ -337,7 +457,7 @@ function Control() {
   <select class="form-select" id="inputGroupSelect01" value={insformData.functioncode} onChange={(e) => setInsformData({ ...insformData, functioncode: e.target.value })}>
   <option value="">Function Code</option>
         <option value={1}>ON</option>
-        <option value={2}>OF</option>
+        <option value={2}>OFF</option>
   </select>
   </div>
       <br/>
@@ -348,6 +468,17 @@ function Control() {
   </div>
 </div>
 </form>
+       
+      </div>
+    </div>
+  </div>
+      
+      
+  <br/>
+  <br/>
+
+  
+</div>
   
   </div>
 
