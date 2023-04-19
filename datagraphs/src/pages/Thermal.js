@@ -67,7 +67,7 @@ const Thermal = () => {
             colors:["#4c4d49"],
             yaxis: {
               title: {
-                text: 'kW',
+                text: 'ckWh',
               }
             },
             xaxis : {
