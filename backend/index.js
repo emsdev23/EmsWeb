@@ -175,7 +175,7 @@ emptyArray.forEach(obj => {
         0
       );
       //const avg=call/minituesdata.length
-      console.log(minituesdata.length)
+      //console.log(minituesdata.length)
 
     finalresult.push(minituesdata)
     calculated.push(call)
@@ -610,7 +610,6 @@ emptyArray.forEach(obj => {
                         // Add the time and its average chillerEnergy to the output object
                         output[key] = { chillerEnergy: avgChillerEnergy };
             }
-            
             }
         
                 const cleanDischargeData = (data)=>{
@@ -630,39 +629,52 @@ emptyArray.forEach(obj => {
                     formatDischargeData(result)
                 }
         
-                    let tempdischargearr = [0]
-                    cummulativeValueDischarge = (chillerEnergy,time) => {
-                        Energy = Math.abs(tempdischargearr.slice(-1)[0]-chillerEnergy)
-                        tempdischargearr.push(chillerEnergy)
-                        // temparr = temparr.shift()
-                        // console.log(chillerEnergy,Energy)
-                        if (chillerEnergy != Energy){
-                            values.push({"chillerEnergy":Energy,"timestamp":time})
-                        }
-                    }
-                    cleanDischargeData(values)
-        
-                    unprocesseddata.query(`select tsOutletBDPvalveStatus,tsInletHvalveStatus,tsOutletADPvalveStatus,polledTime,coolingEnergyConsumption from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = curdate() order by polledTime asc`,function(err,queryres){
-                        if(err){
-                            console.log(err)
+                let tempdischargearr = [0]
+                cummulativeValueDischarge = (chillerEnergy,time,chkno) => {
+                    Energy = Math.abs(tempdischargearr.slice(-1)[0]-chillerEnergy)
+                    tempdischargearr.push(chillerEnergy)
+                    // temparr = temparr.shift()
+                    // console.log(chillerEnergy,Energy)
+                    if (chillerEnergy != Energy){
+                        // console.log(valuesd.length,chkno-2)
+                        if(valuesd.length > (chkno -2)){
+                            // console.log(valuesd.length,chkno-2)
+                            cleanDischargeData(valuesd)
+                            valuesd = []
+                            // console.log(valuesd.length)
                         }
                         else{
-                            // parsing the query output into json
-                            data = JSON.parse(JSON.stringify(queryres))
-                            for (const datum of data){
-                                const tsin = datum.tsInletHvalveStatus
-                                const tsADP = datum.tsOutletADPvalveStatus
-                                const tsBDP = datum.tsOutletBDPvalveStatus
-                                const coolenergy = datum.coolingEnergyConsumption
-                                const polledtime = datum.polledTime
-                                const parsedTime = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-        
-                                if (tsin == 1 && tsADP == 1 && tsBDP == 1){
-                                    cummulativeValueDischarge(coolenergy,parsedTime)
-                                }
+                        valuesd.push({"chillerEnergy":Energy,"timestamp":time})
+                    }
+                }
+                    // console.log(valuesd.length,chkno-1)
+                    // console.log(valuesd)
+                }
+               
+                let chk = 0
+                unprocesseddata.query(`select tsOutletBDPvalveStatus,tsInletHvalveStatus,tsOutletADPvalveStatus,polledTime,coolingEnergyConsumption from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = '2023-03-14' order by polledTime asc`,function(err,queryres){
+                    if(err){
+                        console.log(err)
+                    }
+                    else{
+                        // parsing the query output into json
+                        data = JSON.parse(JSON.stringify(queryres))
+                        for (const datum of data){
+                            const tsin = datum.tsInletHvalveStatus
+                            const tsADP = datum.tsOutletADPvalveStatus
+                            const tsBDP = datum.tsOutletBDPvalveStatus
+                            const coolenergy = datum.coolingEnergyConsumption
+                            const polledtime = datum.polledTime
+                            const parsedTime = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
+   
+                            if (tsin == 1 && tsADP == 1 && tsBDP == 1){
+                                chk = chk + 1
+                                //console.log(coolenergy,parsedTime)
+                                cummulativeValueDischarge(coolenergy/100,parsedTime,chk)
                             }
                         }
-                    })
+                    }
+                })
              res.send(output)
         })
 
@@ -812,9 +824,6 @@ app.get("/outletTemparature",async(req,res)=>{
                       })
                    
                 }
-
-
-                
                 
             }
             
@@ -876,6 +885,22 @@ app.post('/instantaneous', function (req, res) {
         //return 
     });
 });
+
+
+
+app.get("/acknowledment",async(req,res)=>{
+    con.query("select * from acknowlegment order by id desc ",function(err,result,feilds){
+        if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            res.send(response)
+            console.log(response.length)
+        }
+    })
+    
+})
 
 
 
