@@ -21,6 +21,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Thermal from './Thermal';
 import ForestIcon from '@mui/icons-material/Forest';
 
+
 //import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 // import { Zoom, ZoomButtons } from "recharts-plugin-zoom";
 // import { WMSData } from './Wms';
@@ -56,6 +57,7 @@ ChartJS.register(
   
 );
 // ChartJS.register(ArcElement, Tooltip, Legend);
+
 
 
 
@@ -775,7 +777,7 @@ console.log(totaldaysumvalue)
       console.log(timeStamp)
       var time=timeStamp.map((res)=>res.split(",")[1])
       console.log(time)
-      console.log(batteryresultdata)
+      console.log(currentupsStatus)
 
     //   var apexcharts = {
     //     series: [{ 
@@ -1310,6 +1312,22 @@ console.log(totaldaysumvalue)
   };
   
 
+  // const localtime=now.toDateString()
+  const now = new Date();
+  const local=now.toLocaleString()
+  // const formattedDate = now.toLocaleString('en-US', { 
+  //   year: 'numeric', 
+  //   month: '2-digit', 
+  //   day: '2-digit', 
+  //   hour: '2-digit', 
+  //   minute: '2-digit', 
+  //   second: '2-digit', 
+  //   hour12: false
+  // }).replace('/', '-');
+  console.log(local);
+  
+  
+
       
 
   return (
@@ -1319,8 +1337,8 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4 mb-3 mb-sm-0">
     <div class="card" style={{width:"auto",marginTop:"20px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}} >
       <div class="card-body" >
-        <div > 
-        <h5 class="card-title" style={{textAlign:"left",color:"black"}}><b>Building Consumption</b> <span style={{textAlign:"end",color:'black'}}>06-04-2023</span> </h5>  
+        <div >  
+        <h5 class="card-title" style={{textAlign:"left",color:"black"}}><b>Building Consumption</b> <span style={{textAlign:"end",color:'black'}}>{local}</span> </h5>  
         </div>
         
        
@@ -1352,7 +1370,7 @@ console.log(totaldaysumvalue)
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'100px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> 
         <hr/>
-        <p style={{textAlign:"end",color:"black"}}>06-04-2023</p>
+        <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <GaugeChart 
           id="gauge-chart5"
           nrOfLevels={10}
@@ -1395,7 +1413,7 @@ console.log(totaldaysumvalue)
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5>
         <hr/>
-        <p style={{textAlign:"end",color:"black"}}>06-04-2023</p>
+        <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <GaugeChart 
            id="gauge-chart5"
           nrOfLevels={10}
@@ -1434,11 +1452,12 @@ console.log(totaldaysumvalue)
       <h5 class="card-title"> <b style={{color:"black"}}>Thermal Storage</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/></h5> 
         <hr/>
         {/* <Line data={data} options={optionsdata} /> */}
+        <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <Thermal />
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-        <b style={{color:"black"}}>Cooling Energy:</b>
+        {/* <b style={{color:"black"}}>Cooling Energy:</b> */}
           <br/>
-          <b style={{color:"black"}}>Temparature:</b>
+          <b style={{color:"black"}}>Temperature(°C):</b>
 
         </div>
       </div>
@@ -1448,15 +1467,18 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4">
     <div class="card"  style={{width:"auto", height:"450px",marginTop:"30px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>Co2 Reduction</b></h4>
+        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>CO<sub>2</sub> Reduction</b></h4>
         <hr/>
         {/* <p class="card-text">Daily Reduction in Emission:</p> */}
+        <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
+       
+        <h5 style={{textAlign:"center",color:"black"}}><h5><b>{co2}</b></h5>tCO2/MWh</h5>
         <br/>
-        <h4 style={{textAlign:"center",color:"black"}}><h4>{co2}</h4>tCO2/MWh</h4>
-        <br/>
-        <div style={{color:'black',height:'900px'}}> 
-        <ForestIcon size={200}/>
+        <div style={{textAlign:"center"}}  > 
+        {/* <ForestIcon  /> */}
+
+        <img src="https://o.remove.bg/downloads/a9aa2366-326a-4481-b0e8-08c44ad92456/co2img-removebg-preview.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"50px"}}/>
 
         </div>
         
@@ -1472,12 +1494,13 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4" style={{marginTop:"30px"}}>
     <div class="card" style={{height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
+      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus[currentupsStatus.length-1]==="IDLE" ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }<span style={{color:"black"}}>{currentupsStatus[currentupsStatus.length-1]}</span></h5> 
         <hr/>
         {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/> */}
+        <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <div id="chart2"> 
    {
-      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='300px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='290px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
    }
@@ -1547,7 +1570,7 @@ console.log(totaldaysumvalue)
 
 
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
-        <b style={{color:"black"}}>Pack Soc:  {currentupsStatus[currentupsStatus.length-1]}---{packSoc[packSoc.length-1]}% </b>
+        <b style={{color:"black"}}>Pack Soc:  {packSoc[packSoc.length-1]}% </b>
           <br/>
           {/* <b style={{color:"black"}}>Temparature:</b> */}
 
@@ -1558,18 +1581,18 @@ console.log(totaldaysumvalue)
   <div class="col-sm-4" style={{marginTop:"30px" }}>
     <div class="card" style={{width:"auto",height:"450px",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:'black'}}> Zn Air Battery</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/></h5> 
+      <h5 class="card-title"><b style={{color:'black'}}> Zn Air Battery</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5> 
         <hr/>
         <Line data={data} options={optionsdata}/>
         {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
     
         
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-          <b style={{color:'black'}}> No.Of cycles: </b>
+          {/* <b style={{color:'black'}}> No.Of cycles: </b>
           <br/>
           <b style={{color:'black'}}>Charging Energy:</b>
           <br/>
-          <b style={{color:'black'}}>Discharging Energy:</b>
+          <b style={{color:'black'}}>Discharging Energy:</b> */}
 
         </div>
       </div>
