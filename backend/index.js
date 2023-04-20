@@ -437,8 +437,8 @@ emptyArray.forEach(obj => {
         })
 
 
-        values = []
-        values = []
+        let valuesc = []
+        let valuesd = []
         
         
         
@@ -509,11 +509,11 @@ emptyArray.forEach(obj => {
                         // temparr = temparr.shift()
                         // console.log(chillerEnergy,Energy)
                         if (chillerEnergy != Energy){
-                            values.push({"chillerEnergy":Energy,"timestamp":time})
+                            valuesc.push({"chillerEnergy":Energy,"timestamp":time})
                         }
                     }
         
-                    cleanChargeData(values)
+                    cleanChargeData(valuesc)
                     //console.log(.length)
                     // console.log(values)
                     // cleanData(values)
@@ -611,6 +611,7 @@ emptyArray.forEach(obj => {
                         output[key] = { chillerEnergy: avgChillerEnergy };
             }
             }
+            //console.log(output)
         
                 const cleanDischargeData = (data)=>{
                     let result = {};
@@ -652,7 +653,7 @@ emptyArray.forEach(obj => {
                 }
                
                 let chk = 0
-                unprocesseddata.query(`select tsOutletBDPvalveStatus,tsInletHvalveStatus,tsOutletADPvalveStatus,polledTime,coolingEnergyConsumption from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = '2023-03-14' order by polledTime asc`,function(err,queryres){
+                unprocesseddata.query(`select tsOutletBDPvalveStatus,tsInletHvalveStatus,tsOutletADPvalveStatus,polledTime,coolingEnergyConsumption from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = curdate() order by polledTime asc`,function(err,queryres){
                     if(err){
                         console.log(err)
                     }
@@ -676,6 +677,24 @@ emptyArray.forEach(obj => {
                     }
                 })
              res.send(output)
+        })
+
+
+        app.get("/thermaltemp", (req,res)=>{
+            unprocesseddata.query(`select tsStoredWaterTemperature from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = curdate() order by polledTime desc LIMIT 1;`,function(err,querres){
+                let tempera = 0
+                if(err){
+                    console.log(err)
+                }else{
+                    temp = JSON.parse(JSON.stringify(querres))
+                    for (const tempdata of temp){
+                        // console.log("temp : ",tempdata.tsStoredWaterTemperature/100)
+                        tempera = (tempdata.tsStoredWaterTemperature/100)
+                    }
+                    res.send(tempera.toFixed(1))
+                }
+            })
+           
         })
 
 
