@@ -1496,7 +1496,7 @@ console.log(totaldaysumvalue)
         <div style={{textAlign:"center"}}  > 
         {/* <ForestIcon  /> */}
 
-        <img src="https://o.remove.bg/downloads/a9aa2366-326a-4481-b0e8-08c44ad92456/co2img-removebg-preview.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"50px"}}/>
+        <img src="https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-flat-template-with-co2-leaves-for-concept-design-png-image_4674847.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"100px"}}/>
 
         </div>
         
@@ -1518,7 +1518,7 @@ console.log(totaldaysumvalue)
         <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <div id="chart2"> 
    {
-      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='290px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='270px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
    }

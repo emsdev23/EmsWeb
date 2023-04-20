@@ -368,9 +368,10 @@ console.log(distime)
       
         </div>
         
-        <h3>Last Charge: <span style={{color:"red"}}>{(val)} kWh | </span><span>{formattedTimestamp}</span></h3>
-        <p></p>
-        <h3>Last Discharge:  <span style={{color:"red"}}>{DCHG[DCHG.length-1]} </span><span>{disformattedTimestamp} </span></h3>
+        <h3>Last Charge: <span style={{color:"red"}}>{(val)} kWh | </span></h3>
+        <p>{formattedTimestamp}</p>
+        <h3>Last Discharge:  <span style={{color:"red"}}>{DCHG[DCHG.length-1]} kWh | </span><span> </span></h3>
+        <p>{disformattedTimestamp}</p>
         <h1></h1>
       </div>
     </div>
@@ -451,6 +452,12 @@ console.log(distime)
       </div>
     </div>
   </div>
+  <br/>
+ 
+      
+      
+  <br/>
+  <br/>
   <div style={{ display: 'inline-block',marginLeft:"100px" }}>
   <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
   <br/>
@@ -461,10 +468,10 @@ console.log(distime)
   <div class="col-sm-6">
     <div class="cards">
       <div class="card-body">
-        <h5 class="card-title">Battery Charge</h5>
+        {/* <h5 class="card-title">Battery Charge</h5> */}
 
-         <div class="input-group mb-3"  style={{width:"400px"}}>
-      <label class="input-group-text" for="inputGroupSelect01">Charge/Discharge</label>
+        <div class="input-group mb-3"  style={{width:"350px"}}>
+      <label class="input-group-text" for="inputGroupSelect01" >Charge/Discharge</label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) => setInsformData({ ...insformData, batterystatus: e.target.value })}>
   <option value="">Status</option>
         <option value="charge">Charge</option>
@@ -472,7 +479,7 @@ console.log(distime)
   </select>
   </div>
         <br/>
-       <div class="input-group mb-3"  style={{width:"400px"}}>
+        <div class="input-group mb-3"  style={{width:"350px"}}>
       <label class="input-group-text" for="inputGroupSelect01">On/Off:</label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.functioncode} onChange={(e) => setInsformData({ ...insformData, functioncode: e.target.value })}>
   <option value="">Function Code</option>
@@ -495,13 +502,10 @@ console.log(distime)
       </div>
     </div>
   </div>
-      
-      
-  <br/>
-  <br/>
 
   
 </div>
+
   
   </div>
 
