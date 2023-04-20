@@ -90,6 +90,9 @@ function DashBoard() {
 
   const [batterygraph,setBatterygraph]=useState(null)
 
+
+  const [temp,setTemp]=useState(null)
+
   
 
   
@@ -138,6 +141,7 @@ function DashBoard() {
   const meterData="http://localhost:5000/meterdata"
   const acmeterenergy='http://localhost:5000/acmeterenergy'
   const griddata= 'http://localhost:5000/grid'
+  const temparature="http://localhost:5000/thermaltemp"
 
 const values=[]
 
@@ -226,6 +230,17 @@ const values=[]
       setGrid(dataresponse)
     })
   }
+
+  const TempData=()=>{
+    axios.get(temparature).then((res)=>{
+      const dataResponse=res.data
+      setTemp(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
   // piedata()
   //   batterydata()
   //   WMSData()
@@ -247,6 +262,7 @@ const values=[]
     meterfunction()
     acmeterenergyfunction()
     gridfunction()
+    TempData()
 
     const interval = setInterval(() => {
       piedata();
@@ -257,6 +273,7 @@ const values=[]
       meterfunction();
       acmeterenergyfunction();
       gridfunction();
+      TempData()
       console.log("running every 5min ............")
   }, 5 * 60 * 1000);
 
@@ -698,6 +715,7 @@ console.log(totaldaysumvalue)
           //specific yeild calculation values
           var WISspecificyeild=(totalsolargeneration/2008.36).toFixed(2)
           var RTSspecificyeild=(totalrooftopgeneration/1075.8).toFixed(2)
+          console.log(WISspecificyeild,RTSspecificyeild)
 
           // pr% calculation values
           const WheeledinsolarPR= totalsolargeneration/((totalwmsirradiation/60000)* 2008.36)
@@ -752,7 +770,7 @@ console.log(totaldaysumvalue)
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
           packSoc.push(Math.trunc(battery[i].pack_usable_soc))
-          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toString(),"timeStamp":timeString})
+          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toFixed(2),"timeStamp":timeString})
         }
         else if(battery[i].batteryStatus==="CHG"){
           batteryStaus.push(battery[i].chargingAVG)
@@ -767,7 +785,7 @@ console.log(totaldaysumvalue)
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
           packSoc.push(Math.trunc(battery[i].pack_usable_soc))
-          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toString(),"timeStamp":timeString})
+          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toFixed(2),"timeStamp":timeString})
 
         }
 
@@ -846,7 +864,7 @@ console.log(totaldaysumvalue)
     var apexcharts = {
       series: [{ 
         name:"battery Status",
-        data: batteryresultdata.map((val)=>val.batteryEnergy)
+        data: batteryresultdata.map((val)=>(val.batteryEnergy))
       }],
     
       options: {
@@ -1457,7 +1475,7 @@ console.log(totaldaysumvalue)
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
         {/* <b style={{color:"black"}}>Cooling Energy:</b> */}
           <br/>
-          <b style={{color:"black"}}>Temperature(°C):</b>
+          <b style={{color:"black"}}>Temperature(°C):{temp}</b>
 
         </div>
       </div>

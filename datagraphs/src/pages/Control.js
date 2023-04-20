@@ -29,6 +29,8 @@ function Control() {
 
   })
   const [batterydata,setBatterydata]=useState([])
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
 
   const batteryurl="http://localhost:5000/battery"
 
@@ -63,7 +65,7 @@ function Control() {
    
   })
 
-  //console.log(batterydata)
+  console.log(batterydata)
  const packSoc=[]
  const currentStatus=[]
  const CHG=[]
@@ -92,12 +94,16 @@ const time=chgtime[chgtime.length-1]
 const date = new Date(time);
 const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
 const formattedTimestamp = date.toLocaleString('en-US', options);
-console.log(formattedTimestamp.split(",")[1])
+//console.log(formattedTimestamp.split(",")[1])
 
 const distime=dscgtime[dscgtime.length-1]
 const disdate = new Date(distime);
 const disoptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
 const disformattedTimestamp = disdate.toLocaleString('en-US', options);
+console.log(distime)
+
+
+
 
 // const date = time.toLocaleString()
 
@@ -185,7 +191,12 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
         title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge ON ":"battery set to discharge mode",
         //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
         icon: "success",
-      });
+      }).then(()=>{
+        setIsButtonDisabled(true)
+      })
+      
+
+
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
@@ -231,7 +242,9 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
         title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
         //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
         icon: "success",
-      });
+      })
+   
+   
     } catch (error) {
       console.error(error);
       //console.log(formattedData)
@@ -339,8 +352,11 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       <br/>
 
       <div style={{ display: 'flex', flexDirection: 'row' }}>
+         
       <div style={{ display: 'inline-block' }}>
-    <div class="card">
+      <h4 style={{textAlign:"center"}}><b>Overview</b></h4>
+      <br/>
+    <div class="card" style={{background:"#C1E1C1"}}>
       <div class="card-body">
         <h3> Pack SoC(%): <b>{packSoc[packSoc.length-1]}</b></h3>
         <h3>Current Status:<b>{currentStatus[currentStatus.length-1]}</b></h3>
@@ -352,16 +368,18 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       
         </div>
         
-        <h3>Last Charge: <span style={{color:"red"}}>{(val)} </span><span>{formattedTimestamp}</span></h3>
+        <h3>Last Charge: <span style={{color:"red"}}>{(val)} kWh | </span><span>{formattedTimestamp}</span></h3>
         <p></p>
-        <h3>Last Discharge:  <span style={{color:"red"}}>{DCHG[DCHG.length-1]} </span><span>{disformattedTimestamp}</span></h3>
+        <h3>Last Discharge:  <span style={{color:"red"}}>{DCHG[DCHG.length-1]} </span><span>{disformattedTimestamp} </span></h3>
         <h1></h1>
       </div>
     </div>
   </div>
 
       <div style={{ display: 'inline-block',marginLeft:"100px" }}>
-    <div class="card" >
+      <h4 style={{textAlign:"center"}}><b>Sheduled Control</b></h4>
+      <br/>
+    <div class="card" style={{background:"#C1E1C1"}} >
       <div class="card-body">
       <form onSubmit={handleSubmit} >
       &nbsp;
@@ -414,7 +432,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
         />
   </div> */}
   <div class="mb-3">
-
+{/* 
     <input
           type="number"
           name="capacity"
@@ -423,7 +441,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
           onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
           placeholder="Capacity"
           style={{width:"350px"}}
-        />
+        /> */}
   </div>
   <br/>
   <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>
@@ -434,7 +452,9 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
     </div>
   </div>
   <div style={{ display: 'inline-block',marginLeft:"100px" }}>
-    <div class="card">
+  <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
+  <br/>
+    <div class="card" style={{background:"#C1E1C1"}}>
       <div class="card-body">
       <form onSubmit={instantaneousSubmit}> 
   <div class="row">
@@ -461,8 +481,11 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
   </select>
   </div>
       <br/>
+      {
+        isButtonDisabled=== true? <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>:<button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
+      }
 
-      <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>
+     
       </div>
     </div>
   </div>
