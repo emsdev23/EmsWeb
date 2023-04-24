@@ -18,6 +18,8 @@ import Control from './pages/Control';
 import Alerts from './pages/Alerts'
 import Documentation from './pages/Documentation';
 import Peakdemand from './pages/Peakdemand';
+import Thermalalers from './pages/Thermalalers';
+import ChillerAlerts from './pages/ChillerAlerts';
 import axios from 'axios';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -143,6 +145,9 @@ function App() {
       <Route  path ='/Alerts' element={<Alerts/>}/>
       <Route  path ='/Documentation' element={<Documentation/>}/>
       <Route  path ='/Peakdemand' element={<Peakdemand/>}/>
+      <Route  path ='/Thermalalers' element={<Thermalalers/>}/>
+      <Route  path ='/ChillerAlerts' element={<ChillerAlerts/>}/>
+      
 
       </Routes>
 
