@@ -1,3 +1,4 @@
+
 import React, { useState,useEffect } from 'react';
 import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
@@ -349,16 +350,16 @@ console.log(distime)
         <h1 style={{textAlign:'center'}}><b>UPS Battery Control</b></h1>
       </div>
       <br/>
-      <br/>
 
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
+      <div  class="row" style={{marginLeft:'3px'}}>
          
-      <div style={{ display: 'inline-block' }}>
+      <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
       <h4 style={{textAlign:"center"}}><b>Overview</b></h4>
       <br/>
-    <div class="card" style={{background:"#C1E1C1"}}>
+      <div >
+    <div class="card" style={{background:"#a3c1c2",width:"480px"}}>
       <div class="card-body">
-        <h3> Pack SoC(%): <b>{packSoc[packSoc.length-1]}</b></h3>
+        <h3> Pack SoC(%): <b>{Math.round(packSoc[packSoc.length-1])}</b></h3>
         <h3>Current Status:<b>{currentStatus[currentStatus.length-1]}</b></h3>
         <div style={{width:'400px'}}> 
         {
@@ -370,23 +371,24 @@ console.log(distime)
         
         <h3>Last Charge: <span style={{color:"red"}}>{(val)} kWh | </span></h3>
         <p>{formattedTimestamp}</p>
-        <h3>Last Discharge:  <span style={{color:"red"}}>{DCHG[DCHG.length-1]} kWh | </span><span> </span></h3>
+        <h3>Last Discharge:  <span style={{color:"red"}}>{Math.round(DCHG[DCHG.length-1])} kWh | </span><span> </span></h3>
         <p>{disformattedTimestamp}</p>
         <h1></h1>
       </div>
     </div>
+    </div>
   </div>
 
-      <div style={{ display: 'inline-block',marginLeft:"100px" }}>
+      <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
       <h4 style={{textAlign:"center"}}><b>Sheduled Control</b></h4>
       <br/>
-    <div class="card" style={{background:"#C1E1C1"}} >
-      <div class="card-body">
+    <div class="card" style={{background:"#a3c1c2",width:"480px", height:"380px"}} >
+      <div class="card-body" style={{justifyContent:"center",marginLeft:"30px"}}>
       <form onSubmit={handleSubmit} >
       &nbsp;
         &nbsp;
         
-      <div class="input-group mb-3"  style={{width:"350px"}}>
+      <div class="input-group mb-3"  style={{width:"300px"}}>
       <label class="input-group-text" for="inputGroupSelect01">Options</label>
   <select class="form-select" id="inputGroupSelect01" value={formData.functioncode} onChange={(e) => setFormData({ ...formData, functioncode: e.target.value })}>
   <option value="">Status</option>
@@ -398,7 +400,7 @@ console.log(distime)
   <br/>
         
 
-        <div style={{width:"350px"}}>
+        <div style={{width:"300px"}}>
         <DateTime
            inputProps={{ placeholder: "Start Time" }}
            value={formData.starttime}
@@ -410,7 +412,7 @@ console.log(distime)
         </div>
       <br/>
 
-        <div style={{width:"350px"}}> 
+        <div style={{width:"300px"}}> 
         <DateTime
           inputProps={{ placeholder: "End Time" }}
           value={formData.endtime}
@@ -452,17 +454,12 @@ console.log(distime)
       </div>
     </div>
   </div>
-  <br/>
- 
-      
-      
-  <br/>
-  <br/>
-  <div style={{ display: 'inline-block',marginLeft:"100px" }}>
+  
+  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
   <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
   <br/>
-    <div class="card" style={{background:"#C1E1C1"}}>
-      <div class="card-body">
+    <div class="card" style={{background:"#a3c1c2",width:"480px",height:"380px"}}>
+      <div class="card-body" style={{alignItems:"center",marginLeft:"30px"}}>
       <form onSubmit={instantaneousSubmit}> 
   <div class="row">
   <div class="col-sm-6">
@@ -470,7 +467,7 @@ console.log(distime)
       <div class="card-body">
         {/* <h5 class="card-title">Battery Charge</h5> */}
 
-        <div class="input-group mb-3"  style={{width:"350px"}}>
+        <div class="input-group mb-3"  style={{width:"300px"}}>
       <label class="input-group-text" for="inputGroupSelect01" >Charge/Discharge</label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) => setInsformData({ ...insformData, batterystatus: e.target.value })}>
   <option value="">Status</option>
@@ -479,7 +476,7 @@ console.log(distime)
   </select>
   </div>
         <br/>
-        <div class="input-group mb-3"  style={{width:"350px"}}>
+        <div class="input-group mb-3"  style={{width:"300px"}}>
       <label class="input-group-text" for="inputGroupSelect01">On/Off:</label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.functioncode} onChange={(e) => setInsformData({ ...insformData, functioncode: e.target.value })}>
   <option value="">Function Code</option>
