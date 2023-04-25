@@ -301,16 +301,16 @@ emptyArray.forEach(obj => {
 
 
     // app.get("/db",async(req,res)=>{ })
-    unprocesseddata.query("show tables",function(err,result,feilds){
-            if(err){
-                console.log(err)
-            }
-            else{
-                // const response=(JSON.parse(JSON.stringify(result)))
-                // res.send(response)
-                console.log(result)
-            }
-        })
+    // unprocesseddata.query("show tables",function(err,result,feilds){
+    //         if(err){
+    //             console.log(err)
+    //         }
+    //         else{
+    //             // const response=(JSON.parse(JSON.stringify(result)))
+    //             // res.send(response)
+    //             console.log(result)
+    //         }
+    //     })
 
 
 
@@ -388,7 +388,7 @@ emptyArray.forEach(obj => {
         //   });
 
         app.get("/PeakDemand",async(req,res)=>{
-            chakradb.query("select * from hvacSchneider7230Polling WHERE polledTime >= CURDATE() AND polledTime < DATE_ADD(CURDATE(), INTERVAL 1 DAY)",function(err,result,feilds){
+            chakradb.query("select * from hvacSchneider7230Polling WHERE polledTime >= CURDATE() AND polledTime < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by polledTime desc limit 1",function(err,result,feilds){
                 if(err){
                     console.log(err)
                 }
@@ -396,7 +396,7 @@ emptyArray.forEach(obj => {
                     const response=(JSON.parse(JSON.stringify(result)))
                     //res.send(response)
                     for(let i=0;i<response.length;i++){
-                        if(response[i].totalApparentPower2>=4000){
+                        if(response[i].totalApparentPower2>=3900){
                             const date = new Date(response[i].polledTime)
                             const localTimeString = date.toLocaleString();
                             const transporter = nodemailer.createTransport({
@@ -404,17 +404,24 @@ emptyArray.forEach(obj => {
                                     port: 587,
                                     secure: false,
                                     auth: {
-                                      user: 'ganeshr@tenet.res.in',
-                                      pass: 'Ganesh3110#'
+                                      user: 'arun.kumar@tenet.res.in',
+                                      pass: 'Arun@280196'
                                     }
                                   });
                                   
                                   const mailOptions = {
-                                    from: 'ganeshr@tenet.res.in',
-                                    to: 'ganeshkalyan506@gmail.com',
-                                    subject: 'Test email',
-                                    html: `<h1 >Warning:-Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}</h1>`
+                                    from: 'arun.kumar@tenet.res.in',
+                                    to: 'faheera@respark.iitm.ac.in',
+                                    subject: 'Peak Demand Limit-level 1 breach',
+                                    html: `<h5>Peak Demand Limit-level 1 breach</h5>
+                                    
+                                    <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
+                                    <h5> Severity:- Medium</h5>
+                                    
+                                    `
                                   };
+                                  //energyteam@respark.iitm.ac.in
+                                  //faheera@respark.iitm.ac.in
                                   
                                   transporter.sendMail(mailOptions, function(error, info) {
                                     if (error) {
@@ -425,9 +432,81 @@ emptyArray.forEach(obj => {
                                   });
 
                         }
-                        // else{
-                        //     console.log("running fine .....")
-                        // }
+
+                        else if(response[i].totalApparentPower2>=4200){
+                            const date = new Date(response[i].polledTime)
+                            const localTimeString = date.toLocaleString();
+                            const transporter = nodemailer.createTransport({
+                                    host: 'smtp.office365.com',
+                                    port: 587,
+                                    secure: false,
+                                    auth: {
+                                      user: 'arun.kumar@tenet.res.in',
+                                      pass: 'Arun@280196'
+                                    }
+                                  });
+                                  
+                                  const mailOptions = {
+                                    from: 'arun.kumar@tenet.res.in',
+                                    to: 'faheera@respark.iitm.ac.in',
+                                    subject: 'Peak Demand Limit-level 2 breach',
+                                    html: `<h5>Peak Demand Limit-level 2 breach</h5>
+                                    
+                                    <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
+                                    <h5> Severity:- Medium</h5>
+                                    
+                                    `
+                                  };
+                                  //energyteam@respark.iitm.ac.in
+                                  //faheera@respark.iitm.ac.in
+                                  
+                                  transporter.sendMail(mailOptions, function(error, info) {
+                                    if (error) {
+                                      console.log(error);
+                                    } else {
+                                       res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
+                                    }
+                                  });
+
+                        }
+                        
+                        else if(response[i].totalApparentPower2>=4500){
+                            const date = new Date(response[i].polledTime)
+                            const localTimeString = date.toLocaleString();
+                            const transporter = nodemailer.createTransport({
+                                    host: 'smtp.office365.com',
+                                    port: 587,
+                                    secure: false,
+                                    auth: {
+                                      user: 'arun.kumar@tenet.res.in',
+                                      pass: 'Arun@280196'
+                                    }
+                                  });
+                                  
+                                  const mailOptions = {
+                                    from: 'arun.kumar@tenet.res.in',
+                                    to: 'faheera@respark.iitm.ac.in',
+                                    subject: 'Peak Demand Limit-level 3 breach',
+                                    html: `<h5>Peak Demand Limit-level 3 breach</h5>
+                                    
+                                    <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
+                                    <h5> Severity:- Medium</h5>
+                                    
+                                    `
+                                  };
+                                  //energyteam@respark.iitm.ac.in
+                                  //faheera@respark.iitm.ac.in
+                                  
+                                  transporter.sendMail(mailOptions, function(error, info) {
+                                    if (error) {
+                                      console.log(error);
+                                    } else {
+                                       res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
+                                    }
+                                  });
+
+                        }
+                       
                     }
 
                     //console.log(response.length)
@@ -449,24 +528,39 @@ emptyArray.forEach(obj => {
             // })
         let datas = {}
         // Function to get the values from the target database table (hvacChillerCoolingPolling and hvacCpmPolling)
-        app.get("/thermal", (req,res)=>{
+        // app.get("/thermal", (req,res)=>{
             let c = 0
+            let chk = 0
             const timarr = []
-            let output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
-            // let output = {}
+            // var output = []
+            var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
+
+            
+            
+            // respfunc = (key, energy)=>{
+            //     // console.log(key,energy)
+            //     output[key] = { chillerEnergy: energy }
+            //     timarr.push(output[key])
+            //     // res.send(output)
+            // }
+            // console.log(timarr)
             // To get arranged data in hour format and calculates the average per hour and pushes the value into the values array 
             const formatChargeData = (obj) => {
-        
+                
+                    // let output = {}
                     // Loop through each timings in the input object
                     for (const key in obj) {
                     // Calculate the average chillerEnergy for the time
                     const chillerEnergy = obj[key].chillerEnergy;
                     const avgChillerEnergy = (chillerEnergy.reduce((a, b) => a + b) / chillerEnergy.length)/1000; // Converting Watts to kW
                     
+                    // respfunc(key,avgChillerEnergy)
                     // Add the time and its average chillerEnergy to the output object
                     output[key] = { chillerEnergy: avgChillerEnergy };
-        }
-        
+                    // console.log(output)
+                    // res.send(output)
+                }
+        //console.log(output)
         }
                 // console.log(result)
         
@@ -514,10 +608,6 @@ emptyArray.forEach(obj => {
                     }
         
                     cleanChargeData(valuesc)
-                    //console.log(.length)
-                    // console.log(values)
-                    // cleanData(values)
-                    // res.send(values)
         
         
             //Inner join query to get the coresponding value from two tables in  bmsmgmt_olap_prod_v13 database based on recordId
@@ -600,18 +690,23 @@ emptyArray.forEach(obj => {
                     })
         
                     const formatDischargeData = (obj) => {
-        
+                        //var output=[]
                         // Loop through each timings in the input object
+                        // console.log(obj)
                         for (const key in obj) {
                         // Calculate the average chillerEnergy for the time
                         const chillerEnergy = obj[key].chillerEnergy;
-                        const avgChillerEnergy = -Math.abs((chillerEnergy.reduce((a, b) => a + b) / chillerEnergy.length)/1000); // Converting Watts to kW
+                        const avgChillerEnergy = -Math.abs((chillerEnergy.reduce((a, b) => a + b))); // Converting Watts to kW
                         
+                        // console.log("energy : ",avgChillerEnergy)
+                        // respfunc(key,avgChillerEnergy,chkno)
                         // Add the time and its average chillerEnergy to the output object
                         output[key] = { chillerEnergy: avgChillerEnergy };
-            }
-            }
-            //console.log(output)
+                        // output.push({ "chillerEnergy": avgChillerEnergy,"time":key});
+                        // console.log(output)
+                        // console.log(output)
+                             }
+                     }
         
                 const cleanDischargeData = (data)=>{
                     let result = {};
@@ -626,7 +721,7 @@ emptyArray.forEach(obj => {
                     }
                     result[hour].chillerEnergy.push(data[i].chillerEnergy);
                     }
-                    // console.log(result)
+                    // console.log("length : ",result['7'].chillerEnergy.length)
                     formatDischargeData(result)
                 }
         
@@ -638,46 +733,70 @@ emptyArray.forEach(obj => {
                     // console.log(chillerEnergy,Energy)
                     if (chillerEnergy != Energy){
                         // console.log(valuesd.length,chkno-2)
-                        if(valuesd.length > (chkno -2)){
-                            // console.log(valuesd.length,chkno-2)
+                        if(valuesd.length == (chkno -2)){
+                            // console.log(valuesd)
                             cleanDischargeData(valuesd)
                             valuesd = []
                             // console.log(valuesd.length)
                         }
                         else{
                         valuesd.push({"chillerEnergy":Energy,"timestamp":time})
-                    }
+                        }
                 }
                     // console.log(valuesd.length,chkno-1)
                     // console.log(valuesd)
+                    // console.log("values len : ",valuesd.length)
+                    // cleanDischargeData(valuesd)
                 }
-               
-                let chk = 0
-                unprocesseddata.query(`select tsOutletBDPvalveStatus,tsInletHvalveStatus,tsOutletADPvalveStatus,polledTime,coolingEnergyConsumption from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = curdate() order by polledTime asc`,function(err,queryres){
+                
+                
+                unprocesseddata.query(`select polledTime,coolingEnergyConsumption,tsStoredWaterTemperature,tsOutletBDPvalveStatus,tsOutletADPvalveStatus,HValve from thermalStorageMQTTReadings where Date(polledTime)= curdate() and tsOutletADPvalveStatus = 1 and tsOutletBDPvalveStatus = 1 and HValve = 1 order by polledTime asc ;`,function(err,queryres){
                     if(err){
                         console.log(err)
                     }
                     else{
                         // parsing the query output into json
+
                         data = JSON.parse(JSON.stringify(queryres))
+                        chk = data.length
                         for (const datum of data){
-                            const tsin = datum.tsInletHvalveStatus
-                            const tsADP = datum.tsOutletADPvalveStatus
-                            const tsBDP = datum.tsOutletBDPvalveStatus
                             const coolenergy = datum.coolingEnergyConsumption
                             const polledtime = datum.polledTime
                             const parsedTime = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-   
-                            if (tsin == 1 && tsADP == 1 && tsBDP == 1){
-                                chk = chk + 1
-                                //console.log(coolenergy,parsedTime)
-                                cummulativeValueDischarge(coolenergy/100,parsedTime,chk)
-                            }
+                            
+                            // console.log(coolenergy/100,parsedTime)
+
+                            cummulativeValueDischarge(coolenergy/100,parsedTime,chk)
                         }
+                        // res.send(output)
                     }
                 })
-             res.send(output)
+            //console.log(output)
+            
+        // })
+
+
+
+        app.get("/thermal", (req,res)=>{
+            // let c = 0
+            // let chk = 0
+            // const timarr = []
+            // var output = []
+            var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
+
+            con.query(`select coolingEnergy,timeInHour from ThermalStorageProcessed where DATE(recordTime) = curdate()`,function(err,result){
+                if(err){
+                    console.log(err)
+                }else{
+                    for (const res of result){
+                        output[res.timeInHour] = {"chillerEnergy":res.coolingEnergy}
+                    }
+                }
+                res.send(output)
+            })
+
         })
+
 
 
         app.get("/thermaltemp", (req,res)=>{
@@ -825,7 +944,7 @@ app.get("/outletTemparature",async(req,res)=>{
                 if(counter===5){
                     counter=0
                     const mailOptions = {
-                        from: 'ganeshr@tenet.res.in',
+                        from: 'arun.kumar@tenet.res.in',
                         to:'ganeshkalyan506@gmail.com',
                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','sandhyaravikumar@tenet.res.in','arun.kumar@tenet.res.in'
                         subject: 'Common Header Outlet Temparature breach',
