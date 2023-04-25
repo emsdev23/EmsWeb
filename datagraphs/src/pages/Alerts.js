@@ -14,8 +14,8 @@ function Alerts() {
 
       <Dropdown.Menu>
         <Dropdown.Item href="/Peakdemand">Peak Demand</Dropdown.Item>
-        <Dropdown.Item href="#/action-2">Chiller</Dropdown.Item>
-        <Dropdown.Item href="#/action-3">Themal</Dropdown.Item>
+        <Dropdown.Item href="/ChillerAlerts">Chiller</Dropdown.Item>
+        <Dropdown.Item href="/Thermalalers">Thermal</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
       </div>
