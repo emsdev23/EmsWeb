@@ -5,6 +5,7 @@ const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
+const password = "*********"
 
 app.use(
     cors({
@@ -396,7 +397,7 @@ emptyArray.forEach(obj => {
                     const response=(JSON.parse(JSON.stringify(result)))
                     //res.send(response)
                     for(let i=0;i<response.length;i++){
-                        if(response[i].totalApparentPower2>=3900){
+                        if(response[i].totalApparentPower2>=3900 && response[i].totalApparentPower2<=4199 ){
                             const date = new Date(response[i].polledTime)
                             const localTimeString = date.toLocaleString();
                             const transporter = nodemailer.createTransport({
@@ -433,7 +434,7 @@ emptyArray.forEach(obj => {
 
                         }
 
-                        else if(response[i].totalApparentPower2>=4200){
+                        else if(response[i].totalApparentPower2>=4200 && response[i].totalApparentPower2<=4499 ){
                             const date = new Date(response[i].polledTime)
                             const localTimeString = date.toLocaleString();
                             const transporter = nodemailer.createTransport({
@@ -479,7 +480,7 @@ emptyArray.forEach(obj => {
                                     secure: false,
                                     auth: {
                                       user: 'arun.kumar@tenet.res.in',
-                                      pass: 'Arun@280196'
+                                      pass: password
                                     }
                                   });
                                   
@@ -611,7 +612,7 @@ app.get("/thermalalert",(req,res)=>{
                     secure: false,
                     auth: {
                       user: 'ganeshr@tenet.res.in',
-                      pass: 'Ganesh3110#'
+                      pass: password
                     }
                   })
                   
@@ -675,8 +676,8 @@ app.get("/outletTemparature",async(req,res)=>{
                 port: 587,
                 secure: false,
                 auth: {
-                  user: 'ganeshr@tenet.res.in',
-                  pass: 'Ganesh3110#'
+                  user: 'arun.kumar@tenet.res.in',
+                  pass: password
                 }
               })
             
