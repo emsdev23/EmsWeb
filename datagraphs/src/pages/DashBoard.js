@@ -92,9 +92,6 @@ function DashBoard() {
 
 
   const [temp,setTemp]=useState(null)
-
-  
-
   
  
   const linestate  = {
@@ -142,6 +139,26 @@ function DashBoard() {
   const acmeterenergy='http://localhost:5000/acmeterenergy'
   const griddata= 'http://localhost:5000/grid'
   const temparature="http://localhost:5000/thermaltemp"
+  const rooftopac = "http://localhost:5000/rooftop"
+
+  var totalrooftopgeneration
+  const Roof = () => {
+    const [result, setResult] = useState([])
+  
+    const namelist = () =>{
+     axios.get(rooftopac).then((res)=>setResult(res.data))
+    }
+
+    useEffect(()=>{ 
+      namelist()
+    },[])
+
+    totalrooftopgeneration = result[0]
+    // console.log("rooftop : ",totalrooftopgeneration)
+  }
+  Roof()
+  // console.log("rooftop : ",totalrooftopgeneration)
+
 
 const values=[]
 
@@ -299,85 +316,6 @@ const values=[]
 
 
 
-//--------------------- rooftop solar card(generation)-----------------------------------------------
-  const subSystemIdOne=[]
-  const subSystemIdTwo=[]
-
-  for(let i=0; i<acenergy.length;i++){
-    if(acenergy[i].acmetersubsystemid===1147){
-      subSystemIdOne.push(acenergy[i])
-    }
-    else if(acenergy[i].acmetersubsystemid===1035){
-      subSystemIdTwo.push(acenergy[i])
-    }
-
-  }
-  console.log(subSystemIdOne)
-  //----------------------------------------------------
-  let subSystemIdOneprevious = null;
-let subSystemIdOnecurrent = null;
-const subSystemIdOneresult=[]
-
-// loop over the array of data and perform subtraction
-for (let i = 0; i < subSystemIdOne.length; i++) {
-  // set current value to the current item in the array
-  subSystemIdOnecurrent = subSystemIdOne[i].acmeterenergy;
-
-  // check if this is not the first item in the array
-  if (subSystemIdOneprevious !== null) {
-    // subtract current value from previous value
-    const datadifference=subSystemIdOnecurrent - subSystemIdOneprevious
-    console.log(datadifference)
-    subSystemIdOneresult.push(subSystemIdOnecurrent - subSystemIdOneprevious);
-
-    // do something with the difference value, such as logging it to the console
-    // console.log(difference);
-  }
-
-  // set previous value to the current value for the next iteration
-  subSystemIdOneprevious = subSystemIdOnecurrent;
-}
-  console.log(subSystemIdOneresult)
-  const totasubsystemOne = subSystemIdOneresult.reduce((accumulator, currentValue) => {
-    return Math.trunc(accumulator + currentValue);
-  }, 0);
-  const resultValueone=(totasubsystemOne/1000)
-  
-
-  //-------------------------------------------------------------------
-  let subSystemIdTwoprevious = null;
-  let subSystemIdTwocurrent = null;
-  const subSystemIdTworesult=[]
-  
-  // loop over the array of data and perform subtraction
-  for (let i = 0; i < subSystemIdTwo.length; i++) {
-    // set current value to the current item in the array
-    subSystemIdTwocurrent = subSystemIdTwo[i].acmeterenergy;
-  
-    // check if this is not the first item in the array
-    if (subSystemIdTwoprevious !== null) {
-      // subtract current value from previous value
-      const datadifference=subSystemIdTwocurrent - subSystemIdTwoprevious
-      console.log(datadifference)
-      subSystemIdTworesult.push(subSystemIdTwocurrent - subSystemIdTwoprevious);
-  
-      // do something with the difference value, such as logging it to the console
-      // console.log(difference);
-    }
-  
-    // set previous value to the current value for the next iteration
-    subSystemIdTwoprevious = subSystemIdTwocurrent;
-  }
-    console.log(subSystemIdTworesult)
-
-    const totasubsystemTwo = subSystemIdTworesult.reduce((accumulator, currentValue) => {
-      return Math.trunc(accumulator + currentValue);
-    }, 0);
-    const resultvaluetwo=(totasubsystemTwo/1000)
-
-    const totalrooftopgeneration=resultValueone+resultvaluetwo
-    console.log(totalrooftopgeneration)
-
 
 
   
@@ -481,7 +419,7 @@ for (let i = 0; i < subSystemId1167.length; i++) {
     system1135current = subSystemId1135[i].acmeterenergy;
   
     // check if this is not the first item in the array
-    if (subSystemIdTwoprevious !== null) {
+    if (system1135previous !== null) {
       // subtract current value from previous value
       const datadifference=system1135current - system1135previous
       // console.log(datadifference)
@@ -1670,6 +1608,87 @@ console.log(totaldaysumvalue)
 export default DashBoard
 
 
+
+
+
+//--------------------- rooftop solar card(generation)-----------------------------------------------
+// const subSystemIdOne=[]
+// const subSystemIdTwo=[]
+
+// for(let i=0; i<acenergy.length;i++){
+//   if(acenergy[i].acmetersubsystemid===1147){
+//     subSystemIdOne.push(acenergy[i])
+//   }
+//   else if(acenergy[i].acmetersubsystemid===1035){
+//     subSystemIdTwo.push(acenergy[i])
+//   }
+
+// }
+// console.log(subSystemIdOne)
+// //----------------------------------------------------
+// let subSystemIdOneprevious = null;
+// let subSystemIdOnecurrent = null;
+// const subSystemIdOneresult=[]
+
+// // loop over the array of data and perform subtraction
+// for (let i = 0; i < subSystemIdOne.length; i++) {
+// // set current value to the current item in the array
+// subSystemIdOnecurrent = subSystemIdOne[i].acmeterenergy;
+
+// // check if this is not the first item in the array
+// if (subSystemIdOneprevious !== null) {
+//   // subtract current value from previous value
+//   const datadifference=subSystemIdOnecurrent - subSystemIdOneprevious
+//   console.log(datadifference)
+//   subSystemIdOneresult.push(subSystemIdOnecurrent - subSystemIdOneprevious);
+
+//   // do something with the difference value, such as logging it to the console
+//   // console.log(difference);
+// }
+
+// // set previous value to the current value for the next iteration
+// subSystemIdOneprevious = subSystemIdOnecurrent;
+// }
+// console.log(subSystemIdOneresult)
+// const totasubsystemOne = subSystemIdOneresult.reduce((accumulator, currentValue) => {
+//   return Math.trunc(accumulator + currentValue);
+// }, 0);
+// const resultValueone=(totasubsystemOne/1000)
+
+
+// //-------------------------------------------------------------------
+// let subSystemIdTwoprevious = null;
+// let subSystemIdTwocurrent = null;
+// const subSystemIdTworesult=[]
+
+// // loop over the array of data and perform subtraction
+// for (let i = 0; i < subSystemIdTwo.length; i++) {
+//   // set current value to the current item in the array
+//   subSystemIdTwocurrent = subSystemIdTwo[i].acmeterenergy;
+
+//   // check if this is not the first item in the array
+//   if (subSystemIdTwoprevious !== null) {
+//     // subtract current value from previous value
+//     const datadifference=subSystemIdTwocurrent - subSystemIdTwoprevious
+//     console.log(datadifference)
+//     subSystemIdTworesult.push(subSystemIdTwocurrent - subSystemIdTwoprevious);
+
+//     // do something with the difference value, such as logging it to the console
+//     // console.log(difference);
+//   }
+
+//   // set previous value to the current value for the next iteration
+//   subSystemIdTwoprevious = subSystemIdTwocurrent;
+// }
+//   console.log(subSystemIdTworesult)
+
+//   const totasubsystemTwo = subSystemIdTworesult.reduce((accumulator, currentValue) => {
+//     return Math.trunc(accumulator + currentValue);
+//   }, 0);
+//   const resultvaluetwo=(totasubsystemTwo/1000)
+
+//   const totalrooftopgeneration=resultValueone+resultvaluetwo
+//   console.log(totalrooftopgeneration)
   
 
 
