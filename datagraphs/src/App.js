@@ -128,7 +128,7 @@ function App() {
     PeakDemand()
     thermalAlerts()
      
-    },300000)
+    },60000)
   })
 
   return (
