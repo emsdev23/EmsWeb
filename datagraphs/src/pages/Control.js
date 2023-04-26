@@ -1,4 +1,3 @@
-
 import React, { useState,useEffect } from 'react';
 import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
@@ -10,6 +9,7 @@ import { TiBatteryHigh } from "react-icons/ti";
 import {TiBatteryLow} from "react-icons/ti"
 import {TiBatteryFull} from "react-icons/ti"
 import {FaBatteryEmpty} from "react-icons/fa"
+import { height } from '@mui/system';
 
 
 
@@ -357,22 +357,23 @@ console.log(distime)
       <h4 style={{textAlign:"center"}}><b>Overview</b></h4>
       <br/>
       <div >
-    <div class="card" style={{background:"#a3c1c2",width:"480px"}}>
+    <div class="card" style={{background:"#b8bdcc",width:"auto"}}>
       <div class="card-body">
         <h3> Pack SoC(%): <b>{Math.round(packSoc[packSoc.length-1])}</b></h3>
         <h3>Current Status:<b>{currentStatus[currentStatus.length-1]}</b></h3>
         <div style={{width:'400px'}}> 
         {
-          packSoc[packSoc.length-1] >=30 ? <TiBatteryFull size ={100} width="100"/>:<TiBatteryLow size={100} width="100"/>
+          packSoc[packSoc.length-1] >=30 ? <TiBatteryFull size ={100} width="100%"/>:<TiBatteryLow size={100} width="100%"/>
         }
 
       
         </div>
         
-        <h3>Last Charge: <span style={{color:"red"}}>{(val)} kWh | </span></h3>
-        <p>{formattedTimestamp}</p>
-        <h3>Last Discharge:  <span style={{color:"red"}}>{Math.round(DCHG[DCHG.length-1])} kWh | </span><span> </span></h3>
-        <p>{disformattedTimestamp}</p>
+        <h3>Last Charge: {val?<span style={{color:"red"}}>{(val)} kWh | </span>:<span style={{fontSize:"20px"}}>yet to charge</span>} </h3>
+        {formattedTimestamp!=="Invalid Date"?<p>{formattedTimestamp}</p>:<p>_______</p>}
+        {/* <p>{formattedTimestamp}</p> */}
+        <h3>Last Discharge: {DCHG[DCHG.length-1]?<span style={{color:"red"}}>{Math.round(DCHG[DCHG.length-1])} kWh | </span>: <span style={{fontSize:"20px"}}>yet to discharge</span>} </h3>
+        {disformattedTimestamp!=="Invalid Date"?<p>{disformattedTimestamp}</p>:<p>_______</p>}
         <h1></h1>
       </div>
     </div>
@@ -380,10 +381,10 @@ console.log(distime)
   </div>
 
       <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
-      <h4 style={{textAlign:"center"}}><b>Sheduled Control</b></h4>
+      <h4 style={{textAlign:"center"}}><b>Scheduled Control</b></h4>
       <br/>
-    <div class="card" style={{background:"#a3c1c2",width:"480px", height:"380px"}} >
-      <div class="card-body" style={{justifyContent:"center",marginLeft:"30px"}}>
+    <div class="card" style={{background:"#b8bdcc",width:"auto", height:"380px"}} >
+      <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
       <form onSubmit={handleSubmit} >
       &nbsp;
         &nbsp;
@@ -455,11 +456,11 @@ console.log(distime)
     </div>
   </div>
   
-  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
+  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0" >
   <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
   <br/>
-    <div class="card" style={{background:"#a3c1c2",width:"480px",height:"380px"}}>
-      <div class="card-body" style={{alignItems:"center",marginLeft:"30px"}}>
+    <div class="card" style={{background:"#b8bdcc",width:"auto",height:"380px"}}>
+      <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
       <form onSubmit={instantaneousSubmit}> 
   <div class="row">
   <div class="col-sm-6">
@@ -503,6 +504,8 @@ console.log(distime)
   
 </div>
 
+
+
   
   </div>
 
@@ -511,3 +514,61 @@ console.log(distime)
 }
 
 export default Control;
+
+// ------------------------------------------------
+//  ---------------flip card----------
+// <div class="flip-card">
+//   <div class="flip-card-inner">
+//     <div class="flip-card-front">
+//       {/* <img src="img_avatar.png" alt="Avatar" style={{width:'300px',height:'300px'}}/> */}
+//       <h1 style={{justifyContent:"center",alignItems:"center",display:'flex'}}>Card summary</h1>
+//     </div>
+//     <div class="flip-card-back">
+//       {/* <h1>John Doe</h1> 
+//       <p>Architect & Engineer</p> 
+//       <p>We love that guy</p> */}
+//     </div>
+//   </div>
+// </div>
+// ------------------card styling---------------
+// .flip-card {
+//   background-color: transparent;
+//   width: 300px;
+//   height: 300px;
+//   perspective: 1000px;
+// }
+
+// .flip-card-inner {
+//   position: relative;
+//   width: 100%;
+//   height: 100%;
+//   text-align: center;
+//   transition: transform 0.6s;
+//   transform-style: preserve-3d;
+//   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+// }
+
+// .flip-card:hover .flip-card-inner {
+//   transform: rotateY(180deg);
+// }
+
+// .flip-card-front, .flip-card-back {
+//   position: absolute;
+//   width: 100%;
+//   height: 100%;
+//   -webkit-backface-visibility: hidden;
+//   backface-visibility: hidden;
+// }
+
+// .flip-card-front {
+//   background-color: #bbb;
+//   color: black;
+// }
+
+// .flip-card-back {
+//   background-color: #2980b9;
+//   color: white;
+//   transform: rotateY(180deg);
+// }
+
+	

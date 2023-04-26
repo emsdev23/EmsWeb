@@ -16,7 +16,7 @@ const Thermal = () => {
 
     useEffect(()=>{ 
       namelist()
-    })
+    },[])
 
     // console.log(result)
 

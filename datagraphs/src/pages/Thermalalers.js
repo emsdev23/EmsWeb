@@ -1,5 +1,6 @@
 import React from 'react'
 import Table from 'react-bootstrap/Table';
+import {Link} from 'react-router-dom';
 
 function Thermalalers() {
   return (
@@ -9,6 +10,10 @@ function Thermalalers() {
       <div >
         <h1 style={{textAlign:'center',marginTop:"30px"}}><b>Thermal Storage</b></h1>
       </div>
+
+      <Link to='/Alerts'>
+      <button className="btn btn-info">go back</button>
+      </Link> 
 
 <Table striped bordered hover variant="dark"  style={{marginTop:"50px"}}>
       <thead>

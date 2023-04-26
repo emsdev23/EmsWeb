@@ -827,7 +827,7 @@ console.log(totaldaysumvalue)
               colors: 'white' // set the x-axis label color to red
             }
           },
-          title : {text:"Time in 15min"},
+          title : {text:"Time in Hour"},
         },
         fill: {
           opacity: 0.5,
@@ -1348,14 +1348,14 @@ console.log(totaldaysumvalue)
         <br/>
         <br/>
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }} >
-         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow",marginLeft:"80px"}}>{Math.trunc(totalsolargeneration)}</span>
+         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow",marginLeft:"65px"}}>{Math.trunc(totalsolargeneration)}</span>
           <br/>
-          <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow",marginLeft:"105px"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
+          <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow",marginLeft:"20%"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
           <br/>
-          <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow",marginLeft:"30px"}}>{WISspecificyeild}</span>
+          <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow"}}>{WISspecificyeild}</span>
 
           <br/>
-          <b style={{color:"black"}}>Irradiation (kWh/m2)</b>: <span style={{color:"yellow",marginLeft:"50px"}}>{(totalwmsirradiation/60000).toFixed(2)}</span>
+          <b style={{color:"black"}}>Irradiation (kWh/m2)</b>: <span style={{color:"yellow",marginLeft:"9%"}}>{(totalwmsirradiation/60000).toFixed(2)}</span>
           
         </div>
         
