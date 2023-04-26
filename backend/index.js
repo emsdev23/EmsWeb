@@ -411,7 +411,7 @@ emptyArray.forEach(obj => {
                                   
                                   const mailOptions = {
                                     from: 'arun.kumar@tenet.res.in',
-                                    to: 'faheera@respark.iitm.ac.in',
+                                    to: 'energyteam@respark.iitm.ac.in',
                                     subject: 'Peak Demand Limit-level 1 breach',
                                     html: `<h5>Peak Demand Limit-level 1 breach</h5>
                                     
@@ -469,7 +469,7 @@ emptyArray.forEach(obj => {
                                   });
 
                         }
-                        
+
                         else if(response[i].totalApparentPower2>=4500){
                             const date = new Date(response[i].polledTime)
                             const localTimeString = date.toLocaleString();
@@ -515,268 +515,9 @@ emptyArray.forEach(obj => {
             
         })
 
+// ----------------------------------------------------------------------------------------------------------------------------------------
 
-        let valuesc = []
-        let valuesd = []
-        
-        
-        
-        const resultarr=[]
-        
-            // app.get("/thermal",async(res,req) => {
-            //     res.send(result)
-            // })
-        let datas = {}
-        // Function to get the values from the target database table (hvacChillerCoolingPolling and hvacCpmPolling)
-        // app.get("/thermal", (req,res)=>{
-            let c = 0
-            let chk = 0
-            const timarr = []
-            // var output = []
-            var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
-
-            
-            
-            // respfunc = (key, energy)=>{
-            //     // console.log(key,energy)
-            //     output[key] = { chillerEnergy: energy }
-            //     timarr.push(output[key])
-            //     // res.send(output)
-            // }
-            // console.log(timarr)
-            // To get arranged data in hour format and calculates the average per hour and pushes the value into the values array 
-            const formatChargeData = (obj) => {
-                
-                    // let output = {}
-                    // Loop through each timings in the input object
-                    for (const key in obj) {
-                    // Calculate the average chillerEnergy for the time
-                    const chillerEnergy = obj[key].chillerEnergy;
-                    const avgChillerEnergy = (chillerEnergy.reduce((a, b) => a + b) / chillerEnergy.length)/1000; // Converting Watts to kW
-                    
-                    // respfunc(key,avgChillerEnergy)
-                    // Add the time and its average chillerEnergy to the output object
-                    output[key] = { chillerEnergy: avgChillerEnergy };
-                    // console.log(output)
-                    // res.send(output)
-                }
-        //console.log(output)
-        }
-                // console.log(result)
-        
-                // To group the data by hour and get the data in desired format. This function calls formatData() function
-                // const cleanData = (arr) => {  
-                //     const groupedByHour = arr.reduce((acc, obj) => {
-                //     const hour = new Date(obj.timestamp).getUTCHours();
-                //       if (!acc[hour]) {
-                //       acc[hour] = [];
-                //       }
-                //       acc[hour].push(obj);
-                //       return acc;
-                //       }, {});
-                //       formatData(groupedByHour)
-                //     }
-        
-                   
-                    const cleanChargeData = (data)=>{
-                        let result = {};
-                        for (let i = 0; i < data.length; i++) {
-                        let timestamp = new Date(data[i].timestamp);
-                        let hour = timestamp.getUTCHours();
-        
-                        if (!result[hour]) {
-                            result[hour] = {
-                            chillerEnergy: []
-                            };
-                        }
-                        result[hour].chillerEnergy.push(data[i].chillerEnergy);
-                        }
-                        // console.log(result)
-                        formatChargeData(result)
-                    }
-        
-                    // To calculate the cumulative value of the chiller Energy and calls the function cleanData(chillerEnergy)
-                    let tempchargearr = [0]
-                    const cummulativeValueCharge = (chillerEnergy,time) => {
-                        Energy = Math.abs(tempchargearr.slice(-1)[0]-chillerEnergy)
-                        tempchargearr.push(chillerEnergy)
-                        // temparr = temparr.shift()
-                        // console.log(chillerEnergy,Energy)
-                        if (chillerEnergy != Energy){
-                            valuesc.push({"chillerEnergy":Energy,"timestamp":time})
-                        }
-                    }
-        
-                    cleanChargeData(valuesc)
-        
-        
-            //Inner join query to get the coresponding value from two tables in  bmsmgmt_olap_prod_v13 database based on recordId
-        
-            // SQL query to get chiller inlet and outlet , storage tank inlet and outlet from hvacCmpPolling table joined with (inner join) 
-            // hvacChillerCoolingPolling getting chiller energy.
-        
-                    chakradb.query(`select hvacCpmPolling.recordId,
-                                    hvacCpmPolling.chillerInletValve1Status,hvacCpmPolling.chillerInletValve2Status,hvacCpmPolling.chillerInletValve3Status,hvacCpmPolling.chillerInletValve4Status,
-                                    hvacCpmPolling.chillerOutletValve1Status,hvacCpmPolling.chillerOutletValve2Status,hvacCpmPolling.chillerOutletValve3Status,hvacCpmPolling.chillerOutletValve4Status,
-                                    hvacCpmPolling.storageTankInletValve1Status,hvacCpmPolling.storageTankInletValve2Status,hvacCpmPolling.storageTankInletValve3Status,hvacCpmPolling.storageTankInletValve4Status,
-                                    hvacCpmPolling.storageTankOutletValve1Status,hvacCpmPolling.storageTankOutletValve2Status,hvacCpmPolling.storageTankOutletValve3Status,hvacCpmPolling.storageTankOutletValve4Status,
-                                    hvacChillerCoolingPolling.chiller1Energy,hvacChillerCoolingPolling.chiller2Energy,hvacChillerCoolingPolling.chiller3Energy,hvacChillerCoolingPolling.chiller4Energy, hvacCpmPolling.polledTime from bmsmgmt_olap_prod_v13.hvacCpmPolling inner join bmsmgmt_olap_prod_v13.hvacChillerCoolingPolling on hvacCpmPolling.polledTime = hvacChillerCoolingPolling.polledTime where Date (hvacCpmPolling.polledTime) = curdate() order by hvacChillerCoolingPolling.polledTime asc;`,function(err,queryres){
-                        if(err){
-                            console.log(err)
-                        }
-                        else{
-                            // parsing the query output into json
-                            data = JSON.parse(JSON.stringify(queryres))
-                            // console.log(datas)
-                            for (let i=0; i<data.length;i++) {
-        
-                                const recid = data[i].recordId
-                                const ci1 = data[i].chillerInletValve1Status
-                                const ci2 = data[i].chillerInletValve2Status
-                                const ci3 = data[i].chillerInletValve3Status
-                                const ci4 = data[i].chillerInletValve4Status
-                                const co1 = data[i].chillerOutletValve1Status
-                                const co2 = data[i].chillerOutletValve2Status
-                                const co3 = data[i].chillerOutletValve3Status
-                                const co4 = data[i].chillerOutletValve4Status
-                                const si1 = data[i].storageTankInletValve1Status
-                                const si2 = data[i].storageTankInletValve2Status
-                                const si3 = data[i].storageTankInletValve3Status
-                                const si4 = data[i].storageTankInletValve4Status
-                                const so1 = data[i].storageTankOutletValve1Status
-                                const so2 = data[i].storageTankOutletValve2Status
-                                const so3 = data[i].storageTankOutletValve3Status
-                                const so4 = data[i].storageTankOutletValve4Status
-                                const corsptime = data[i].polledTime
-                                const parsedTime = moment.tz(corsptime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-                                const che1 = data[i].chiller1Energy
-                                const che2 = data[i].chiller2Energy
-                                const che3 = data[i].chiller3Energy
-                                const che4 = data[i].chiller4Energy
-                        
-                                // console.log(recid)
-                                
-                                // Checking the charging status of the chillers based on the inlet and outlet valve
-        
-                                    if ((ci1 == 0 && co1 == 0) && (si1 == 1 && so1 == 1)) {
-                                        // console.log("Chiller 1 Charging","Chiller Energy : ",che1,parsedTime)
-                                        if(che1 !=null){
-                                            cummulativeValueCharge(che1,parsedTime)
-                                        }
-                                    }
-                                    else if ((ci2 == 0 && co2 == 0) && (si2 ==1 && so2 == 1)) {
-                                        // console.log("Chiller 2 is charging","Chiller Energy : ",che2,parsedTime)
-                                        if(che2 !=null){
-                                            cummulativeValueCharge(che2,parsedTime)
-                                        }
-                                    }
-                                    else if ((ci3 == 0 && co3 == 0) && (si3 ==1 && so3 == 1)) {
-                                        // console.log("Chiller 3 is charging","Chiller Energy : ",che3,parsedTime)
-                                        if(che3 !=null){
-                                            cummulativeValueCharge(che3,parsedTime)
-                                        }
-                                    }
-                                    else if ((ci4 == 0 && co4 == 0) && (si4 ==1 && so4 == 1)) {
-                                        // console.log("Chiller 4 is charging","Chiller Energy : ",che4,parsedTime)
-                                        if(che4 !=null){
-                                            cummulativeValueCharge(che4,parsedTime)
-                                        }
-                                    }
-                                    // else{
-                                    //     console.log("Chillers not charging")
-                                    // }
-                                }
-                        }
-                    })
-        
-                    const formatDischargeData = (obj) => {
-                        //var output=[]
-                        // Loop through each timings in the input object
-                        // console.log(obj)
-                        for (const key in obj) {
-                        // Calculate the average chillerEnergy for the time
-                        const chillerEnergy = obj[key].chillerEnergy;
-                        const avgChillerEnergy = -Math.abs((chillerEnergy.reduce((a, b) => a + b))); // Converting Watts to kW
-                        
-                        // console.log("energy : ",avgChillerEnergy)
-                        // respfunc(key,avgChillerEnergy,chkno)
-                        // Add the time and its average chillerEnergy to the output object
-                        output[key] = { chillerEnergy: avgChillerEnergy };
-                        // output.push({ "chillerEnergy": avgChillerEnergy,"time":key});
-                        // console.log(output)
-                        // console.log(output)
-                             }
-                     }
-        
-                const cleanDischargeData = (data)=>{
-                    let result = {};
-                    for (let i = 0; i < data.length; i++) {
-                    let timestamp = new Date(data[i].timestamp);
-                    let hour = timestamp.getUTCHours();
-        
-                    if (!result[hour]) {
-                        result[hour] = {
-                        chillerEnergy: []
-                        };
-                    }
-                    result[hour].chillerEnergy.push(data[i].chillerEnergy);
-                    }
-                    // console.log("length : ",result['7'].chillerEnergy.length)
-                    formatDischargeData(result)
-                }
-        
-                let tempdischargearr = [0]
-                cummulativeValueDischarge = (chillerEnergy,time,chkno) => {
-                    Energy = Math.abs(tempdischargearr.slice(-1)[0]-chillerEnergy)
-                    tempdischargearr.push(chillerEnergy)
-                    // temparr = temparr.shift()
-                    // console.log(chillerEnergy,Energy)
-                    if (chillerEnergy != Energy){
-                        // console.log(valuesd.length,chkno-2)
-                        if(valuesd.length == (chkno -2)){
-                            // console.log(valuesd)
-                            cleanDischargeData(valuesd)
-                            valuesd = []
-                            // console.log(valuesd.length)
-                        }
-                        else{
-                        valuesd.push({"chillerEnergy":Energy,"timestamp":time})
-                        }
-                }
-                    // console.log(valuesd.length,chkno-1)
-                    // console.log(valuesd)
-                    // console.log("values len : ",valuesd.length)
-                    // cleanDischargeData(valuesd)
-                }
-                
-                
-                unprocesseddata.query(`select polledTime,coolingEnergyConsumption,tsStoredWaterTemperature,tsOutletBDPvalveStatus,tsOutletADPvalveStatus,HValve from thermalStorageMQTTReadings where Date(polledTime)= curdate() and tsOutletADPvalveStatus = 1 and tsOutletBDPvalveStatus = 1 and HValve = 1 order by polledTime asc ;`,function(err,queryres){
-                    if(err){
-                        console.log(err)
-                    }
-                    else{
-                        // parsing the query output into json
-
-                        data = JSON.parse(JSON.stringify(queryres))
-                        chk = data.length
-                        for (const datum of data){
-                            const coolenergy = datum.coolingEnergyConsumption
-                            const polledtime = datum.polledTime
-                            const parsedTime = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-                            
-                            // console.log(coolenergy/100,parsedTime)
-
-                            cummulativeValueDischarge(coolenergy/100,parsedTime,chk)
-                        }
-                        // res.send(output)
-                    }
-                })
-            //console.log(output)
-            
-        // })
-
-
-
+        // thermal api
         app.get("/thermal", (req,res)=>{
             // let c = 0
             // let chk = 0
@@ -797,8 +538,8 @@ emptyArray.forEach(obj => {
 
         })
 
-
-
+        
+        // thermal Temp api
         app.get("/thermaltemp", (req,res)=>{
             unprocesseddata.query(`select tsStoredWaterTemperature from bmsmgmtprodv13.thermalStorageMQTTReadings where Date(polledTime) = curdate() order by polledTime desc LIMIT 1;`,function(err,querres){
                 let tempera = 0
@@ -816,6 +557,24 @@ emptyArray.forEach(obj => {
            
         })
 
+
+// ----------------------------------------------------------------------------------------------------------------------------------
+
+        // rooftop
+        app.get("/rooftop",(req,res)=>{
+            var rooftop = 0 
+            con.query(`select acEnergy from RooftopProcessed where polledDate = curdate()`,function(err,qrres){
+                if(err){
+                    console.log(err)
+                }else{
+                    for (const result of qrres){
+                        rooftop = result["acEnergy"]
+                    }
+                }
+                res.send([rooftop])
+                console.log(rooftop)
+            })
+        })
 
 
 //Thermal alert api
@@ -1059,3 +818,273 @@ app.listen(5000,(err)=>{
 })
 
 
+
+
+
+
+
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+// let valuesc = []
+//         let valuesd = []
+        
+        
+        
+//         const resultarr=[]
+        
+//             // app.get("/thermal",async(res,req) => {
+//             //     res.send(result)
+//             // })
+//         let datas = {}
+//         // Function to get the values from the target database table (hvacChillerCoolingPolling and hvacCpmPolling)
+//         // app.get("/thermal", (req,res)=>{
+//             let c = 0
+//             let chk = 0
+//             const timarr = []
+//             // var output = []
+//             var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
+
+            
+            
+//             // respfunc = (key, energy)=>{
+//             //     // console.log(key,energy)
+//             //     output[key] = { chillerEnergy: energy }
+//             //     timarr.push(output[key])
+//             //     // res.send(output)
+//             // }
+//             // console.log(timarr)
+//             // To get arranged data in hour format and calculates the average per hour and pushes the value into the values array 
+//             const formatChargeData = (obj) => {
+                
+//                     // let output = {}
+//                     // Loop through each timings in the input object
+//                     for (const key in obj) {
+//                     // Calculate the average chillerEnergy for the time
+//                     const chillerEnergy = obj[key].chillerEnergy;
+//                     const avgChillerEnergy = (chillerEnergy.reduce((a, b) => a + b) / chillerEnergy.length)/1000; // Converting Watts to kW
+                    
+//                     // respfunc(key,avgChillerEnergy)
+//                     // Add the time and its average chillerEnergy to the output object
+//                     output[key] = { chillerEnergy: avgChillerEnergy };
+//                     // console.log(output)
+//                     // res.send(output)
+//                 }
+//         //console.log(output)
+//         }
+//                 // console.log(result)0.
+        
+//                 // To group the data by hour and get the data in desired format. This function calls formatData() function
+//                 // const cleanData = (arr) => {  
+//                 //     const groupedByHour = arr.reduce((acc, obj) => {
+//                 //     const hour = new Date(obj.timestamp).getUTCHours();
+//                 //       if (!acc[hour]) {
+//                 //       acc[hour] = [];
+//                 //       }
+//                 //       acc[hour].push(obj);
+//                 //       return acc;
+//                 //       }, {});
+//                 //       formatData(groupedByHour)
+//                 //     }
+        
+                   
+//                     const cleanChargeData = (data)=>{
+//                         let result = {};
+//                         for (let i = 0; i < data.length; i++) {
+//                         let timestamp = new Date(data[i].timestamp);
+//                         let hour = timestamp.getUTCHours();
+        
+//                         if (!result[hour]) {
+//                             result[hour] = {
+//                             chillerEnergy: []
+//                             };
+//                         }
+//                         result[hour].chillerEnergy.push(data[i].chillerEnergy);
+//                         }
+//                         // console.log(result)
+//                         formatChargeData(result)
+//                     }
+        
+//                     // To calculate the cumulative value of the chiller Energy and calls the function cleanData(chillerEnergy)
+//                     let tempchargearr = [0]
+//                     const cummulativeValueCharge = (chillerEnergy,time) => {
+//                         Energy = Math.abs(tempchargearr.slice(-1)[0]-chillerEnergy)
+//                         tempchargearr.push(chillerEnergy)
+//                         // temparr = temparr.shift()
+//                         // console.log(chillerEnergy,Energy)
+//                         if (chillerEnergy != Energy){
+//                             valuesc.push({"chillerEnergy":Energy,"timestamp":time})
+//                         }
+//                     }
+        
+//                     cleanChargeData(valuesc)
+        
+        
+//             //Inner join query to get the coresponding value from two tables in  bmsmgmt_olap_prod_v13 database based on recordId
+        
+//             // SQL query to get chiller inlet and outlet , storage tank inlet and outlet from hvacCmpPolling table joined with (inner join) 
+//             // hvacChillerCoolingPolling getting chiller energy.
+        
+//                     chakradb.query(`select hvacCpmPolling.recordId,
+//                                     hvacCpmPolling.chillerInletValve1Status,hvacCpmPolling.chillerInletValve2Status,hvacCpmPolling.chillerInletValve3Status,hvacCpmPolling.chillerInletValve4Status,
+//                                     hvacCpmPolling.chillerOutletValve1Status,hvacCpmPolling.chillerOutletValve2Status,hvacCpmPolling.chillerOutletValve3Status,hvacCpmPolling.chillerOutletValve4Status,
+//                                     hvacCpmPolling.storageTankInletValve1Status,hvacCpmPolling.storageTankInletValve2Status,hvacCpmPolling.storageTankInletValve3Status,hvacCpmPolling.storageTankInletValve4Status,
+//                                     hvacCpmPolling.storageTankOutletValve1Status,hvacCpmPolling.storageTankOutletValve2Status,hvacCpmPolling.storageTankOutletValve3Status,hvacCpmPolling.storageTankOutletValve4Status,
+//                                     hvacChillerCoolingPolling.chiller1Energy,hvacChillerCoolingPolling.chiller2Energy,hvacChillerCoolingPolling.chiller3Energy,hvacChillerCoolingPolling.chiller4Energy, hvacCpmPolling.polledTime from bmsmgmt_olap_prod_v13.hvacCpmPolling inner join bmsmgmt_olap_prod_v13.hvacChillerCoolingPolling on hvacCpmPolling.polledTime = hvacChillerCoolingPolling.polledTime where Date (hvacCpmPolling.polledTime) = curdate() order by hvacChillerCoolingPolling.polledTime asc;`,function(err,queryres){
+//                         if(err){
+//                             console.log(err)
+//                         }
+//                         else{
+//                             // parsing the query output into json
+//                             data = JSON.parse(JSON.stringify(queryres))
+//                             // console.log(datas)
+//                             for (let i=0; i<data.length;i++) {
+        
+//                                 const recid = data[i].recordId
+//                                 const ci1 = data[i].chillerInletValve1Status
+//                                 const ci2 = data[i].chillerInletValve2Status
+//                                 const ci3 = data[i].chillerInletValve3Status
+//                                 const ci4 = data[i].chillerInletValve4Status
+//                                 const co1 = data[i].chillerOutletValve1Status
+//                                 const co2 = data[i].chillerOutletValve2Status
+//                                 const co3 = data[i].chillerOutletValve3Status
+//                                 const co4 = data[i].chillerOutletValve4Status
+//                                 const si1 = data[i].storageTankInletValve1Status
+//                                 const si2 = data[i].storageTankInletValve2Status
+//                                 const si3 = data[i].storageTankInletValve3Status
+//                                 const si4 = data[i].storageTankInletValve4Status
+//                                 const so1 = data[i].storageTankOutletValve1Status
+//                                 const so2 = data[i].storageTankOutletValve2Status
+//                                 const so3 = data[i].storageTankOutletValve3Status
+//                                 const so4 = data[i].storageTankOutletValve4Status
+//                                 const corsptime = data[i].polledTime
+//                                 const parsedTime = moment.tz(corsptime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
+//                                 const che1 = data[i].chiller1Energy
+//                                 const che2 = data[i].chiller2Energy
+//                                 const che3 = data[i].chiller3Energy
+//                                 const che4 = data[i].chiller4Energy
+                        
+//                                 // console.log(recid)
+                                
+//                                 // Checking the charging status of the chillers based on the inlet and outlet valve
+        
+//                                     if ((ci1 == 0 && co1 == 0) && (si1 == 1 && so1 == 1)) {
+//                                         // console.log("Chiller 1 Charging","Chiller Energy : ",che1,parsedTime)
+//                                         if(che1 !=null){
+//                                             cummulativeValueCharge(che1,parsedTime)
+//                                         }
+//                                     }
+//                                     else if ((ci2 == 0 && co2 == 0) && (si2 ==1 && so2 == 1)) {
+//                                         // console.log("Chiller 2 is charging","Chiller Energy : ",che2,parsedTime)
+//                                         if(che2 !=null){
+//                                             cummulativeValueCharge(che2,parsedTime)
+//                                         }
+//                                     }
+//                                     else if ((ci3 == 0 && co3 == 0) && (si3 ==1 && so3 == 1)) {
+//                                         // console.log("Chiller 3 is charging","Chiller Energy : ",che3,parsedTime)
+//                                         if(che3 !=null){
+//                                             cummulativeValueCharge(che3,parsedTime)
+//                                         }
+//                                     }
+//                                     else if ((ci4 == 0 && co4 == 0) && (si4 ==1 && so4 == 1)) {
+//                                         // console.log("Chiller 4 is charging","Chiller Energy : ",che4,parsedTime)
+//                                         if(che4 !=null){
+//                                             cummulativeValueCharge(che4,parsedTime)
+//                                         }
+//                                     }
+//                                     // else{
+//                                     //     console.log("Chillers not charging")
+//                                     // }
+//                                 }
+//                         }
+//                     })
+        
+//                     const formatDischargeData = (obj) => {
+//                         //var output=[]
+//                         // Loop through each timings in the input object
+//                         // console.log(obj)
+//                         for (const key in obj) {
+//                         // Calculate the average chillerEnergy for the time
+//                         const chillerEnergy = obj[key].chillerEnergy;
+//                         const avgChillerEnergy = -Math.abs((chillerEnergy.reduce((a, b) => a + b))); // Converting Watts to kW
+                        
+//                         // console.log("energy : ",avgChillerEnergy)
+//                         // respfunc(key,avgChillerEnergy,chkno)
+//                         // Add the time and its average chillerEnergy to the output object
+//                         output[key] = { chillerEnergy: avgChillerEnergy };
+//                         // output.push({ "chillerEnergy": avgChillerEnergy,"time":key});
+//                         // console.log(output)
+//                         // console.log(output)
+//                              }
+//                      }
+        
+//                 const cleanDischargeData = (data)=>{
+//                     let result = {};
+//                     for (let i = 0; i < data.length; i++) {
+//                     let timestamp = new Date(data[i].timestamp);
+//                     let hour = timestamp.getUTCHours();
+        
+//                     if (!result[hour]) {
+//                         result[hour] = {
+//                         chillerEnergy: []
+//                         };
+//                     }
+//                     result[hour].chillerEnergy.push(data[i].chillerEnergy);
+//                     }
+//                     // console.log("length : ",result['7'].chillerEnergy.length)
+//                     formatDischargeData(result)
+//                 }
+        
+//                 let tempdischargearr = [0]
+//                 cummulativeValueDischarge = (chillerEnergy,time,chkno) => {
+//                     Energy = Math.abs(tempdischargearr.slice(-1)[0]-chillerEnergy)
+//                     tempdischargearr.push(chillerEnergy)
+//                     // temparr = temparr.shift()
+//                     // console.log(chillerEnergy,Energy)
+//                     if (chillerEnergy != Energy){
+//                         // console.log(valuesd.length,chkno-2)
+//                         if(valuesd.length == (chkno -2)){
+//                             // console.log(valuesd)
+//                             cleanDischargeData(valuesd)
+//                             valuesd = []
+//                             // console.log(valuesd.length)
+//                         }
+//                         else{
+//                         valuesd.push({"chillerEnergy":Energy,"timestamp":time})
+//                         }
+//                 }
+//                     // console.log(valuesd.length,chkno-1)
+//                     // console.log(valuesd)
+//                     // console.log("values len : ",valuesd.length)
+//                     // cleanDischargeData(valuesd)
+//                 }
+                
+                
+//                 unprocesseddata.query(`select polledTime,coolingEnergyConsumption,tsStoredWaterTemperature,tsOutletBDPvalveStatus,tsOutletADPvalveStatus,HValve from thermalStorageMQTTReadings where Date(polledTime)= curdate() and tsOutletADPvalveStatus = 1 and tsOutletBDPvalveStatus = 1 and HValve = 1 order by polledTime asc ;`,function(err,queryres){
+//                     if(err){
+//                         console.log(err)
+//                     }
+//                     else{
+//                         // parsing the query output into json
+
+//                         data = JSON.parse(JSON.stringify(queryres))
+//                         chk = data.length
+//                         for (const datum of data){
+//                             const coolenergy = datum.coolingEnergyConsumption
+//                             const polledtime = datum.polledTime
+//                             const parsedTime = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
+                            
+//                             // console.log(coolenergy/100,parsedTime)
+
+//                             cummulativeValueDischarge(coolenergy/100,parsedTime,chk)
+//                         }
+//                         // res.send(output)
+//                     }
+//                 })
+//             //console.log(output)
+            
+//         // })
