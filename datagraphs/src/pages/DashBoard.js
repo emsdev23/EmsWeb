@@ -130,16 +130,16 @@ function DashBoard() {
       ],
     
   }
-  const url="http://localhost:5000/sollar"
-  const batteryurl="http://localhost:5000/battery"
-  const wms="http://localhost:5000/wms"
-  const solarPerformance="http://localhost:5000/solarPerformance"
-  const sensorurl="http://localhost:5000/sensorreadings"
-  const meterData="http://localhost:5000/meterdata"
-  const acmeterenergy='http://localhost:5000/acmeterenergy'
-  const griddata= 'http://localhost:5000/grid'
-  const temparature="http://localhost:5000/thermaltemp"
-  const rooftopac = "http://localhost:5000/rooftop"
+  const url="http://121.242.232.211:5000/sollar"
+  const batteryurl="http://121.242.232.211:5000/battery"
+  const wms="http://121.242.232.211:5000/wms"
+  const solarPerformance="http://121.242.232.211:5000/solarPerformance"
+  const sensorurl="http://121.242.232.211:5000/sensorreadings"
+  const meterData="http://121.242.232.211:5000/meterdata"
+  const acmeterenergy='http://121.242.232.211:5000/acmeterenergy'
+  const griddata= 'http://121.242.232.211:5000/grid'
+  const temparature="http://121.242.232.211:5000/thermaltemp"
+  const rooftopac = "http://121.242.232.211:5000/rooftop"
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -508,7 +508,7 @@ for (let i = 0; i < subSystemId358.length; i++) {
     console.log(resultvalue350)
 
     console.log(resultValue1167+resultvalue1135+resultValue358+resultvalue350)
-    const gridvalue=(resultValue1167+resultvalue1135+resultValue358+resultvalue350)/1000
+    const gridvalue=(resultValue1167+resultvalue1135+resultValue358+resultvalue350)
 
 
 
@@ -662,7 +662,7 @@ console.log(totaldaysumvalue)
           const prpercentage=rooftopPR*100
           const wheeledinsolarprpercentage=WheeledinsolarPR*100
 
-           values.push(37050,totalrooftopgeneration,totalsolargeneration,totalDeisel)
+           values.push(gridvalue,Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),totalDeisel)
            console.log(values)
 
 
@@ -816,7 +816,7 @@ console.log(totaldaysumvalue)
         stroke: {
           curve: 'straight'
         },
-        colors: ['blue', '	#00FF00'], // Red for positive values, green for negative values
+        colors: ['#152138', '	#00FF00'], // Red for positive values, green for negative values
         // colors: ({ value }) => {
         //   return value < 0 ? ['#00ff00'] : ['#ff0000'];
         // },
@@ -1289,9 +1289,9 @@ console.log(totaldaysumvalue)
   return (
     <div   className="main"  style={{backgroundColor:'#25a36f'}}>
   
-  <div class="row" style={{backgroundColor:"whitesmoke"}} >
+  <div class="row" style={{backgroundColor:"#f6e3fc"}} >
   <div class="col-sm-4 mb-3 mb-sm-0">
-    <div class="card" style={{width:"100%",marginTop:"5%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}} >
+    <div class="card" style={{width:"100%",marginTop:"5%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}} >
       <div class="card-body" >
         <div >  
         <h5 class="card-title" style={{textAlign:"left",color:"black"}}><b>Building Consumption</b> <span style={{textAlign:"end",color:'black'}}>{local}</span> </h5>  
@@ -1309,10 +1309,10 @@ console.log(totaldaysumvalue)
 <span style={{color:"black"}}><b>Diesel </b>:</span><span style={{color:"yellow"}}>{totalDeisel}  </span>
 
 <br/>
-<span style={{color:"black",marginRight:"47px"}}><b>Rooftop </b> </span><span style={{color:"black"}}>:</span><span style={{color:"yellow"}}>{totalrooftopgeneration}</span>
+<span style={{color:"black",marginRight:"47px"}}><b>Rooftop </b> </span><span style={{color:"black"}}>:</span><span style={{color:"yellow"}}>{Math.trunc(totalrooftopgeneration)}</span>
 
 
-<span style={{color:"black",marginLeft:"40px"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{37050}</span>
+<span style={{color:"black",marginLeft:"40px"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{gridvalue}</span>
 {/* totalEnergy, */}
 
 </div>
@@ -1322,7 +1322,7 @@ console.log(totaldaysumvalue)
   </div>
 
   <div class="col-sm-4" >
-    <div class="card" style={{width:"auto",height:"96%",marginTop:"5%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{width:"auto",height:"96%",marginTop:"5%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'100px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> 
         <hr/>
@@ -1347,15 +1347,16 @@ console.log(totaldaysumvalue)
         <br/>
         <br/>
         <br/>
+        <br/>
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }} >
-         <b style={{color:"black"}}>Generation (kWh)</b> :<span style={{color:"yellow",marginLeft:"65px"}}>{Math.trunc(totalsolargeneration)}</span>
+         <b style={{color:"black"}}>Generation (kWh):</b> <span style={{color:"yellow",marginLeft:"66px"}}>{Math.trunc(totalsolargeneration)}</span>
           <br/>
-          <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow",marginLeft:"20%"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
+          <b style={{color:"black"}}>Performance %:</b><span style={{color:"yellow",marginLeft:"93px"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span>
           <br/>
-          <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow"}}>{WISspecificyeild}</span>
+          <b style={{color:"black"}}>Specific yield (kWh/kWp):</b><span style={{color:"yellow"}}>{WISspecificyeild}</span>
 
           <br/>
-          <b style={{color:"black"}}>Irradiation (kWh/m2)</b>: <span style={{color:"yellow",marginLeft:"9%"}}>{(totalwmsirradiation/60000).toFixed(2)}</span>
+          <b style={{color:"black"}}>Irradiation (kWh/m2):</b> <span style={{color:"yellow",marginLeft:"42px"}}>{(totalwmsirradiation/60000).toFixed(2)}</span>
           
         </div>
         
@@ -1366,7 +1367,7 @@ console.log(totaldaysumvalue)
 
 
   <div class="col-sm-4" style={{marginTop:"1.75%"}}>
-    <div class="card"  style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card"  style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="lightgreen" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5>
         <hr/>
@@ -1385,14 +1386,15 @@ console.log(totaldaysumvalue)
         />
         <br/>
         <br/>
+        <br/>
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-         <b style={{color:"black"}}>Generation (kWh)</b>:<span style={{color:"yellow",marginLeft:"75px"}}>{totalrooftopgeneration}</span>
+         <b style={{color:"black"}}>Generation (kWh):</b><span style={{color:"yellow",marginLeft:"72px"}}>{Math.trunc(totalrooftopgeneration)}</span>
          <br/>
-         <b style={{color:"black"}}>Performance %</b>:<span style={{color:"yellow",marginLeft:"93px"}}>{Math.trunc(prpercentage)}%</span>
+         <b style={{color:"black"}}>Performance %:</b><span style={{color:"yellow",marginLeft:"93px"}}>{Math.trunc(prpercentage)}%</span>
          <br/>
-         <b style={{color:"black"}}>Specific yield (kWh/kWp)</b>:<span style={{color:"yellow"}}>{RTSspecificyeild}</span>
+         <b style={{color:"black"}}>Specific yield (kWh/kWp):</b><span style={{color:"yellow"}}>{RTSspecificyeild}</span>
          <br/>
-         <b style={{color:"black"}}>Irradiation (kWh/m2)</b>:<span style={{color:"yellow",marginLeft:"50px"}}>{(totalsensordata/4000).toFixed(2)} </span>
+         <b style={{color:"black"}}>Irradiation (kWh/m2) :</b><span style={{color:"yellow",marginLeft:"43px"}}>{(totalsensordata/4000).toFixed(2)} </span>
 
         </div>
        
@@ -1404,9 +1406,10 @@ console.log(totaldaysumvalue)
 
 
   <div class="col-sm-4" style={{marginTop:"2.25%"}}>
-    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"> <b style={{color:"black"}}>Thermal Storage</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/></h5> 
+      <h5 class="card-title"> <b style={{color:"black"}}>Thermal Storage</b></h5> 
+      {/*<span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/>*/}
         <hr/>
         {/* <Line data={data} options={optionsdata} /> */}
         <p style={{textAlign:"end",color:"black"}}>{local}</p>
@@ -1422,7 +1425,7 @@ console.log(totaldaysumvalue)
   </div>
 
   <div class="col-sm-4">
-    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"6.2%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"6.2%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>CO<sub>2</sub> Reduction</b></h4>
         <hr/>
@@ -1449,11 +1452,14 @@ console.log(totaldaysumvalue)
   
 
   <div class="col-sm-4" style={{marginTop:"2.25%"}}>
-    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus[currentupsStatus.length-1]==="IDLE" ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }<span style={{color:"black"}}>{currentupsStatus[currentupsStatus.length-1]}</span></h5> 
+      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus[currentupsStatus.length-1]==="IDLE" ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> 
         <hr/>
-        {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/> */}
+        {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/>
+           <span style={{color:"black"}}>{currentupsStatus[currentupsStatus.length-1]}</span>
+        
+         */}
         <p style={{textAlign:"end",color:"black"}}>{local}</p>
         <div id="chart2"> 
    {
@@ -1536,7 +1542,7 @@ console.log(totaldaysumvalue)
     </div>
   </div>
   <div class="col-sm-4" style={{marginTop:"2.25%" }}>
-    <div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
       <h5 class="card-title"><b style={{color:'black'}}> Zn Air Battery</b><span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5> 
         <hr/>
@@ -1557,7 +1563,7 @@ console.log(totaldaysumvalue)
   </div> 
 
    <div class="col-sm-4"  style={{marginTop:"2.25%"}}>
-     <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+     <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
        <div class="card-body">
          <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Peak Shavings</b>  </h5>
          
@@ -1572,7 +1578,7 @@ console.log(totaldaysumvalue)
 
   
   <div class="col-sm-4"  style={{marginTop:"2.25%"}}>
-    <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#b95cb9,rgba(86, 151, 211, 0.6))',color:"white"}}>
+    <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#3a5f8c,rgba(86, 151, 211, 0.6))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title"><b style={{color:'black'}}> Wheeled In Wind</b> <span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5>
         <hr/>

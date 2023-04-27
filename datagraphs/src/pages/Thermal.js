@@ -9,7 +9,7 @@ const Thermal = () => {
     const [result, setResult] = useState([])
   
     const namelist = () =>{
-     axios.get("http://localhost:5000/thermal").then((res)=>setResult(res.data))
+     axios.get("http://121.242.232.211:5000/thermal").then((res)=>setResult(res.data))
     }
 
    
@@ -64,7 +64,7 @@ const Thermal = () => {
             dataLabels: {
               enabled: false,
             },
-            colors:["#4c4d49"],
+            colors:["#384147"],
             yaxis: {
               title: {
                 text: 'ckWh',
@@ -83,7 +83,7 @@ const Thermal = () => {
         theme: 'dark',
         style: {
           background: '#222',
-          color: '#fff'
+          color: '#031157'
         }
             },
             fill: {
@@ -96,7 +96,7 @@ const Thermal = () => {
                 stops: [0, 100]
               },
             
-              colors: ['#0000FF']
+              colors: ['#7aadeb']
             },
             }
           }
