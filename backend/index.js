@@ -5,7 +5,7 @@ const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
-const password = "*********"
+const password = "Arun@1807"
 
 app.use(
     cors({
@@ -534,6 +534,7 @@ emptyArray.forEach(obj => {
                         output[res.timeInHour] = {"chillerEnergy":res.coolingEnergy}
                     }
                 }
+                console.log(output)
                 res.send(output)
             })
 
