@@ -26,6 +26,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useState,useEffect } from 'react';
 import swal from 'sweetalert';
+import Thermalcontrol from './pages/Thermalcontrol';
 
 
 
@@ -141,12 +142,14 @@ function App() {
     <Routes> 
       <Route  path ='/' element={<DashBoard/>}/>
       <Route  path ='/Analytics' element={<Analytics/>}/>
-      <Route  path ='/Control' element={<Control/>}/>
-      <Route  path ='/Alerts' element={<Alerts/>}/>
+      <Route  path ='/Control/upsbattery' element={<Control/>}/>
+      <Route  path ='/Control/thermal' element={<Thermalcontrol/>}/>
+      
+      {/* <Route  path ='/Alerts' element={<Alerts/>}/> */}
       <Route  path ='/Documentation' element={<Documentation/>}/>
-      <Route  path ='/Peakdemand' element={<Peakdemand/>}/>
-      <Route  path ='/Thermalalers' element={<Thermalalers/>}/>
-      <Route  path ='/ChillerAlerts' element={<ChillerAlerts/>}/>
+      <Route  path ='/Alerts/Peakdemand' element={<Peakdemand/>}/>
+      <Route  path ='/Alerts/Thermalalers' element={<Thermalalers/>}/>
+      <Route  path ='/Alerts/ChillerAlerts' element={<ChillerAlerts/>}/>
       
 
       </Routes>
