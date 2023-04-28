@@ -6,6 +6,8 @@ const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
 const password = "*****"
+const email = ""
+const emailto = "********"
 
 app.use(
     cors({
@@ -282,14 +284,24 @@ emptyArray.forEach(obj => {
     })
 
     app.get("/grid",async(req,res)=>{
-        unprocesseddata.query("select * from acmeterreadings WHERE acmeterpolledtimestamp >= CURDATE() AND acmeterpolledtimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND acmetersubsystemid IN (1167,1135,358,350) ",function(err,result,feilds){
+        // unprocesseddata.query("select * from acmeterreadings WHERE acmeterpolledtimestamp >= CURDATE() AND acmeterpolledtimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND acmetersubsystemid IN (1167,1135,358,350) ",function(err,result,feilds){
+        //     if(err){
+        //         console.log(err)
+        //     }
+        //     else{
+        //         const response=(JSON.parse(JSON.stringify(result)))
+        //         res.send(response)
+        //         console.log(response.length)
+        //     }
+        // })
+
+        con.query("select Energy from GridProcessed where polledDate = curdate()",function(err,qrres){
             if(err){
                 console.log(err)
-            }
-            else{
-                const response=(JSON.parse(JSON.stringify(result)))
+            }else{
+                const response=(JSON.parse(JSON.stringify(qrres)))
+                console.log(response)
                 res.send(response)
-                console.log(response.length)
             }
         })
         
@@ -388,133 +400,7 @@ emptyArray.forEach(obj => {
         //     }
         //   });
 
-        app.get("/PeakDemand",async(req,res)=>{
-            chakradb.query("select * from hvacSchneider7230Polling WHERE polledTime >= CURDATE() AND polledTime < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by polledTime desc limit 1",function(err,result,feilds){
-                if(err){
-                    console.log(err)
-                }
-                else{
-                    const response=(JSON.parse(JSON.stringify(result)))
-                    //res.send(response)
-                    for(let i=0;i<response.length;i++){
-                        if(response[i].totalApparentPower2>=3900 && response[i].totalApparentPower2<=4199 ){
-                            const date = new Date(response[i].polledTime)
-                            const localTimeString = date.toLocaleString();
-                            const transporter = nodemailer.createTransport({
-                                    host: 'smtp.office365.com',
-                                    port: 587,
-                                    secure: false,
-                                    auth: {
-                                      user: 'arun.kumar@tenet.res.in',
-                                      pass: 'Arun@280196'
-                                    }
-                                  });
-                                  
-                                  const mailOptions = {
-                                    from: 'arun.kumar@tenet.res.in',
-                                    to: 'energyteam@respark.iitm.ac.in',
-                                    subject: 'Peak Demand Limit-level 1 breach',
-                                    html: `<h5>Peak Demand Limit-level 1 breach</h5>
-                                    
-                                    <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
-                                    <h5> Severity:- Medium</h5>
-                                    
-                                    `
-                                  };
-                                  //energyteam@respark.iitm.ac.in
-                                  //faheera@respark.iitm.ac.in
-                                  
-                                  transporter.sendMail(mailOptions, function(error, info) {
-                                    if (error) {
-                                      console.log(error);
-                                    } else {
-                                       res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
-                                    }
-                                  });
-
-                        }
-
-                        else if(response[i].totalApparentPower2>=4200 && response[i].totalApparentPower2<=4499 ){
-                            const date = new Date(response[i].polledTime)
-                            const localTimeString = date.toLocaleString();
-                            const transporter = nodemailer.createTransport({
-                                    host: 'smtp.office365.com',
-                                    port: 587,
-                                    secure: false,
-                                    auth: {
-                                      user: 'arun.kumar@tenet.res.in',
-                                      pass: 'Arun@280196'
-                                    }
-                                  });
-                                  
-                                  const mailOptions = {
-                                    from: 'arun.kumar@tenet.res.in',
-                                    to: 'faheera@respark.iitm.ac.in',
-                                    subject: 'Peak Demand Limit-level 2 breach',
-                                    html: `<h5>Peak Demand Limit-level 2 breach</h5>
-                                    
-                                    <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
-                                    <h5> Severity:- Medium</h5>
-                                    
-                                    `
-                                  };
-                                  //energyteam@respark.iitm.ac.in
-                                  //faheera@respark.iitm.ac.in
-                                  
-                                  transporter.sendMail(mailOptions, function(error, info) {
-                                    if (error) {
-                                      console.log(error);
-                                    } else {
-                                       res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
-                                    }
-                                  });
-
-                        }
-
-                        else if(response[i].totalApparentPower2>=4500){
-                            const date = new Date(response[i].polledTime)
-                            const localTimeString = date.toLocaleString();
-                            const transporter = nodemailer.createTransport({
-                                    host: 'smtp.office365.com',
-                                    port: 587,
-                                    secure: false,
-                                    auth: {
-                                      user: 'arun.kumar@tenet.res.in',
-                                      pass: password
-                                    }
-                                  });
-                                  
-                                  const mailOptions = {
-                                    from: 'arun.kumar@tenet.res.in',
-                                    to: 'faheera@respark.iitm.ac.in',
-                                    subject: 'Peak Demand Limit-level 3 breach',
-                                    html: `<h5>Peak Demand Limit-level 3 breach</h5>
-                                    
-                                    <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
-                                    <h5> Severity:- Medium</h5>
-                                    
-                                    `
-                                  };
-                                  //energyteam@respark.iitm.ac.in
-                                  //faheera@respark.iitm.ac.in
-                                  
-                                  transporter.sendMail(mailOptions, function(error, info) {
-                                    if (error) {
-                                      console.log(error);
-                                    } else {
-                                       res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
-                                    }
-                                  });
-
-                        }
-                       
-                    }
-
-                    //console.log(response.length)
-                }
-            })
-            
-        })
+        
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -579,6 +465,10 @@ emptyArray.forEach(obj => {
         })
 
 
+
+            //ALERTS
+// --------------------------------------------------------------------------------------------------------------------------------------
+
 //Thermal alert api
 let k = 0
 let criticaltemp = 14
@@ -608,11 +498,11 @@ app.get("/thermalalert",(req,res)=>{
                 
 
                 const transporter = nodemailer.createTransport({
-                    host: 'smtp.office365.com',
-                    port: 587,
+                    service: 'gmail',
+                    host: 'smtp.gmail.com',
                     secure: false,
                     auth: {
-                      user: 'ganeshr@tenet.res.in',
+                      user: email,
                       pass: password
                     }
                   })
@@ -635,8 +525,8 @@ app.get("/thermalalert",(req,res)=>{
                                     // console.log("Message : ","Thermal Storage temperature needs to reach 14°C to be turned off.")
                                     // console.log("Temperature is",storedwatertemp+"°C since",time)
                                     const mailOptions = {
-                                        from: 'ganeshr@tenet.res.in',
-                                        to: 'ganeshkalyan506@gmail.com',
+                                        from: email,
+                                        to: emailto,
                                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','arun.kumar@tenet.res.in'
                                         subject: 'Thermal Storage turned off prior to temperature limit',
                                         html: `<h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
@@ -673,11 +563,11 @@ app.get("/outletTemparature",async(req,res)=>{
         }
         else{
             const transporter = nodemailer.createTransport({
-                host: 'smtp.office365.com',
-                port: 587,
+                service: 'gmail',
+                host: 'smtp.gmail.com',
                 secure: false,
                 auth: {
-                  user: 'arun.kumar@tenet.res.in',
+                  user: email,
                   pass: password
                 }
               })
@@ -705,8 +595,8 @@ app.get("/outletTemparature",async(req,res)=>{
                 if(counter===5){
                     counter=0
                     const mailOptions = {
-                        from: 'arun.kumar@tenet.res.in',
-                        to:'ganeshkalyan506@gmail.com',
+                        from: email,
+                        to: emailto,
                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','sandhyaravikumar@tenet.res.in','arun.kumar@tenet.res.in'
                         subject: 'Common Header Outlet Temparature breach',
                         html: `<h1>Common Header Outlet Temparature limit has crossed 10°C</h1>
@@ -734,6 +624,138 @@ app.get("/outletTemparature",async(req,res)=>{
     
 })
 
+
+app.get("/PeakDemand",async(req,res)=>{
+    chakradb.query("select * from hvacSchneider7230Polling WHERE polledTime >= CURDATE() AND polledTime < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by polledTime desc limit 1",function(err,result,feilds){
+        if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            //res.send(response)
+            for(let i=0;i<response.length;i++){
+                if(response[i].totalApparentPower2>=3900 && response[i].totalApparentPower2<=4199 ){
+                    const date = new Date(response[i].polledTime)
+                    const localTimeString = date.toLocaleString();
+                    const transporter = nodemailer.createTransport({
+                            service: 'gmail',
+                            host: 'smtp.gmail.com',
+                            secure: false,
+                            auth: {
+                              user: email,
+                              pass: password
+                            }
+                          });
+                          
+                          const mailOptions = {
+                            from: email,
+                            to: emailto,
+                            subject: 'Peak Demand Limit-level 1 breach',
+                            html: `<h5>Peak Demand Limit-level 1 breach</h5>
+                            
+                            <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
+                            <h5> Severity:- Medium</h5>
+                            
+                            `
+                          };
+                          //energyteam@respark.iitm.ac.in
+                          //faheera@respark.iitm.ac.in
+                          
+                          transporter.sendMail(mailOptions, function(error, info) {
+                            if (error) {
+                              console.log(error);
+                            } else {
+                               res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
+                            }
+                          });
+
+                }
+
+                else if(response[i].totalApparentPower2>=4200 && response[i].totalApparentPower2<=4499 ){
+                    const date = new Date(response[i].polledTime)
+                    const localTimeString = date.toLocaleString();
+                    const transporter = nodemailer.createTransport({
+                            service: 'gmail',
+                            host: 'smtp.gmail.com',
+                            secure: false,
+                            auth: {
+                              user: email,
+                              pass: password
+                            }
+                          });
+                          
+                          const mailOptions = {
+                            from: email,
+                            to: emailto,
+                            subject: 'Peak Demand Limit-level 2 breach',
+                            html: `<h5>Peak Demand Limit-level 2 breach</h5>
+                            
+                            <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
+                            <h5> Severity:- Medium</h5>
+                            
+                            `
+                          };
+                          //energyteam@respark.iitm.ac.in
+                          //faheera@respark.iitm.ac.in
+                          
+                          transporter.sendMail(mailOptions, function(error, info) {
+                            if (error) {
+                              console.log(error);
+                            } else {
+                               res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
+                            }
+                          });
+
+                }
+
+                else if(response[i].totalApparentPower2>=4500){
+                    const date = new Date(response[i].polledTime)
+                    const localTimeString = date.toLocaleString();
+                    const transporter = nodemailer.createTransport({
+                            service: 'gmail',
+                            host: 'smtp.gmail.com',
+                            secure: false,
+                            auth: {
+                              user: email,
+                              pass: password
+                            }
+                          });
+                          
+                          const mailOptions = {
+                            from: email,
+                            to: emailto,
+                            subject: 'Peak Demand Limit-level 3 breach',
+                            html: `<h5>Peak Demand Limit-level 3 breach</h5>
+                            
+                            <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
+                            <h5> Severity:- Medium</h5>
+                            
+                            `
+                          };
+                          //energyteam@respark.iitm.ac.in
+                          //faheera@respark.iitm.ac.in
+                          
+                          transporter.sendMail(mailOptions, function(error, info) {
+                            if (error) {
+                              console.log(error);
+                            } else {
+                               res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
+                            }
+                          });
+
+                }
+               
+            }
+
+            //console.log(response.length)
+        }
+    })
+    
+})
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------
 
  //controlls post request
  app.post('/controlls', function (req, res) {
