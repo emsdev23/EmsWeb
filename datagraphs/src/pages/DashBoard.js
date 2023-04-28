@@ -59,14 +59,11 @@ ChartJS.register(
 // ChartJS.register(ArcElement, Tooltip, Legend);
 
 
+const host = "localhost"
 
 
 function DashBoard() {
     // assigning chakra db data
-  const[piechartdata,setPiechartdata]=useState([])
-  const [solar,setSolar]=useState([])
-  const [diesel,setDiesel]=useState([])
-  const [rooftop,setRooftop]=useState([])
 
   //   assigning battery data
   const [battery,setBattery]=useState([])
@@ -130,16 +127,16 @@ function DashBoard() {
       ],
     
   }
-  const url="http://121.242.232.211:5000/sollar"
-  const batteryurl="http://121.242.232.211:5000/battery"
-  const wms="http://121.242.232.211:5000/wms"
-  const solarPerformance="http://121.242.232.211:5000/solarPerformance"
-  const sensorurl="http://121.242.232.211:5000/sensorreadings"
-  const meterData="http://121.242.232.211:5000/meterdata"
-  const acmeterenergy='http://121.242.232.211:5000/acmeterenergy'
-  const griddata= 'http://121.242.232.211:5000/grid'
-  const temparature="http://121.242.232.211:5000/thermaltemp"
-  const rooftopac = "http://121.242.232.211:5000/rooftop"
+  const url=`http://${host}:5000/sollar`
+  const batteryurl=`http://${host}:5000/battery`
+  const wms=`http://${host}:5000/wms`
+  const solarPerformance=`http://${host}:5000/solarPerformance`
+  const sensorurl=`http://${host}:5000/sensorreadings`
+  const meterData=`http://${host}:5000/meterdata`
+  const acmeterenergy=`http://${host}:5000/acmeterenergy`
+  const griddata= `http://${host}:5000/grid`
+  const temparature=`http://${host}:5000/thermaltemp`
+  const rooftopac = `http://${host}:5000/rooftop`
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -161,31 +158,6 @@ function DashBoard() {
 
 
 const values=[]
-
-  const piedata=()=>{
-    axios.get(url).then((res)=>{
-      const dataresponse=res.data
-      // console.log(dataresponse)
-      
-      let griddata=dataresponse.filter((grid)=>grid.energyType==="Net Grid")
-      let rooftop=dataresponse.filter((grid)=>grid.energyType==="solar") 
-      let dieseldata=dataresponse.filter((diesel)=>diesel.energyType==="diesel")
-      let wheeledinsolardata=dataresponse.filter((rooftop)=>rooftop.energyType==="wheeled_in_solar")
-      setPiechartdata(griddata)
-      setSolar(rooftop)
-      setDiesel(dieseldata)
-      setRooftop(wheeledinsolardata)
-      
-      
- 
-
-    
-
-    }).catch((err)=>{
-      console.log(err)
-    })
-
-  }
 
   const batterydata=()=>{
     batteryData().then(data => {
@@ -247,6 +219,12 @@ const values=[]
       setGrid(dataresponse)
     })
   }
+ let gridunprocess='';
+  for(let i=0;i<grid.length;i++){
+    gridunprocess=(grid[i].Energy)
+
+  }
+  console.log(grid)
 
   const TempData=()=>{
     axios.get(temparature).then((res)=>{
@@ -271,7 +249,7 @@ const values=[]
 
 
   useEffect(()=>{ 
-    piedata()
+ 
     batterydata()
     WMSData()
     solarfunction()
@@ -282,7 +260,7 @@ const values=[]
     TempData()
 
     const interval = setInterval(() => {
-      piedata();
+     
       batterydata();
       WMSData();
       solarfunction();
@@ -304,8 +282,6 @@ const values=[]
 
  
 
-  
-  console.log(piechartdata)
   console.log(wmsData)
   console.log(solarData)
   console.log(sensor)
@@ -473,7 +449,7 @@ for (let i = 0; i < subSystemId358.length; i++) {
   console.log(resultValue358)
   
 
-  //-------------------------------------------------------------------
+  // -------------------------------------------------------------------
   let system350previous = null;
   let system350current = null;
   const system350result=[]
@@ -509,6 +485,7 @@ for (let i = 0; i < subSystemId358.length; i++) {
 
     console.log(resultValue1167+resultvalue1135+resultValue358+resultvalue350)
     const gridvalue=(resultValue1167+resultvalue1135+resultValue358+resultvalue350)
+    console.log(gridvalue)
 
 
 
@@ -523,22 +500,22 @@ for (let i = 0; i < subSystemId358.length; i++) {
 
 
 
-   const totalEnergy = piechartdata.reduce((accumulator, currentValue) => {
-    return Math.trunc(accumulator + currentValue.energy);
-  }, 0);
+  //  const totalEnergy = piechartdata.reduce((accumulator, currentValue) => {
+  //   return Math.trunc(accumulator + currentValue.energy);
+  // }, 0);
   
 
-  const totalrooftop = solar.reduce((accumulator, currentValue) => {
-    return Math.trunc(accumulator + currentValue.energy);
-  }, 0);
+  // const totalrooftop = solar.reduce((accumulator, currentValue) => {
+  //   return Math.trunc(accumulator + currentValue.energy);
+  // }, 0);
 
-  const totalDeisel = diesel.reduce((accumulator, currentValue) => {
-    return Math.trunc(accumulator + currentValue.energy);
-  }, 0);
+  // const totalDeisel = diesel.reduce((accumulator, currentValue) => {
+  //   return Math.trunc(accumulator + currentValue.energy);
+  // }, 0);
 
-  const totalwheeledinsolar = rooftop.reduce((accumulator, currentValue) => {
-    return  Math.trunc(accumulator + currentValue.energy);
-  }, 0);
+  // const totalwheeledinsolar = rooftop.reduce((accumulator, currentValue) => {
+  //   return  Math.trunc(accumulator + currentValue.energy);
+  // }, 0);
   
 
   const totalwmsirradiation=wmsData.reduce((accumulator,currentValue)=>{
@@ -621,9 +598,9 @@ console.log(totaldaysumvalue)
 
 
 
-  console.log(totalEnergy)
-  console.log(totalrooftop)
-  console.log(totalDeisel)
+  // console.log(totalEnergy)
+  // console.log(totalrooftop)
+  // console.log(totalDeisel)
  
   console.log(totalwmsirradiation)
   console.log(totalsolardata)
@@ -631,20 +608,20 @@ console.log(totaldaysumvalue)
 
 
   //  to convert hole number to decimal value for rooftopsolar 
-          let number = totalrooftop;
-          let percentagenumber=number/1000
-          while (percentagenumber >= 1) {
-            percentagenumber /= 10;
-          }
-          number = percentagenumber.toFixed(1);
+          // let number = totalrooftop;
+          // let percentagenumber=number/1000
+          // while (percentagenumber >= 1) {
+          //   percentagenumber /= 10;
+          // }
+          // number = percentagenumber.toFixed(1);
       
   // to convert hole number to decimal value for rooftopsolar 
-    let wheeledpercentage=totalwheeledinsolar
-    let wheeledres=wheeledpercentage/1000
-          while (wheeledres >= 1) {
-            wheeledres /= 10;
-          }
-          wheeledpercentage=wheeledres.toFixed(1)
+    // let wheeledpercentage=totalwheeledinsolar
+    // let wheeledres=wheeledpercentage/1000
+    //       while (wheeledres >= 1) {
+    //         wheeledres /= 10;
+    //       }
+    //       wheeledpercentage=wheeledres.toFixed(1)
 
 
 
@@ -662,7 +639,7 @@ console.log(totaldaysumvalue)
           const prpercentage=rooftopPR*100
           const wheeledinsolarprpercentage=WheeledinsolarPR*100
 
-           values.push(gridvalue,Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),totalDeisel)
+           values.push(Math.round(gridunprocess),Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),0)
            console.log(values)
 
 
@@ -1306,13 +1283,13 @@ console.log(totaldaysumvalue)
 <div className='card-text' style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',boxshadow:'5px 10px' }}>
   <h4 style={{textAlign:'center',color:"black"}}><b>Energy in kWh</b></h4> 
 <span style={{color:"black"}}><b>Wheeled in solar </b>:</span> <span style={{color:"yellow"}}>{Math.trunc(totalsolargeneration)}  </span>&nbsp;&nbsp;&nbsp;
-<span style={{color:"black"}}><b>Diesel </b>:</span><span style={{color:"yellow"}}>{totalDeisel}  </span>
+<span style={{color:"black"}}><b>Diesel </b>:</span><span style={{color:"yellow"}}>{0}  </span>
 
 <br/>
 <span style={{color:"black",marginRight:"47px"}}><b>Rooftop </b> </span><span style={{color:"black"}}>:</span><span style={{color:"yellow"}}>{Math.trunc(totalrooftopgeneration)}</span>
 
 
-<span style={{color:"black",marginLeft:"40px"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{gridvalue}</span>
+<span style={{color:"black",marginLeft:"40px"}}><b>Grid</b>:</span><span style={{color:"yellow"}}>{Math.round(gridunprocess)}</span>
 {/* totalEnergy, */}
 
 </div>

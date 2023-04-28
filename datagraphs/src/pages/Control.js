@@ -14,7 +14,7 @@ import { height } from '@mui/system';
 
 
 
-
+const host = 'localhost'
 
 function Control() {
   const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ function Control() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
 
-  const batteryurl="http://localhost:5000/battery"
+  const batteryurl=`http://${host}:5000/battery`
 
 
 //  function batteryData() {
@@ -64,7 +64,7 @@ function Control() {
       batteryData()
     
    
-  })
+  },[])
 
   console.log(batterydata)
  const packSoc=[]
@@ -137,7 +137,7 @@ console.log(distime)
       dangerMode: false,
     }).then(()=>{
       try {
-        const response =  axios.post("http://localhost:5000/controlls",formattedData);
+        const response =  axios.post(`http://${host}:5000/controlls`,formattedData);
         const result=response.data
         setFormData({
           functioncode: "",
@@ -180,7 +180,7 @@ console.log(distime)
    if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===1){
     insformatedData.functioncode=1
     try {
-      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
       //const result=response.data
       setInsformData({
         functioncode:"",
@@ -207,7 +207,7 @@ console.log(distime)
    else if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===2){
     insformatedData.functioncode=2
     try {
-      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
       //const result=response.data
       setInsformData({
         functioncode:"",
@@ -231,7 +231,7 @@ console.log(distime)
    else if(insformatedData.batterystatus==="discharge" && insformatedData.functioncode===1){
     insformatedData.functioncode=3
     try {
-      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
       //const result=response.data
       setInsformData({
         functioncode:"",
@@ -257,7 +257,7 @@ console.log(distime)
    else if(insformatedData.batterystatus==="discharge" && insformatedData.functioncode===2){
     insformatedData.functioncode=4
     try {
-      const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
+      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
       //const result=response.data
       setInsformData({
         functioncode:"",
@@ -390,9 +390,9 @@ console.log(distime)
         &nbsp;
         
       <div class="input-group mb-3"  style={{width:"300px"}}>
-      <label class="input-group-text" for="inputGroupSelect01">Options</label>
+      <label class="input-group-text" for="inputGroupSelect01">Status</label>
   <select class="form-select" id="inputGroupSelect01" value={formData.functioncode} onChange={(e) => setFormData({ ...formData, functioncode: e.target.value })}>
-  <option value="">Status</option>
+  {/* <option value=""> Options</option> */}
           <option value={0}>IDLE</option>
           <option value={1}>CHG</option>
           <option value={2}>DCHG</option>
@@ -469,18 +469,18 @@ console.log(distime)
         {/* <h5 class="card-title">Battery Charge</h5> */}
 
         <div class="input-group mb-3"  style={{width:"300px"}}>
-      <label class="input-group-text" for="inputGroupSelect01" >Charge/Discharge</label>
+      <label class="input-group-text" for="inputGroupSelect01" >Status </label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) => setInsformData({ ...insformData, batterystatus: e.target.value })}>
-  <option value="">Status</option>
+  <option value="">Charge/Discharge</option>
         <option value="charge">Charge</option>
         <option value="discharge">Discharge</option>
   </select>
   </div>
         <br/>
         <div class="input-group mb-3"  style={{width:"300px"}}>
-      <label class="input-group-text" for="inputGroupSelect01">On/Off:</label>
+      <label class="input-group-text" for="inputGroupSelect01">Function</label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.functioncode} onChange={(e) => setInsformData({ ...insformData, functioncode: e.target.value })}>
-  <option value="">Function Code</option>
+  <option value=""> On/Off</option>
         <option value={1}>ON</option>
         <option value={2}>OFF</option>
   </select>
