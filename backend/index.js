@@ -5,9 +5,9 @@ const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
-const password = "*****"
+const password = ""
 const email = ""
-const emailto = "********"
+const emailto = ""
 
 app.use(
     cors({
@@ -498,8 +498,8 @@ app.get("/thermalalert",(req,res)=>{
                 
 
                 const transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    host: 'smtp.gmail.com',
+                    host: 'smtp.office365.com',
+                    port: 587,
                     secure: false,
                     auth: {
                       user: email,
@@ -563,8 +563,8 @@ app.get("/outletTemparature",async(req,res)=>{
         }
         else{
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                host: 'smtp.gmail.com',
+                host: 'smtp.office365.com',
+                port: 587,
                 secure: false,
                 auth: {
                   user: email,
@@ -638,8 +638,8 @@ app.get("/PeakDemand",async(req,res)=>{
                     const date = new Date(response[i].polledTime)
                     const localTimeString = date.toLocaleString();
                     const transporter = nodemailer.createTransport({
-                            service: 'gmail',
-                            host: 'smtp.gmail.com',
+                            host: 'smtp.office365.com',
+                            port: 587,
                             secure: false,
                             auth: {
                               user: email,
@@ -675,8 +675,8 @@ app.get("/PeakDemand",async(req,res)=>{
                     const date = new Date(response[i].polledTime)
                     const localTimeString = date.toLocaleString();
                     const transporter = nodemailer.createTransport({
-                            service: 'gmail',
-                            host: 'smtp.gmail.com',
+                            host: 'smtp.office365.com',
+                            port: 587,
                             secure: false,
                             auth: {
                               user: email,
@@ -712,8 +712,8 @@ app.get("/PeakDemand",async(req,res)=>{
                     const date = new Date(response[i].polledTime)
                     const localTimeString = date.toLocaleString();
                     const transporter = nodemailer.createTransport({
-                            service: 'gmail',
-                            host: 'smtp.gmail.com',
+                            host: 'smtp.office365.com',
+                            port: 587,
                             secure: false,
                             auth: {
                               user: email,
