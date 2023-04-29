@@ -8,7 +8,7 @@ import { IconContext } from 'react-icons/lib';
 import React, { useState } from 'react';
 
 const Nav = styled.div`
-  background: #4BB543;
+  background: #237030;
   height: 80px;
   display: flex;
   justify-content: flex-start;
@@ -55,11 +55,12 @@ function Navbar() {
         <Nav class="row" style={{display: 'flex',alignitems: 'center',justifycontent: 'center',height:"100px"}}> 
           <NavIcon to='#'>
             <FaIcons.FaBars onClick={showSidebar} />
+
            
           </NavIcon>
           <div  style={{display: "flex", alignItems: "center", justifyContent: "center"}}> 
           <img src='https://respark.iitm.ac.in/wp-content/uploads/2019/07/iitm-logo-cirle.png' alt='iitmrp' style={{width:"150px",height:"100px",marginLeft:"150px"}}/>
-          <h1 style={{marginLeft: "20px", textAlign: "center",fontSize:"45px",color:"black"}}> <b>IITMRP Energy Management System</b></h1>
+          <h1 style={{marginLeft: "20px", textAlign: "center",fontSize:"45px",color:"white"}}> <b>IITMRP Energy Management System</b></h1>
           </div>
           
         </Nav>
