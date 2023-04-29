@@ -34,7 +34,7 @@
             border-radius: 30px;
    box-shadow: 
    7px 7px 14px #404630,
-             -7px -7px 14px #ffffc0;
+             -5px -5px 10px #a0a1a3;
   }
   .card:hover {
     transform: scale(1.1);
