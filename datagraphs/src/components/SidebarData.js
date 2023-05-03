@@ -25,6 +25,12 @@ export const SidebarData = [
     cName: 'nav-text'
   },
   {
+    title: 'Alert Logs',
+    path: '/Alertlogs',
+    icon: <GoIcons.GoAlert />,
+    cName: 'nav-text'
+  },
+  {
     title: 'Active Alerts',
     // path: '/Alerts',
     icon: <GoIcons.GoAlert />,
