@@ -7,7 +7,7 @@ function Alerts() {
     <div>
       <div style={{display: "flex",
   alignitems: "flex-right"}}> 
-      <Dropdown >
+      {/* <Dropdown >
       <Dropdown.Toggle variant="warning" id="dropdown-basic" style={{marginTop:"30px",width:"300px"}} >
         <b> Active Alerts </b>
       </Dropdown.Toggle>
@@ -17,7 +17,7 @@ function Alerts() {
         <Dropdown.Item href="/ChillerAlerts">Chiller</Dropdown.Item>
         <Dropdown.Item href="/Thermalalers">Thermal</Dropdown.Item>
       </Dropdown.Menu>
-    </Dropdown>
+    </Dropdown> */}
       </div>
      
     <Table striped bordered hover variant="dark"  style={{marginTop:"50px"}}>
