@@ -410,9 +410,8 @@ emptyArray.forEach(obj => {
             // let chk = 0
             // const timarr = []
             // var output = []
-            var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
-
             con.query(`select coolingEnergy,timeInHour from ThermalStorageProcessed where DATE(recordTime) = curdate()`,function(err,result){
+                var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
                 if(err){
                     console.log(err)
                 }else{
@@ -528,7 +527,7 @@ app.get("/thermalalert",(req,res)=>{
                                         from: email,
                                         to: emailto,
                                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','arun.kumar@tenet.res.in'
-                                        subject: 'Thermal Storage turned off prior to temperature limit',
+                                        subject: 'EMS - Thermal Storage turned off prior to temperature limit',
                                         html: `<h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
                                                <h2>Temperature is ${storedwatertemp}°C since ${timar[1]}</h2> `
                                       }
@@ -598,7 +597,7 @@ app.get("/outletTemparature",async(req,res)=>{
                         from: email,
                         to: emailto,
                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','sandhyaravikumar@tenet.res.in','arun.kumar@tenet.res.in'
-                        subject: 'Common Header Outlet Temparature breach',
+                        subject: 'EMS - Common Header Outlet Temparature breach',
                         html: `<h1>Common Header Outlet Temparature limit has crossed 10°C</h1>
                                <h2>Current inlet Temparature is ${(response[i].commonHeaderinletTemp).toFixed(2)}°C since ${localtime}</h2>
                                <h2>Current outlet Temparature is ${(response[i].commonHeaderoutletTemp).toFixed(2)}°C since ${localtime}</h2> `
@@ -650,7 +649,7 @@ app.get("/PeakDemand",async(req,res)=>{
                           const mailOptions = {
                             from: email,
                             to: emailto,
-                            subject: 'Peak Demand Limit-level 1 breach',
+                            subject: 'EMS - Peak Demand Limit-level 1 breach',
                             html: `<h5>Peak Demand Limit-level 1 breach</h5>
                             
                             <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
@@ -687,7 +686,7 @@ app.get("/PeakDemand",async(req,res)=>{
                           const mailOptions = {
                             from: email,
                             to: emailto,
-                            subject: 'Peak Demand Limit-level 2 breach',
+                            subject: 'EMS - Peak Demand Limit-level 2 breach',
                             html: `<h5>Peak Demand Limit-level 2 breach</h5>
                             
                             <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
@@ -724,7 +723,7 @@ app.get("/PeakDemand",async(req,res)=>{
                           const mailOptions = {
                             from: email,
                             to: emailto,
-                            subject: 'Peak Demand Limit-level 3 breach',
+                            subject: 'EMS - Peak Demand Limit-level 3 breach',
                             html: `<h5>Peak Demand Limit-level 3 breach</h5>
                             
                             <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
