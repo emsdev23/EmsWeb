@@ -1,3 +1,4 @@
+
 import React, { useState,useEffect } from 'react';
 import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
@@ -10,7 +11,11 @@ import {TiBatteryLow} from "react-icons/ti"
 import {TiBatteryFull} from "react-icons/ti"
 import {FaBatteryEmpty} from "react-icons/fa"
 import { height } from '@mui/system';
+import image2 from "../images/power.png"
+import batterylow from '../images/battery-status.png'
+import batteryfull from '../images/smartphone-charger.png'
 
+// import './Controls.css'
 
 
 
@@ -30,7 +35,7 @@ function Control() {
 
   })
   const [batterydata,setBatterydata]=useState([])
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 
   const batteryurl=`http://${host}:5000/battery`
@@ -74,19 +79,25 @@ function Control() {
  const DCHG=[]
  const dscgtime=[]
 
-  for(let i=0;i<batterydata.length;i++){
-    packSoc.push(batterydata[i].pack_usable_soc)
-    currentStatus.push(batterydata[i].batteryStatus)
-    if(batterydata[i].batteryStatus==="CHG"){
-      CHG.push((batterydata[i].chargingAVG).toFixed(2))
-      chgtime.push(batterydata[i].timestamp)
-     
-    }
-    if(batterydata[i].batteryStatus==="DCHG"){
-      DCHG.push((batterydata[i].dischargingAVG).toFixed(2))
-      dscgtime.push(batterydata[i].timestamp)
-     
-    }
+ for(let i=0;i<batterydata.length;i++){
+  packSoc.push(batterydata[i].pack_usable_soc)
+ 
+  if(batterydata[i].batteryStatus==="CHG"){
+    CHG.push((batterydata[i].chargingAVG).toFixed(2))
+    chgtime.push(batterydata[i].timestamp)
+    currentStatus.push("Charging")
+   
+  }
+  if(batterydata[i].batteryStatus==="DCHG"){
+    DCHG.push((batterydata[i].dischargingAVG).toFixed(2))
+    dscgtime.push(batterydata[i].timestamp)
+    currentStatus.push("Discharging")
+   
+  }
+  if(batterydata[i].batteryStatus==="IDLE"){
+    currentStatus.push("IDLE")
+   
+  }
 }
 
 
@@ -131,32 +142,39 @@ console.log(distime)
     };
     swal({
       title: "Are you sure?",
-      text: "the given parameters will be set for battery!",
+      text: `the given parameters ${formattedData.functioncode},${formattedData.starttime},${formattedData.endtime}be set for battery!`,
       icon: "warning",
-      buttons: true,
+      buttons: {
+        cancel: "Cancel",
+        confirm: "OK",
+      },
       dangerMode: false,
-    }).then(()=>{
-      try {
-        const response =  axios.post(`http://${host}:5000/controlls`,formattedData);
-        const result=response.data
-        setFormData({
-          functioncode: "",
-          starttime: "",
-          endtime: "",
-          capacity: "",
-        });
-        swal({
-          title: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-          //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-          icon: "success",
-        });
-      } catch (error) {
-        console.error(error);
-        console.log(formattedData)
+    }).then((willContinue) => {
+      if (willContinue) {
+        axios.post(`http://${host}:5000/controlls`, formattedData)
+          .then((response) => {
+            const result = response.data;
+            setFormData({
+              functioncode: "",
+              starttime: "",
+              endtime: "",
+              capacity: "",
+            });
+            swal({
+              title: formattedData.functioncode === 1 ? "battery set to charge mode" : "battery set to discharge mode",
+              icon: "success",
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+            swal({
+              title: "Error",
+              text: "Failed to set battery parameters",
+              icon: "error",
+            });
+          });
       }
-
-    })
-    
+    });
   };
 
  
@@ -179,165 +197,223 @@ console.log(distime)
 
    if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===1){
     insformatedData.functioncode=1
-    try {
-      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
-      //const result=response.data
-      setInsformData({
-        functioncode:"",
-        batterystatus:""
+    swal({
+      title: "Are you sure?",
+      text: `the given parameters be set for battery!`,
+      icon: "warning",
+      buttons: {
+        cancel: "Cancel",
+        confirm: "OK",
+      },
+      dangerMode: false,
+    }).then((willContinue) => {
+      if (willContinue) {
+        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+          .then((response) => {
+            const result = response.data;
+            setInsformData({
+              functioncode:"",
+              batterystatus:""
+      
+            });
+            swal({
+              title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge ON ":" ",
+              //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+              icon: "success",
+            }).then(()=>{
+              setIsButtonDisabled(true);
+          setTimeout(() => {
+            setIsButtonDisabled(false);
+          },3 * 60 * 1000)
+              // 
+            })
+          })
+          .catch((error) => {
+            console.error(error);
+            swal({
+              title: "Error",
+              text: "Failed to set battery parameters",
+              icon: "error",
+            });
+          });
+      }
+    });
 
-      })
-      console.log(insformatedData)
-      swal({
-        title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge ON ":"battery set to discharge mode",
-        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-        icon: "success",
-      }).then(()=>{
-        setIsButtonDisabled(true)
-      })
+
+    // try {
+    //   const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
+    //   //const result=response.data
+    //   setInsformData({
+    //     functioncode:"",
+    //     batterystatus:""
+
+    //   })
+    //   console.log(insformatedData)
+    //   swal({
+    //     title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge ON ":"battery set to discharge mode",
+    //     //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+    //     icon: "success",
+    //   }).then(()=>{
+    //     setIsButtonDisabled(true);
+    // setTimeout(() => {
+    //   setIsButtonDisabled(false);
+    // },3 * 60 * 1000)
+    //     // 
+    //   })
       
 
 
-    } catch (error) {
-      console.error(error);
-      //console.log(formattedData)
-    }
+    // } catch (error) {
+    //   console.error(error);
+    //   //console.log(formattedData)
+    // }
     console.log(insformatedData.functioncode)
    }
    else if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===2){
     insformatedData.functioncode=2
-    try {
-      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
-      //const result=response.data
-      setInsformData({
-        functioncode:"",
-        batterystatus:""
-
-      })
-      console.log(insformatedData)
-      swal({
-        title:insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
-        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-        icon: "success",
-      });
-    } catch (error) {
-      console.error(error);
-      //console.log(formattedData)
-    }
+    swal({
+      title: "Are you sure?",
+      text: `the given parameters be set for battery!`,
+      icon: "warning",
+      buttons: {
+        cancel: "Cancel",
+        confirm: "OK",
+      },
+      dangerMode: false,
+    }).then((willContinue) => {
+      if (willContinue) {
+        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+          .then((response) => {
+            const result = response.data;
+            setInsformData({
+              functioncode:"",
+              batterystatus:""
+      
+            });
+            swal({
+              title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===2 ?"battery set to charge OFF ":" ",
+              //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+              icon: "success",
+            }).then(()=>{
+              setIsButtonDisabled(true);
+          setTimeout(() => {
+            setIsButtonDisabled(false);
+          },3 * 60 * 1000)
+              // 
+            })
+          })
+          .catch((error) => {
+            console.error(error);
+            swal({
+              title: "Error",
+              text: "Failed to set battery parameters",
+              icon: "error",
+            });
+          });
+      }
+    });
     console.log(insformatedData.functioncode)
    
 
    }
    else if(insformatedData.batterystatus==="discharge" && insformatedData.functioncode===1){
     insformatedData.functioncode=3
-    try {
-      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
-      //const result=response.data
-      setInsformData({
-        functioncode:"",
-        batterystatus:""
+    swal({
+      title: "Are you sure?",
+      text: `the given parameters be set for battery!`,
+      icon: "warning",
+      buttons: {
+        cancel: "Cancel",
+        confirm: "OK",
+      },
+      dangerMode: false,
+    }).then((willContinue) => {
+      if (willContinue) {
+        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+          .then((response) => {
+            const result = response.data;
+            setInsformData({
+              functioncode:"",
+              batterystatus:""
+      
+            });
+            swal({
+              title: insformatedData.batterystatus==="discharge" && insformatedData.functioncode===3 ?"battery set to discharge ON ":" ",
+              //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+              icon: "success",
+            }).then(()=>{
+              setIsButtonDisabled(true);
+          setTimeout(() => {
+            setIsButtonDisabled(false);
+          },3 * 60 * 1000)
+              // 
+            })
+          })
+          .catch((error) => {
+            console.error(error);
+            swal({
+              title: "Error",
+              text: "Failed to set battery parameters",
+              icon: "error",
+            });
+          });
+      }
+    });
+    console.log(insformatedData.functioncode)
 
-      })
-      console.log(insformatedData)
-      swal({
-        title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
-        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-        icon: "success",
-      })
-   
-   
-    } catch (error) {
-      console.error(error);
-      //console.log(formattedData)
-    }
-    console.log(insformatedData.functioncode)
-    console.log(insformatedData.functioncode)
 
    }
    else if(insformatedData.batterystatus==="discharge" && insformatedData.functioncode===2){
     insformatedData.functioncode=4
-    try {
-      const response =  axios.post(`http://${host}:5000/instantaneous`, insformatedData);
-      //const result=response.data
-      setInsformData({
-        functioncode:"",
-        batterystatus:""
-
-      })
-      console.log(insformatedData)
-      swal({
-        title: insformatedData.batterystatus==="charge" && insformatedData.functioncode===1 ?"battery set to charge mode":"battery set to discharge mode",
-        //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-        icon: "success",
-      });
-    } catch (error) {
-      console.error(error);
-      //console.log(formattedData)
-    }
+    swal({
+      title: "Are you sure?",
+      text: `the given parameters be set for battery!`,
+      icon: "warning",
+      buttons: {
+        cancel: "Cancel",
+        confirm: "OK",
+      },
+      dangerMode: false,
+    }).then((willContinue) => {
+      if (willContinue) {
+        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+          .then((response) => {
+            const result = response.data;
+            setInsformData({
+              functioncode:"",
+              batterystatus:""
+      
+            });
+            swal({
+              title: insformatedData.batterystatus==="discharge" && insformatedData.functioncode===4 ?"battery set to discharge OFF ":" ",
+              //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
+              icon: "success",
+            }).then(()=>{
+              setIsButtonDisabled(true);
+          setTimeout(() => {
+            setIsButtonDisabled(false);
+          },3 * 60 * 1000)
+              // 
+            })
+          })
+          .catch((error) => {
+            console.error(error);
+            swal({
+              title: "Error",
+              text: "Failed to set battery parameters",
+              icon: "error",
+            });
+          });
+      }
+    });
     console.log(insformatedData.functioncode)
     console.log(insformatedData.functioncode)
 
    }
-    // try {
-    //   const response =  axios.post("http://localhost:5000/instantaneous", insformatedData);
-    //   //const result=response.data
-    //   setInsformData({
-    //     functioncode:"",
-    //     chargeOrDischarge:""
-
-    //   })
-    //   console.log(typeof(functioncode))
-    //   // swal({
-    //   //   title: chargeOrDischarge === "charge" ?"battery set to charge mode":"battery set to discharge mode",
-    //   //   //text: formattedData.functioncode ===1 ?"battery set to charge mode":"battery set to discharge mode",
-    //   //   icon: "success",
-    //   // });
-    // } catch (error) {
-    //   console.error(error);
-    //   //console.log(formattedData)
-    // }
    
-    // console.log(chargeOrDischarge,onOrOff)
-    // if(chargeOrDischarge==="charge" && functioncode==="on"){
-     
-    // }
-    // else if(chargeOrDischarge==="charge" && functioncode==="off"){
-    //   console.log("2")
-
-    // }
-    // else if(chargeOrDischarge==="discharge" && functioncode==="on"){
-    //   console.log("3")
-
-    // }
-    // else if(chargeOrDischarge==="discharge" && functioncode==="off"){
-    //   console.log("4")
-
-    // }
-  
-
-    // Make HTTP POST request to server
-    // fetch('/api/submit-form', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ name, email }),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //   // Reset form values
-    //   setName('');
-    //   setEmail('');
-    // })
-    // .catch(error => {
-    //   console.error('Error submitting form:', error);
-    // });
     console.log(insformatedData)
     
   };
-
-  //console.log(packSoc)
- 
 
   
 
@@ -359,21 +435,25 @@ console.log(distime)
       <div >
     <div class="card" style={{background:"#b8bdcc",width:"auto"}}>
       <div class="card-body">
-        <h3> Pack SoC(%): <b>{Math.round(packSoc[packSoc.length-1])}</b></h3>
-        <h3>Current Status:<b>{currentStatus[currentStatus.length-1]}</b></h3>
+        <h3> <b>Pack SoC(%):</b> {Math.round(packSoc[packSoc.length-1])}</h3>
+        <h3><b>Current Status:</b>{currentStatus[currentStatus.length-1]}</h3>
         <div style={{width:'400px'}}> 
-        {
-          packSoc[packSoc.length-1] >=30 ? <TiBatteryFull size ={100} width="100%"/>:<TiBatteryLow size={100} width="100%"/>
-        }
+        {packSoc[packSoc.length - 1] >= 65  ? (
+  <img src={batteryfull} alt="batteryfull" style={{ width: "100px", height: "100px" }} />
+) : packSoc[packSoc.length - 1] <= 20 ? (
+  <img src={batterylow} alt="batterylow" style={{ width: "100px", height: "100px" }} />
+) : (
+  <img src={image2} alt="batteryhalf" style={{ width: "100px", height: "100px" }} />
+)}
 
       
         </div>
         
-        <h3>Last Charge: {val?<span style={{color:"red"}}>{(val)} kWh | </span>:<span style={{fontSize:"20px"}}>yet to charge</span>} </h3>
-        {formattedTimestamp!=="Invalid Date"?<p>{formattedTimestamp}</p>:<p>_______</p>}
+        <h3><b>Last Charge: </b> {val?<span style={{color:"red"}}>{(val)} kWh | </span>:<span style={{fontSize:"20px"}}>yet to charge</span>} </h3>
+        {formattedTimestamp!=="Invalid Date"?<h4>{formattedTimestamp}</h4>:<p>_______</p>}
         {/* <p>{formattedTimestamp}</p> */}
-        <h3>Last Discharge: {DCHG[DCHG.length-1]?<span style={{color:"red"}}>{Math.round(DCHG[DCHG.length-1])} kWh | </span>: <span style={{fontSize:"20px"}}>yet to discharge</span>} </h3>
-        {disformattedTimestamp!=="Invalid Date"?<p>{disformattedTimestamp}</p>:<p>_______</p>}
+        <h3><b>Last Discharge:</b> {DCHG[DCHG.length-1]?<span style={{color:"red"}}>{Math.round(DCHG[DCHG.length-1])} kWh | </span>: <span style={{fontSize:"20px"}}>yet to discharge</span>} </h3>
+        {disformattedTimestamp!=="Invalid Date"?<h4>{disformattedTimestamp}</h4>:<p>_______</p>}
         <h1></h1>
       </div>
     </div>
@@ -487,7 +567,7 @@ console.log(distime)
   </div>
       <br/>
       {
-        isButtonDisabled=== true? <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>:<button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
+        isButtonDisabled=== false ? <button type="submit" class="btn btn-primary bt-lg" style={{height:"40px"}}>Submit</button>:<button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
       }
 
      
