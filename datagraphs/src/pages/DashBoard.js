@@ -137,6 +137,9 @@ function DashBoard() {
   const griddata= `http://${host}:5000/grid`
   const temparature=`http://${host}:5000/thermaltemp`
   const rooftopac = `http://${host}:5000/rooftop`
+  const energysaved = `http://${host}:5000/peaksavings`
+  const chillerstatus = `http://${host}:5000/chillerstatus`
+  const chillerstatusph2 = `http://${host}:5000/chillerstatusph2`
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -156,8 +159,60 @@ function DashBoard() {
   Roof()
   // console.log("rooftop : ",totalrooftopgeneration)
 
+  var energySaved = 0
+  const Peaksave = () => {
+    const [energy,setEnergysaved] = useState([])
 
-const values=[]
+    const namelist = () =>{
+      axios.get(energysaved).then((res)=>setEnergysaved(res.data))
+     }
+
+     useEffect(()=>{ 
+      namelist()
+    },[])
+
+    energySaved = energy[0]
+  }
+  Peaksave()
+
+  // chiller status function
+  var chillerval = []
+  const Chillerstatus = () => {
+    const [chiller, setChiller] = useState([])
+
+    const namelist = () =>{
+      axios.get(chillerstatus).then((res)=>setChiller(res.data))
+     }
+
+     useEffect(()=>{ 
+      namelist()
+    },[])
+
+    chillerval = chiller 
+  }
+  Chillerstatus()
+
+  var chillerval2 = []
+  const Chillerstatush2 = () => {
+    const [chiller, setChiller] = useState([])
+
+    const namelist = () =>{
+      axios.get(chillerstatusph2).then((res)=>setChiller(res.data))
+     }
+
+     useEffect(()=>{ 
+      namelist()
+    },[])
+
+    chillerval2 = chiller 
+  }
+  Chillerstatush2()
+
+
+
+
+
+  const values=[]
 
   const batterydata=()=>{
     batteryData().then(data => {
@@ -635,8 +690,15 @@ console.log(totaldaysumvalue)
           // pr% calculation values
           const WheeledinsolarPR= totalsolargeneration/((totalwmsirradiation/60000)* 2008.36)
           const rooftopPR=totalrooftopgeneration/((totalsensordata/4000)*1075.8)
+          let prpercentage = 0
 
-          const prpercentage=rooftopPR*100
+          if (rooftopPR<1){
+            prpercentage=rooftopPR*100
+          }else if(rooftopPR>1){
+            prpercentage=81
+          }
+          // const prpercentage=rooftopPR*100
+          console.log(prpercentage, rooftopPR )
           const wheeledinsolarprpercentage=WheeledinsolarPR*100
 
            values.push(Math.round(gridunprocess),Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),0)
@@ -1376,7 +1438,7 @@ const currentdate=local.split(",")[0]
           colors={["#FF0000","#FF4500","#f9bd00","#9bf400","#008000"]}
           arcsLength={[0.3, 0.3, 0.3,0.3,0.3]}
           arcWidth={0.3}
-          percent={(rooftopPR).toFixed(2)}
+          percent={Math.trunc(prpercentage)/100}
           needleColor="black"
           textColor="black"
           style={{width:"100",height:"100",alignItems:"center"}}
@@ -1567,12 +1629,45 @@ const currentdate=local.split(",")[0]
   <div class="col-sm-4" style={{marginTop:"2.25%" }}>
     <div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:'black'}}> Chiller Energy</b><span style={{color:"black",marginLeft:'100px'}}></span><TiWeatherSnow style={{color:"gray"}}/></h5> 
+      <h5 class="card-title"><b style={{color:'black'}}> Chiller Status</b><span style={{color:"black",marginLeft:'100px'}}></span></h5> 
         <hr/>
         <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
         {/* <Line data={data} options={optionsdata}/> */}
         {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
     
+        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
+        <tr>
+            <td><b style={{color:"#4d4b47"}}>Chillers phase 1 :</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;1</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;2</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;3</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;4</b></td>
+          </tr>
+          <br/>
+          <tr>
+            <td><b style={{color:"black"}}></b></td>
+            <td><span>{chillerval[0] === 0 || chillerval[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+            <td>{chillerval[1] === 0 || chillerval[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+            <td>{chillerval[2] === 0 || chillerval[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+            <td>{chillerval[3] === 0 || chillerval[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+          </tr>
+          <br/>
+          <tr>
+            <td><b style={{color:"#4d4b47"}}>Chillers phase 2 :</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;5</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;6</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;7</b></td>
+            <td><b style={{color:"black"}}>&nbsp;&nbsp;8</b></td>
+          </tr>
+          <br/>
+          <tr>
+          <td><b style={{color:"black"}}></b></td>
+            <td><span>{chillerval2[0] === 0 || chillerval2[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+            <td>{chillerval2[1] === 0 || chillerval2[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+            <td>{chillerval2[2] === 0 || chillerval2[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+            <td>{chillerval2[3] === 0 || chillerval2[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+          </tr>
+        </table>
         
         <div class="card-text"style={{color:"black",font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
           {/* <b style={{color:'black'}}> No.Of cycles: </b>
@@ -1593,7 +1688,19 @@ const currentdate=local.split(",")[0]
          <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Peak Shavings</b>  </h5>
          
          <hr/>
-         <p class="card-text"style={{color:"black",font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}>Cost saved (in Rs)</p>
+         <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
+
+         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>Energy saved (kWh):</b></td>
+    <td><span style={{color:"black"}}>{energySaved}</span></td>
+  </tr>
+  <br/>
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>Cost saved (Rs):</b></td>
+    <td><span style={{color:"black"}}>-</span></td>
+  </tr>
+  </table>
          {/* <p> Shavings:</p> */}
        </div>
      </div>
