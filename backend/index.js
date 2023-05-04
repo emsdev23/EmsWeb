@@ -464,6 +464,62 @@ emptyArray.forEach(obj => {
         })
 
 
+//------------------------------------------------------------------------------------------------------------------------------------
+    
+        // Peak shavings
+        app.get('/peaksavings',(req,res)=>{
+            con.query(`select Energysaved from energySaved where date(polledTime) = curdate()`,function(err,qres){
+                var energysaved = 0
+                if(err){
+                    console.log(err)
+                }else{
+                    for (const result of qres){
+                        energysaved = result["Energysaved"]
+                    }
+                console.log("Energysaved ",energysaved)
+                res.send([energysaved])
+                }
+            })
+        })
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+            // Chiller status
+        
+            app.get("/chillerstatus",(req,res)=>{
+                con.query(`SELECT chiller1Energy,chiller2Energy,chiller3Energy,chiller4Energy from chillerEnergy order by polledDate desc LIMIT 1`,function(err,qres){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        outli = []
+                        for(const out of qres){
+                            outli.push(out["chiller1Energy"])
+                            outli.push(out["chiller2Energy"])
+                            outli.push(out["chiller3Energy"])
+                            outli.push(out["chiller4Energy"])
+                        }
+                        res.send(outli)
+                    }
+                })
+            })
+
+            app.get("/chillerstatusph2",(req,res)=>{
+                con.query(`select chiller5Energy,chiller6Energy,chiller7Energy,chiller8Energy from chillerEnergyph2 order by polledDate desc Limit 1;`,function(err,qres){
+                    if(err){
+                        console.log(err)
+                    }else{
+                        outl = []
+                        for(const out of qres){
+                            outl.push(out["chiller5Energy"])
+                            outl.push(out["chiller6Energy"])
+                            outl.push(out["chiller7Energy"])
+                            outl.push(out["chiller8Energy"])
+                        }
+                        // console.log(outl)
+                        res.send(outl)
+                    }
+                })
+            })
 
             //ALERTS
 // --------------------------------------------------------------------------------------------------------------------------------------
