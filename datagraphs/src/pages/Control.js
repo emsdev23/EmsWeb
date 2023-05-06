@@ -427,7 +427,7 @@ console.log(distime)
       </div>
       <br/>
 
-      <div  class="row" style={{marginLeft:'3px'}}>
+      <div  class="row" style={{ margin:'30px'}}>
          
       <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
       <h4 style={{textAlign:"center"}}><b>Overview</b></h4>
@@ -463,7 +463,7 @@ console.log(distime)
       <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
       <h4 style={{textAlign:"center"}}><b>Scheduled Control</b></h4>
       <br/>
-    <div class="card" style={{background:"#b8bdcc",width:"auto", height:"380px"}} >
+    <div class="card" style={{background:"#b8bdcc",width:"auto", height:"380px",marginLeft:"10px"}} >
       <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
       <form onSubmit={handleSubmit} >
       &nbsp;
@@ -539,7 +539,7 @@ console.log(distime)
   <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0" >
   <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
   <br/>
-    <div class="card" style={{background:"#b8bdcc",width:"auto",height:"380px"}}>
+    <div class="card" style={{background:"#b8bdcc",width:"auto",height:"380px",marginLeft:"10px"}}>
       <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
       <form onSubmit={instantaneousSubmit}> 
   <div class="row">

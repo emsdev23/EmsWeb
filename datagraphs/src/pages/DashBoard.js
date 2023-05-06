@@ -1016,8 +1016,9 @@ console.log(totaldaysumvalue)
 
               legend:{
                 labels:{
-                  fontSize:"15px"
-                }
+                  fontSize:"20px"
+                },
+      
               },
               //"wheeled_in_solar"
               
@@ -1046,6 +1047,10 @@ console.log(totaldaysumvalue)
                   colors: "black",
                   useSeriesColors: false
               },
+              fontSize: '17px',
+              fontFamily: 'Helvetica, Arial',
+              fontWeight: 400,
+              
 
               }
             },
@@ -1337,9 +1342,9 @@ const currentdate=local.split(",")[0]
       
 
   return (
-    <div   className="main"  style={{backgroundColor:'#25a36f'}}>
+    <div   className="main"  style={{ margin:'30px'}} >
   
-  <div class="row" style={{backgroundColor:"#d5dbd6"}} >
+  <div class="row"  >
   <div class="col-sm-4 mb-3 mb-sm-0">
     <div class="card" style={{width:"100%",marginTop:"5%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}} >
       <div class="card-body" >
@@ -1497,30 +1502,62 @@ const currentdate=local.split(",")[0]
       </div>
     </div>
   </div>
+  <div class="col-sm-4" style={{marginTop:"2.25%" }}>
+<div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+  <div class="card-body">
+  <h5 class="card-title"><b style={{color:'black'}}> Chiller Status</b><span style={{color:"black",marginLeft:'100px'}}></span></h5> 
+    <hr/>
+    <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
+    {/* <Line data={data} options={optionsdata}/> */}
+    {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
 
-  <div class="col-sm-4">
-    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"6.2%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
-      <div class="card-body">
-        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>CO<sub>2</sub> Reduction</b></h4>
-        <hr/>
-        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
-        <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
-       
-        <h5 style={{textAlign:"center",color:"black"}}><h5><b>{co2}</b></h5>tCO2/MWh</h5>
-        <br/>
-        <div style={{textAlign:"center"}}  > 
-        {/* <ForestIcon  /> */}
+    <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
+    <tr>
+        <td><b style={{color:"#4d4b47"}}>Chillers phase 1 :</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;1</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;2</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;3</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;4</b></td>
+      </tr>
+      <br/>
+      <tr>
+        <td><b style={{color:"black"}}></b></td>
+        <td><span>{chillerval[0] === 0 || chillerval[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td>{chillerval[1] === 0 || chillerval[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval[2] === 0 || chillerval[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval[3] === 0 || chillerval[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+      </tr>
+      <br/>
+      <tr>
+        <td><b style={{color:"#4d4b47"}}>Chillers phase 2 :</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;5</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;6</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;7</b></td>
+        <td><b style={{color:"black"}}>&nbsp;&nbsp;8</b></td>
+      </tr>
+      <br/>
+      <tr>
+      <td><b style={{color:"black"}}></b></td>
+        <td><span>{chillerval2[0] === 0 || chillerval2[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td>{chillerval2[1] === 0 || chillerval2[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval2[2] === 0 || chillerval2[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval2[3] === 0 || chillerval2[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+      </tr>
+    </table>
+    
+    <div class="card-text"style={{color:"black",font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
+      {/* <b style={{color:'black'}}> No.Of cycles: </b>
+      <br/>
+      <b style={{color:'black'}}>Charging Energy:</b>
+      <br/>
+      <b style={{color:'black'}}>Discharging Energy:</b> */}
 
-        <img src="https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-flat-template-with-co2-leaves-for-concept-design-png-image_4674847.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"100px"}}/>
-
-        </div>
-        
-        
-        
-      </div>
     </div>
   </div>
+</div>
+</div> 
+
+  
 
 
   
@@ -1621,65 +1658,36 @@ const currentdate=local.split(",")[0]
       </div>
     </div>
   </div>
+   
+  <div class="col-sm-4">
+    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"6.2%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+      <div class="card-body">
+        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>CO<sub>2</sub> Reduction</b></h4>
+        <hr/>
+        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
+        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
+        <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
+       
+        <h5 style={{textAlign:"center",color:"black"}}><h5><b>{co2}</b></h5>tCO2/MWh</h5>
+        <br/>
+        <div style={{textAlign:"center"}}  > 
+        {/* <ForestIcon  /> */}
+
+        <img src="https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-flat-template-with-co2-leaves-for-concept-design-png-image_4674847.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"100px"}}/>
+
+        </div>
+        
+        
+        
+      </div>
+    </div>
+  </div>
 
 
 
   
 
-  <div class="col-sm-4" style={{marginTop:"2.25%" }}>
-    <div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
-      <div class="card-body">
-      <h5 class="card-title"><b style={{color:'black'}}> Chiller Status</b><span style={{color:"black",marginLeft:'100px'}}></span></h5> 
-        <hr/>
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
-        {/* <Line data={data} options={optionsdata}/> */}
-        {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
-    
-        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
-        <tr>
-            <td><b style={{color:"#4d4b47"}}>Chillers phase 1 :</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;1</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;2</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;3</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;4</b></td>
-          </tr>
-          <br/>
-          <tr>
-            <td><b style={{color:"black"}}></b></td>
-            <td><span>{chillerval[0] === 0 || chillerval[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
-            <td>{chillerval[1] === 0 || chillerval[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-            <td>{chillerval[2] === 0 || chillerval[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-            <td>{chillerval[3] === 0 || chillerval[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-          </tr>
-          <br/>
-          <tr>
-            <td><b style={{color:"#4d4b47"}}>Chillers phase 2 :</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;5</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;6</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;7</b></td>
-            <td><b style={{color:"black"}}>&nbsp;&nbsp;8</b></td>
-          </tr>
-          <br/>
-          <tr>
-          <td><b style={{color:"black"}}></b></td>
-            <td><span>{chillerval2[0] === 0 || chillerval2[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
-            <td>{chillerval2[1] === 0 || chillerval2[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-            <td>{chillerval2[2] === 0 || chillerval2[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-            <td>{chillerval2[3] === 0 || chillerval2[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-          </tr>
-        </table>
-        
-        <div class="card-text"style={{color:"black",font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-          {/* <b style={{color:'black'}}> No.Of cycles: </b>
-          <br/>
-          <b style={{color:'black'}}>Charging Energy:</b>
-          <br/>
-          <b style={{color:'black'}}>Discharging Energy:</b> */}
-
-        </div>
-      </div>
-    </div>
-  </div> 
+ 
 
 
    <div class="col-sm-4"  style={{marginTop:"2.25%"}}>
@@ -1709,7 +1717,7 @@ const currentdate=local.split(",")[0]
   
 
   
-  <div class="col-sm-4"  style={{marginTop:"2.25%"}}>
+  <div class="col-sm-4"  style={{marginTop:"2.25%",scrollpaddingbottom: '20px'}}>
     <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
       <div class="card-body">
         <h5 class="card-title"><b style={{color:'black'}}> Wheeled In Wind</b> <span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5>
@@ -1717,7 +1725,7 @@ const currentdate=local.split(",")[0]
         <GaugeChart 
           id="gauge-chart3"
           nrOfLevels={12}
-          colors={["red","green"]}
+          colors={["gray"]}
           arcWidth={0.3}
           percent={0}
           textColor={'black'}
@@ -1725,9 +1733,9 @@ const currentdate=local.split(",")[0]
           
         />
         <div class="card-text"style={{color:"black",font:"icon",fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-           Generation(kWh):
+           Generation(kWh):0
            <br/>
-           Wind Speed:
+           Wind Speed:0
         </div>
   
       </div>
@@ -1744,6 +1752,10 @@ const currentdate=local.split(",")[0]
 }
 
 export default DashBoard
+
+
+
+
 
 
 
