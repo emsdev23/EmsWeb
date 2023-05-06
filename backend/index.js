@@ -584,8 +584,14 @@ app.get("/thermalalert",(req,res)=>{
                                         to: emailto,
                                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','arun.kumar@tenet.res.in'
                                         subject: 'EMS - Thermal Storage turned off prior to temperature limit',
-                                        html: `<h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
-                                               <h2>Temperature is ${storedwatertemp}°C since ${timar[1]}</h2> `
+                                        html: ` <body style="background-color:#e4f0ee;">
+                                                <center>
+                                                <h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
+                                                <h2>Temperature is ${storedwatertemp}°C since ${timar[1]}</h2>
+                                                <hr>
+                                                <p>EMS team</p>
+                                                </center> 
+                                                </body>`
                                       }
                                 // Condition check to send mail only till the 15th minute after occurence
                                    if((Math.abs(currenttime-timestamp)/1000/60)<15){
@@ -654,9 +660,15 @@ app.get("/outletTemparature",async(req,res)=>{
                         to: emailto,
                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','sandhyaravikumar@tenet.res.in','arun.kumar@tenet.res.in'
                         subject: 'EMS - Common Header Outlet Temparature breach',
-                        html: `<h1>Common Header Outlet Temparature limit has crossed 10°C</h1>
-                               <h2>Current inlet Temparature is ${(response[i].commonHeaderinletTemp).toFixed(2)}°C since ${localtime}</h2>
-                               <h2>Current outlet Temparature is ${(response[i].commonHeaderoutletTemp).toFixed(2)}°C since ${localtime}</h2> `
+                        html: ` <body style="background-color:#e4f0ee;">
+                                <center>
+                                <h1>Common Header Outlet Temparature limit has crossed 10°C</h1>
+                                <h2>Current inlet Temparature is ${(response[i].commonHeaderinletTemp).toFixed(2)}°C since ${localtime}</h2>
+                                <h2>Current outlet Temparature is ${(response[i].commonHeaderoutletTemp).toFixed(2)}°C since ${localtime}</h2> 
+                                <hr>
+                                <p>EMS team</p>
+                                </center> 
+                                </body>`
                       }
                       transporter.sendMail(mailOptions, function(error, info) {
                         if (error) {
@@ -706,10 +718,15 @@ app.get("/PeakDemand",async(req,res)=>{
                             from: email,
                             to: emailto,
                             subject: 'EMS - Peak Demand Limit-level 1 breach',
-                            html: `<h5>Peak Demand Limit-level 1 breach</h5>
+                            html: `<body style="background-color:#e4f0ee;">
+                                    <center><h5>Peak Demand Limit-level 1 breach</h5>
                             
                             <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
                             <h5> Severity:- Medium</h5>
+                            <hr>
+                            <p>EMS team</p>
+                            </center> 
+                            </body>
                             
                             `
                           };
@@ -743,11 +760,17 @@ app.get("/PeakDemand",async(req,res)=>{
                             from: email,
                             to: emailto,
                             subject: 'EMS - Peak Demand Limit-level 2 breach',
-                            html: `<h5>Peak Demand Limit-level 2 breach</h5>
+                            html: `<body style="background-color:#e4f0ee;">
+                            <center>
+                            
+                            <h5>Peak Demand Limit-level 2 breach</h5>
                             
                             <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
                             <h5> Severity:- Medium</h5>
-                            
+                            <hr>
+                            <p>EMS team</p>
+                            </center> 
+                            </body>
                             `
                           };
                           //energyteam@respark.iitm.ac.in
@@ -780,11 +803,17 @@ app.get("/PeakDemand",async(req,res)=>{
                             from: email,
                             to: emailto,
                             subject: 'EMS - Peak Demand Limit-level 3 breach',
-                            html: `<h5>Peak Demand Limit-level 3 breach</h5>
+                            html: `
+                            <body style="background-color:#e4f0ee;">
+                            <center>
+                            <h5>Peak Demand Limit-level 3 breach</h5>
                             
                             <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
                             <h5> Severity:- Medium</h5>
-                            
+                            <hr>
+                            <p>EMS team</p>
+                            </center> 
+                            </body>
                             `
                           };
                           //energyteam@respark.iitm.ac.in
@@ -877,6 +906,19 @@ app.get("/acknowledment",async(req,res)=>{
     })
     
 })
+
+// data filtering acording to the selected date for peakdemad data
+app.post("/past/hvacSchneider7230Polling", (req, res) => {
+  const { date } = req.body;
+  const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) = '${date}' and totalApparentPower2>2500`;
+  chakradb.query(query, (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred' });
+    }
+    return res.json(results);
+  });
+});
 
 
 
