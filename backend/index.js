@@ -486,34 +486,42 @@ emptyArray.forEach(obj => {
 
             // Chiller status
         
-            app.get("/chillerstatus",(req,res)=>{
-                con.query(`SELECT chiller1Energy,chiller2Energy,chiller3Energy,chiller4Energy from chillerEnergy order by polledDate desc LIMIT 1`,function(err,qres){
+            app.get("/chillerstatusd",(req,res)=>{
+                chakradb.query(`select chiller1Power,chiller2Power,chiller3Power,chiller4Power,polledTime from hvacChillerElectricPolling order by polledTime desc LIMIT 1`,function(err,qres){
                     if(err){
                         console.log(err)
                     }else{
                         outli = []
                         for(const out of qres){
-                            outli.push(out["chiller1Energy"])
-                            outli.push(out["chiller2Energy"])
-                            outli.push(out["chiller3Energy"])
-                            outli.push(out["chiller4Energy"])
+                            outli.push(out["chiller1Power"])
+                            outli.push(out["chiller2Power"])
+                            outli.push(out["chiller3Power"])
+                            outli.push(out["chiller4Power"])
                         }
                         res.send(outli)
                     }
                 })
             })
 
-            app.get("/chillerstatusph2",(req,res)=>{
-                con.query(`select chiller5Energy,chiller6Energy,chiller7Energy,chiller8Energy from chillerEnergyph2 order by polledDate desc Limit 1;`,function(err,qres){
+            app.get("/chillerstatuse",(req,res)=>{
+                unprocesseddata.query(`select FLOOR(acmeterenergy),acmeterpower,acmeterpolledtimestamp,acmetersubsystemid from acmeterreadings where acmetersubsystemid in(1442,1163,1441,1494) order by acmeterpolledtimestamp desc limit 4;`,function(err,qres){
                     if(err){
                         console.log(err)
                     }else{
-                        outl = []
+                        outl = {}
                         for(const out of qres){
-                            outl.push(out["chiller5Energy"])
-                            outl.push(out["chiller6Energy"])
-                            outl.push(out["chiller7Energy"])
-                            outl.push(out["chiller8Energy"])
+                            if (out["acmetersubsystemid"] == 1442){
+                                outl['chiller5']=out['acmeterpower']
+                            }
+                            else if (out["acmetersubsystemid"] == 1163){
+                                outl['chiller6']=out['acmeterpower']
+                            }
+                            else if (out["acmetersubsystemid"] == 1441){
+                                outl["chiller7"]=out['acmeterpower']
+                            }
+                            else if (out["acmetersubsystemid"] == 1494){
+                                outl["chiller8"]=out['acmeterpower']
+                            }
                         }
                         // console.log(outl)
                         res.send(outl)
