@@ -138,8 +138,8 @@ function DashBoard() {
   const temparature=`http://${host}:5000/thermaltemp`
   const rooftopac = `http://${host}:5000/rooftop`
   const energysaved = `http://${host}:5000/peaksavings`
-  const chillerstatus = `http://${host}:5000/chillerstatus`
-  const chillerstatusph2 = `http://${host}:5000/chillerstatusph2`
+  const chillerstatus = `http://${host}:5000/chillerstatusd`
+  const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -190,6 +190,7 @@ function DashBoard() {
 
     chillerval = chiller 
   }
+  console.log(chillerval)
   Chillerstatus()
 
   var chillerval2 = []
@@ -762,8 +763,9 @@ console.log(totaldaysumvalue)
           timeStamp.push(timeString)
           Status.push(battery[i].batteryStatus)
           packSoc.push(Math.trunc(battery[i].pack_usable_soc))
+          if (battery[i].chargingAVG !== null){
           batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toFixed(2),"timeStamp":timeString})
-
+          }
         }
 
       }
@@ -1502,6 +1504,7 @@ const currentdate=local.split(",")[0]
       </div>
     </div>
   </div>
+
   <div class="col-sm-4" style={{marginTop:"2.25%" }}>
 <div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
   <div class="card-body">
@@ -1513,7 +1516,7 @@ const currentdate=local.split(",")[0]
 
     <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
     <tr>
-        <td><b style={{color:"#4d4b47"}}>Chillers phase 1 :</b></td>
+        <td><b style={{color:"#4d4b47"}}>Chillers D-Block :</b></td>
         <td><b style={{color:"black"}}>&nbsp;&nbsp;1</b></td>
         <td><b style={{color:"black"}}>&nbsp;&nbsp;2</b></td>
         <td><b style={{color:"black"}}>&nbsp;&nbsp;3</b></td>
@@ -1529,7 +1532,7 @@ const currentdate=local.split(",")[0]
       </tr>
       <br/>
       <tr>
-        <td><b style={{color:"#4d4b47"}}>Chillers phase 2 :</b></td>
+        <td><b style={{color:"#4d4b47"}}>Chillers E-block :</b></td>
         <td><b style={{color:"black"}}>&nbsp;&nbsp;5</b></td>
         <td><b style={{color:"black"}}>&nbsp;&nbsp;6</b></td>
         <td><b style={{color:"black"}}>&nbsp;&nbsp;7</b></td>
@@ -1538,10 +1541,10 @@ const currentdate=local.split(",")[0]
       <br/>
       <tr>
       <td><b style={{color:"black"}}></b></td>
-        <td><span>{chillerval2[0] === 0 || chillerval2[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
-        <td>{chillerval2[1] === 0 || chillerval2[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-        <td>{chillerval2[2] === 0 || chillerval2[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-        <td>{chillerval2[3] === 0 || chillerval2[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td><span>{chillerval2['chiller5'] <= 0.8 || chillerval2['chiller5'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td>{chillerval2['chiller6'] === 0 || chillerval2['chiller6'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval2['chiller7'] === 0 || chillerval2['chiller7'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval2['chiller8'] === 0 || chillerval2['chiller8'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
       </tr>
     </table>
     
