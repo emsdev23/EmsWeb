@@ -863,7 +863,7 @@ console.log(totaldaysumvalue)
         // },
         yaxis: {
           title: {
-            text: 'discharge(-) , charge(+) ',
+            text: 'DCHG (-) | CHG (+) Energy ',
           }
         },
         xaxis: {
@@ -1568,7 +1568,7 @@ const currentdate=local.split(",")[0]
   <div class="col-sm-4" style={{marginTop:"2.25%"}}>
     <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus[currentupsStatus.length-1]==="IDLE" ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> 
+      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> 
         <hr/>
         {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/>
            <span style={{color:"black"}}>{currentupsStatus[currentupsStatus.length-1]}</span>

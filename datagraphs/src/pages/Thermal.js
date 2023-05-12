@@ -9,7 +9,7 @@ const Thermal = () => {
     const [result, setResult] = useState([])
   
     const namelist = () =>{
-     axios.get("http://121.242.232.211:5000/thermal").then((res)=>setResult(res.data))
+     axios.get("http://localhost:5000/thermal").then((res)=>setResult(res.data))
     }
 
    
@@ -36,7 +36,7 @@ const Thermal = () => {
     const graph={
       series :
           [{
-              name : "power",
+              name : "Cooling Energy",
               data : averageenergy.map((val)=>val.toFixed(2))  
           }],
   
