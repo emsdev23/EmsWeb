@@ -592,14 +592,79 @@ app.get("/thermalalert",(req,res)=>{
                                         to: emailto,
                                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','arun.kumar@tenet.res.in'
                                         subject: 'EMS - Thermal Storage turned off prior to temperature limit',
-                                        html: ` <body style="background-color:#e4f0ee;">
-                                                <center>
-                                                <h1>Thermal Storage temperature needs to reach 14°C to be turned off.</h1>
-                                                <h2>Temperature is ${storedwatertemp}°C since ${timar[1]}</h2>
-                                                <hr>
-                                                <p>EMS team</p>
-                                                </center> 
-                                                </body>`
+                                        html: `<head>
+                                        <style>
+                                            .container {
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center
+                                          }
+                                          
+                                          img {
+                                            max-width: 100%;
+                                            max-height:100%;
+                                            border-radius: 50%;
+                                        }
+                                          
+                                          .text {
+                                            font-size: 20px;
+                                            padding-left: 20px;
+                                          }
+                                          a:link, a:visited {
+                                            background-color: #dbdae3;
+                                            color: black;
+                                            padding: 14px 25px;
+                                            text-align: center;
+                                            text-decoration: none;
+                                            display: inline-block;
+                                          }
+                                          
+                                          a:hover, a:active {
+                                            background-color: #4c727d;
+                                          }
+                                            </style>  
+                                    </head>
+                                    <body style="background-color:#b8ccba;">
+                                        <center>
+                                        <div class="container">
+                                            <div class="image">
+                                                <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
+                                            </div>
+                                            <div class="text">
+                                                <h3>  EMS Alert</h3>
+                                            </div>
+                                          </div>
+                                        <hr>
+                                            <table>
+                                                <tr>
+                                                <td><b>Alert : <b></td>
+                                                <td>Thermal Storage turned off prior to temperature limit</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Severity : <b></td>
+                                                    <td>High</td>
+                                                </tr>
+                                                <tr>
+                                                <td><b>Limit : <b></td>
+                                                    <td>${storedwatertemp}°C</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Date : <b></td>
+                                                    <td> ${timar[0]}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Time : <b></td>
+                                                    <td> ${timar[1]}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>System : <b></td>
+                                                    <td>Thermal Storage</td>
+                                                </tr>
+                                            </table> 
+                                            <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
+                                            <hr>
+                                            <p>EMS team</p></center>
+                                    </body>`
                                       }
                                 // Condition check to send mail only till the 15th minute after occurence
                                    if((Math.abs(currenttime-timestamp)/1000/60)<15){
@@ -647,6 +712,7 @@ app.get("/outletTemparature",async(req,res)=>{
                 const outletTemp=response[i].commonHeaderoutletTemp+8
                 const date=new Date(response[i].polledTime)
                 const localtime=date.toLocaleString()
+                let timearr = localtime.split(',')
                 if((response[i].commonHeaderoutletTemp>=5 && response[i].commonHeaderoutletTemp<=10) && (response[i].commonHeaderinletTemp>outletTemp)){
                     counter+=1
                     //console.log(`common header outlet temparature as limited 10°C ${response[i].commonHeaderinletTemp}... ${outletTemp} at ${localtime}`)
@@ -668,15 +734,79 @@ app.get("/outletTemparature",async(req,res)=>{
                         to: emailto,
                         //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','sandhyaravikumar@tenet.res.in','arun.kumar@tenet.res.in'
                         subject: 'EMS - Common Header Outlet Temparature breach',
-                        html: ` <body style="background-color:#e4f0ee;">
-                                <center>
-                                <h1>Common Header Outlet Temparature limit has crossed 10°C</h1>
-                                <h2>Current inlet Temparature is ${(response[i].commonHeaderinletTemp).toFixed(2)}°C since ${localtime}</h2>
-                                <h2>Current outlet Temparature is ${(response[i].commonHeaderoutletTemp).toFixed(2)}°C since ${localtime}</h2> 
-                                <hr>
-                                <p>EMS team</p>
-                                </center> 
-                                </body>`
+                        html: `<head>
+                        <style>
+                            .container {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center
+                          }
+                          
+                          img {
+                            max-width: 100%;
+                            max-height:100%;
+                            border-radius: 50%;
+                        }
+                          
+                          .text {
+                            font-size: 20px;
+                            padding-left: 20px;
+                          }
+                          a:link, a:visited {
+                            background-color: #dbdae3;
+                            color: black;
+                            padding: 14px 25px;
+                            text-align: center;
+                            text-decoration: none;
+                            display: inline-block;
+                          }
+                          
+                          a:hover, a:active {
+                            background-color: #4c727d;
+                          }
+                            </style>  
+                    </head>
+                    <body style="background-color:#b8ccba;">
+                        <center>
+                        <div class="container">
+                            <div class="image">
+                                <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
+                            </div>
+                            <div class="text">
+                                <h3>  EMS Alert</h3>
+                            </div>
+                          </div>
+                        <hr>
+                            <table>
+                                <tr>
+                                <td><b>Alert : <b></td>
+                                <td>Common Header Outlet Temparature limit has crossed 10°C</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Severity : <b></td>
+                                    <td>High</td>
+                                </tr>
+                                <tr>
+                                <td><b>Limit : <b></td>
+                                 <td> Inlet : ${(response[i].commonHeaderinletTemp).toFixed(2)}°C , Outlet : ${(response[i].commonHeaderoutletTemp).toFixed(2)}°C</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Date : <b></td>
+                                    <td> ${timearr[0]}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Time : <b></td>
+                                    <td> ${timearr[1]}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>System : <b></td>
+                                    <td>Thermal Storage</td>
+                                </tr>
+                            </table> 
+                            <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
+                            <hr>
+                            <p>EMS team</p></center>
+                    </body>`
                       }
                       transporter.sendMail(mailOptions, function(error, info) {
                         if (error) {
@@ -710,8 +840,9 @@ app.get("/PeakDemand",async(req,res)=>{
             //res.send(response)
             for(let i=0;i<response.length;i++){
                 if(response[i].totalApparentPower2>=3900 && response[i].totalApparentPower2<=4199 ){
-                    const date = new Date(response[i].polledTime)
+                    const date = String(new Date(response[i].polledTime))
                     const localTimeString = date.toLocaleString();
+                    let timearr = localTimeString.split(',')
                     const transporter = nodemailer.createTransport({
                             host: 'smtp.office365.com',
                             port: 587,
@@ -725,18 +856,80 @@ app.get("/PeakDemand",async(req,res)=>{
                           const mailOptions = {
                             from: email,
                             to: emailto,
-                            subject: 'EMS - Peak Demand Limit-level 1 breach',
-                            html: `<body style="background-color:#e4f0ee;">
-                                    <center><h5>Peak Demand Limit-level 1 breach</h5>
-                            
-                            <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
-                            <h5> Severity:- Medium</h5>
+                            subject: 'EMS - Peak Demand Limit-level 2 breach',
+                            html: `<head>
+                            <style>
+                                .container {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center
+                              }
+                              
+                              img {
+                                max-width: 100%;
+                                max-height:100%;
+                                border-radius: 50%;
+                            }
+                              
+                              .text {
+                                font-size: 20px;
+                                padding-left: 20px;
+                              }
+                              a:link, a:visited {
+                                background-color: #dbdae3;
+                                color: black;
+                                padding: 14px 25px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                              }
+                              
+                              a:hover, a:active {
+                                background-color: #4c727d;
+                              }
+                                </style>  
+                        </head>
+                        <body style="background-color:#b8ccba;">
+                            <center>
+                            <div class="container">
+                                <div class="image">
+                                    <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
+                                </div>
+                                <div class="text">
+                                    <h3>  EMS Alert</h3>
+                                </div>
+                              </div>
                             <hr>
-                            <p>EMS team</p>
-                            </center> 
-                            </body>
-                            
-                            `
+                                <table>
+                                    <tr>
+                                    <td><b>Alert : <b></td>
+                                    <td>Peak Demand Limit - Level 2 Breach</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Severity : <b></td>
+                                        <td>Medium</td>
+                                    </tr>
+                                    <tr>
+                                    <td><b>Limit : <b></td>
+                                     <td> ${Math.round(response[i].totalApparentPower2)} KVA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Date : <b></td>
+                                        <td> ${timearr[0]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Time : <b></td>
+                                        <td> ${timearr[1]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>System : <b></td>
+                                        <td>Building Load</td>
+                                    </tr>
+                                </table> 
+                                <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
+                                <hr>
+                                <p>EMS team</p></center>
+                        </body>`
                           };
                           //energyteam@respark.iitm.ac.in
                           //faheera@respark.iitm.ac.in
@@ -768,18 +961,79 @@ app.get("/PeakDemand",async(req,res)=>{
                             from: email,
                             to: emailto,
                             subject: 'EMS - Peak Demand Limit-level 2 breach',
-                            html: `<body style="background-color:#e4f0ee;">
+                            html: `<head>
+                            <style>
+                                .container {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center
+                              }
+                              
+                              img {
+                                max-width: 100%;
+                                max-height:100%;
+                                border-radius: 50%;
+                            }
+                              
+                              .text {
+                                font-size: 20px;
+                                padding-left: 20px;
+                              }
+                              a:link, a:visited {
+                                background-color: #dbdae3;
+                                color: black;
+                                padding: 14px 25px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                              }
+                              
+                              a:hover, a:active {
+                                background-color: #4c727d;
+                              }
+                                </style>  
+                        </head>
+                        <body style="background-color:#b8ccba;">
                             <center>
-                            
-                            <h5>Peak Demand Limit-level 2 breach</h5>
-                            
-                            <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
-                            <h5> Severity:- Medium</h5>
+                            <div class="container">
+                                <div class="image">
+                                    <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
+                                </div>
+                                <div class="text">
+                                    <h3>  EMS Alert</h3>
+                                </div>
+                              </div>
                             <hr>
-                            <p>EMS team</p>
-                            </center> 
-                            </body>
-                            `
+                                <table>
+                                    <tr>
+                                    <td><b>Alert : <b></td>
+                                    <td>Peak Demand Limit - Level 1 Breach</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Severity : <b></td>
+                                        <td>High</td>
+                                    </tr>
+                                    <tr>
+                                    <td><b>Limit : <b></td>
+                                     <td>  ${Math.round(response[i].totalApparentPower2)} KVA </td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Date : <b></td>
+                                        <td> ${timearr[0]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Time : <b></td>
+                                        <td> ${timearr[1]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>System : <b></td>
+                                        <td>Building Load</td>
+                                    </tr>
+                                </table> 
+                                <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
+                                <hr>
+                                <p>EMS team</p></center>
+                        </body>`
                           };
                           //energyteam@respark.iitm.ac.in
                           //faheera@respark.iitm.ac.in
@@ -811,18 +1065,79 @@ app.get("/PeakDemand",async(req,res)=>{
                             from: email,
                             to: emailto,
                             subject: 'EMS - Peak Demand Limit-level 3 breach',
-                            html: `
-                            <body style="background-color:#e4f0ee;">
+                            html: `<head>
+                            <style>
+                                .container {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center
+                              }
+                              
+                              img {
+                                max-width: 100%;
+                                max-height:100%;
+                                border-radius: 50%;
+                            }
+                              
+                              .text {
+                                font-size: 20px;
+                                padding-left: 20px;
+                              }
+                              a:link, a:visited {
+                                background-color: #dbdae3;
+                                color: black;
+                                padding: 14px 25px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                              }
+                              
+                              a:hover, a:active {
+                                background-color: #4c727d;
+                              }
+                                </style>  
+                        </head>
+                        <body style="background-color:#b8ccba;">
                             <center>
-                            <h5>Peak Demand Limit-level 3 breach</h5>
-                            
-                            <h5 >Warning:-Peak Demand has crossed limit of ${Math.round(response[i].totalApparentPower2)} KVA at ${localTimeString}</h5>
-                            <h5> Severity:- Medium</h5>
+                            <div class="container">
+                                <div class="image">
+                                    <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
+                                </div>
+                                <div class="text">
+                                    <h3>  EMS Alert</h3>
+                                </div>
+                              </div>
                             <hr>
-                            <p>EMS team</p>
-                            </center> 
-                            </body>
-                            `
+                                <table>
+                                    <tr>
+                                    <td><b>Alert : <b></td>
+                                    <td>Peak Demand Limit - Level 1 Breach</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Severity : <b></td>
+                                        <td>High</td>
+                                    </tr>
+                                    <tr>
+                                    <td><b>Limit : <b></td>
+                                     <td>  ${Math.round(response[i].totalApparentPower2)} KVA </td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Date : <b></td>
+                                        <td> ${timearr[0]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Time : <b></td>
+                                        <td> ${timearr[1]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>System : <b></td>
+                                        <td>Building Load</td>
+                                    </tr>
+                                </table> 
+                                <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
+                                <hr>
+                                <p>EMS team</p></center>
+                        </body>` 
                           };
                           //energyteam@respark.iitm.ac.in
                           //faheera@respark.iitm.ac.in
@@ -917,17 +1232,32 @@ app.get("/acknowledment",async(req,res)=>{
 
 // data filtering acording to the selected date for peakdemad data
 app.post("/past/hvacSchneider7230Polling", (req, res) => {
-  const { date } = req.body;
-  const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) = '${date}' and totalApparentPower2>2500`;
-  chakradb.query(query, (error, results) => {
-    if (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'An error occurred' });
-    }
-    return res.json(results);
+    const { date,endDate} = req.body;
+   
+    const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}' And totalApparentPower2>3900 `;
+    chakradb.query(query, (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
+      return res.json(results);
+    });
   });
-});
-
+  
+  
+  // data filtering for single days data
+  app.post("/singleday/hvacSchneider7230Polling", (req, res) => {
+      const { date} = req.body;
+     
+      const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) = '${date}' And totalApparentPower2>2000 `;
+      chakradb.query(query, (error, results) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ message: 'An error occurred' });
+        }
+        return res.json(results);
+      });
+    });
 
 
 
