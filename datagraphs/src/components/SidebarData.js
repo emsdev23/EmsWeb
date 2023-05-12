@@ -8,6 +8,7 @@ import SevereColdIcon from '@mui/icons-material/SevereCold';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import ThermostatAutoIcon from '@mui/icons-material/ThermostatAuto';
+import * as SiIcons from 'react-icons/si'
 
 
 export const SidebarData = [
@@ -20,9 +21,17 @@ export const SidebarData = [
   },
   {
     title: 'Analytics',
-    path: '/Analytics',
+    // path: '/Analytics',
     icon: <IoIcons.IoIosPaper />,
-    cName: 'nav-text'
+    cName: 'nav-text',
+    subNav: [
+      {
+        title: 'Building consumption',
+        path: '/Analytics/peakgraph',
+        icon: <SiIcons.SiGoogleanalytics />
+      },
+      
+    ]
   },
   {
     title: 'Alert Logs',
