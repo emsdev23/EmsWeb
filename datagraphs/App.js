@@ -1,4 +1,3 @@
-
 import './App.css';
 // import Sidebar from './main';
 // import Data from './Api'
@@ -30,11 +29,52 @@ import Thermalcontrol from './pages/Thermalcontrol';
 import Peakdemandgraph from './pages/Peakdemandgraph';
 
 
-
 function App() {
-  const url="http://localhost:5000/PeakDemand"
-  const thermalAlert="http://localhost:5000/thermalalert"
-  const outlettemp ="http://localhost:5000/outletTemparature"
+
+
+  return (
+    <> 
+    <div > 
+
+    
+    <BrowserRouter>
+    <Navbar/> 
+    <Routes> 
+      <Route  path ='/' element={<DashBoard/>}/>
+      <Route  path ='/Analytics' element={<Analytics/>}/>
+      <Route  path ='/Control/upsbattery' element={<Control/>}/>
+      <Route  path ='/Control/thermal' element={<Thermalcontrol/>}/>
+      
+      <Route  path ='/Alertlogs' element={<Alerts/>}/>
+      <Route  path ='/Documentation' element={<Documentation/>}/>
+      <Route  path ='/Alerts/Peakdemand' element={<Peakdemand/>}/>
+      <Route  path ='/Alerts/Thermalalers' element={<Thermalalers/>}/>
+      <Route  path ='/Alerts/ChillerAlerts' element={<ChillerAlerts/>}/>
+      <Route  path ='/peakgraph' element={<Peakdemandgraph/>}/>
+      
+
+      </Routes>
+
+    
+    </BrowserRouter>
+
+    </div>
+
+
+
+
+
+    </>
+  );
+}
+
+export default App;
+
+
+  {/*const host = "121.242.232.211"
+  const url=`http://${host}:5000/PeakDemand`
+  const thermalAlert=`http://${host}:5000/thermalalert`
+  const outlettemp =`http://${host}:5000/outletTemparature`
 
   const PeakDemand=()=>{
     axios.get(url).then((res)=>{
@@ -114,7 +154,14 @@ function App() {
       });
     });
   }).catch((err)=>{
-      console.log(err)
+      swal({
+      title: "Alert",
+      text: `${err} '\u{1F600}'`,
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+      background: 'darkblue'
+    })
     })
   } 
 
@@ -126,77 +173,15 @@ function App() {
 
   useEffect(()=>{
     setInterval(()=>{
-    OutletTemp()
+     OutletTemp()
     PeakDemand()
     thermalAlerts()
      
     },60000)
-  })
-
-  return (
-    <> 
-    <div > 
-
-    
-    <BrowserRouter>
-    <Navbar/> 
-    <Routes> 
-      <Route  path ='/' element={<DashBoard/>}/>
-      <Route  path ='/Analytics' element={<Analytics/>}/>
-      <Route  path ='/Control/upsbattery' element={<Control/>}/>
-      <Route  path ='/Control/thermal' element={<Thermalcontrol/>}/>
-      
-      <Route  path ='/Alertlogs' element={<Alerts/>}/>
-      <Route  path ='/Documentation' element={<Documentation/>}/>
-      <Route  path ='/Alerts/Peakdemand' element={<Peakdemand/>}/>
-      <Route  path ='/Alerts/Thermalalers' element={<Thermalalers/>}/>
-      <Route  path ='/Alerts/ChillerAlerts' element={<ChillerAlerts/>}/>
-      <Route  path ='/Analytics/peakgraph' element={<Peakdemandgraph/>}/>
-      
-
-      </Routes>
-
-    
-    </BrowserRouter>
-
-    {/* <ToastContainer /> */}
-    </div>
-
-
-    
-   
+  })*/}
  
-    {/* <BrowserRouter>
-    <div>
-    <Navebar/>
-      <br/>
-      <br/>
-
-    </div>
-    <br/>
-      
-        <div style={{display:"grid",gridTemplateColumns:"20% 80%",height:"100vw"}}>
-            <div id='sidebar' style={{width:"100%"}}>
-                <Sidebar/>
-            </div>
-            <div>
-           
-                <Routes>
-                <Route path='/Documentation' element={<Csv/>}/>
-                      <Route path ='/Analytics' element={<Data/>}/>
-                      <Route path = '/Alerts' element={<Alerts/>}/>
-                      <Route path ='/Control' element={<Control/>}/>
-                      <Route path ='/Solargraph' element={<Solargraph/>}/>
-                      <Route path='/' element={<Dashboard/>}/>
-                </Routes>
-              
-            </div>
-        </div>
-    </BrowserRouter> */}
 
 
-    </>
-  );
-}
 
-export default App;
+
+
