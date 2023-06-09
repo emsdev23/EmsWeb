@@ -1,13 +1,28 @@
 const express=require('express')
-const {con,chakradb,unprocesseddata}=require('./connect')
+const timeout = require('connect-timeout')
+const {con,chakradb,unprocesseddata,hashtic,meterDb}=require('./connect')
 const app=express()
+const alert = express()
 const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
-const password = ""
-const email = ""
-const emailto = ""
+const password = "Arun@1807"
+const email = 'arun.kumar@tenet.res.in'
+const emailto =['ems@respark.iitm.ac.in']
+//faheera@respark.iitm.ac.in
+
+
+alert.use(
+    cors({
+      origin: "*",
+      credentials: true,
+    })
+  );
+
+alert.use(express.json());
+
+alert.use(timeout('40s'))
 
 app.use(
     cors({
@@ -284,26 +299,18 @@ emptyArray.forEach(obj => {
     })
 
     app.get("/grid",async(req,res)=>{
-        // unprocesseddata.query("select * from acmeterreadings WHERE acmeterpolledtimestamp >= CURDATE() AND acmeterpolledtimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND acmetersubsystemid IN (1167,1135,358,350) ",function(err,result,feilds){
-        //     if(err){
-        //         console.log(err)
-        //     }
-        //     else{
-        //         const response=(JSON.parse(JSON.stringify(result)))
-        //         res.send(response)
-        //         console.log(response.length)
-        //     }
-        // })
+         meterDb.query("select polled_timestamp,cumulative_energy from acmeterreadingtoday WHERE polled_timestamp >= CURDATE() AND polled_timestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by polled_timestamp desc limit 1 ",function(err,result,feilds){
+             if(err){
+                 console.log(err)
+             }
+             else{
+                 const response=(JSON.parse(JSON.stringify(result)))
+                 res.send(response)
+                 console.log(response.length)
+             }
+         })
 
-        con.query("select Energy from GridProcessed where polledDate = curdate()",function(err,qrres){
-            if(err){
-                console.log(err)
-            }else{
-                const response=(JSON.parse(JSON.stringify(qrres)))
-                console.log(response)
-                res.send(response)
-            }
-        })
+ 
         
     })
 
@@ -533,632 +540,6 @@ emptyArray.forEach(obj => {
 // --------------------------------------------------------------------------------------------------------------------------------------
 
 //Thermal alert api
-let k = 0
-let criticaltemp = 14
-app.get("/thermalalert",(req,res)=>{
-    unprocesseddata.query(`select polledTime,tsStoredWaterTemperature/100 as tsStored,tsOutletBDPvalveStatus,tsOutletADPvalveStatus,HValve from thermalStorageMQTTReadings where Date(polledTime)=curdate() order by polledTime;`,function(err,queryres){
-        if(err){
-            console.log(err)
-        }
-        else{
-            data = JSON.parse(JSON.stringify(queryres))
-
-            for (let i=0; i<data.length;i++){
-                const polledtime = data[i].polledTime
-                const time = moment.tz(polledtime, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-                const timeinmin = time.substring(11,16)
-                const date= new Date(polledtime)
-                const local=date.toLocaleString()
-                const timar = local.split(',')
-                const storedwatertemp = data[i].tsStored
-                const outBDP = data[i].tsOutletBDPvalveStatus
-                const outADP = data[i].tsOutletADPvalveStatus
-                const hvalve = data[i].HValve
-                const timestamp = new Date(time)
-                var curr = new Date(Date.now())
-                var currenttime = new Date(moment.tz(curr, tz).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))
-                // const
-                
-
-                const transporter = nodemailer.createTransport({
-                    host: 'smtp.office365.com',
-                    port: 587,
-                    secure: false,
-                    auth: {
-                      user: email,
-                      pass: password
-                    }
-                  })
-                  
-
-                // console.log(storedwatertemp,outADP,outBDP,hvalve,time)
-
-
-                 // to get values after 12:10 am
-                if (timeinmin>"00:10") {
-                     // Checking the temperature after the ts valves have been shut down immediately
-                    if ((data[i].tsOutletBDPvalveStatus == 0 && data[i].tsOutletADPvalveStatus == 0 && data[i].HValve == 0) &&
-                        (data[i-6].tsOutletBDPvalveStatus == 1 && data[i-6].tsOutletADPvalveStatus == 1 && data[i-6].HValve == 1) ){
-                            if (data[i].tsStored < criticaltemp){
-                                k=k +1
-                            }
-                            if (k===5){
-                                    k = 0
-                                    // console.log("Alert Name : ","Thermal Storage turned off prior to temperature limit")
-                                    // console.log("Message : ","Thermal Storage temperature needs to reach 14°C to be turned off.")
-                                    // console.log("Temperature is",storedwatertemp+"°C since",time)
-                                    const mailOptions = {
-                                        from: email,
-                                        to: emailto,
-                                        //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','arun.kumar@tenet.res.in'
-                                        subject: 'EMS - Thermal Storage turned off prior to temperature limit',
-                                        html: `<head>
-                                        <style>
-                                            .container {
-                                            display: flex;
-                                            align-items: center;
-                                            justify-content: center
-                                          }
-                                          
-                                          img {
-                                            max-width: 100%;
-                                            max-height:100%;
-                                            border-radius: 50%;
-                                        }
-                                          
-                                          .text {
-                                            font-size: 20px;
-                                            padding-left: 20px;
-                                          }
-                                          a:link, a:visited {
-                                            background-color: #dbdae3;
-                                            color: black;
-                                            padding: 14px 25px;
-                                            text-align: center;
-                                            text-decoration: none;
-                                            display: inline-block;
-                                          }
-                                          
-                                          a:hover, a:active {
-                                            background-color: #4c727d;
-                                          }
-                                            </style>  
-                                    </head>
-                                    <body style="background-color:#b8ccba;">
-                                        <center>
-                                        <div class="container">
-                                            <div class="image">
-                                                <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
-                                            </div>
-                                            <div class="text">
-                                                <h3>  EMS Alert</h3>
-                                            </div>
-                                          </div>
-                                        <hr>
-                                            <table>
-                                                <tr>
-                                                <td><b>Alert : <b></td>
-                                                <td>Thermal Storage turned off prior to temperature limit</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><b>Severity : <b></td>
-                                                    <td>High</td>
-                                                </tr>
-                                                <tr>
-                                                <td><b>Limit : <b></td>
-                                                    <td>${storedwatertemp}°C</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><b>Date : <b></td>
-                                                    <td> ${timar[0]}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><b>Time : <b></td>
-                                                    <td> ${timar[1]}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><b>System : <b></td>
-                                                    <td>Thermal Storage</td>
-                                                </tr>
-                                            </table> 
-                                            <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
-                                            <hr>
-                                            <p>EMS team</p></center>
-                                    </body>`
-                                      }
-                                // Condition check to send mail only till the 15th minute after occurence
-                                   if((Math.abs(currenttime-timestamp)/1000/60)<15){
-                                        transporter.sendMail(mailOptions, function(error, info) {
-                                            if (error) {
-                                            console.log(error);
-                                            } else {
-                                                console.log("Temperature is",storedwatertemp+"°C since",timar[1])
-                                                res.send(`Temperature is ${storedwatertemp}°C since ${timar[1]}`)
-                                            }
-                                        })
-                            }
-                                    
-                            }
-                    }
-                }
-            }
-        }
-    })
-})
-
-
-
-
-app.get("/outletTemparature",async(req,res)=>{
-    
-    chakradb.query("select * from hvacChillerCoolingPolling WHERE polledTime >= CURDATE() AND polledTime < DATE_ADD(CURDATE(), INTERVAL 1 DAY)",function(err,result,feilds){
-        if(err){
-            console.log(err)
-        }
-        else{
-            const transporter = nodemailer.createTransport({
-                host: 'smtp.office365.com',
-                port: 587,
-                secure: false,
-                auth: {
-                  user: email,
-                  pass: password
-                }
-              })
-            
-            const response=(JSON.parse(JSON.stringify(result)))
-            let counter=0
-            for(let i=0;i<response.length;i++){
-                const outletTemp=response[i].commonHeaderoutletTemp+8
-                const date=new Date(response[i].polledTime)
-                const localtime=date.toLocaleString()
-                let timearr = localtime.split(',')
-                if((response[i].commonHeaderoutletTemp>=5 && response[i].commonHeaderoutletTemp<=10) && (response[i].commonHeaderinletTemp>outletTemp)){
-                    counter+=1
-                    //console.log(`common header outlet temparature as limited 10°C ${response[i].commonHeaderinletTemp}... ${outletTemp} at ${localtime}`)
-                    
-                    //console.log(`the consicutive count is ${counter} and time ${localtime}`)
-                }
-
-                
-
-                else{
-                    counter=0
-
-                }
-                //condition for consicutive 5min than trigger the alert
-                if(counter===5){
-                    counter=0
-                    const mailOptions = {
-                        from: email,
-                        to: emailto,
-                        //'abhishek@respark.iitm.ac.in' ,'anson@respark.iitm.ac.in','faheera@respark.iitm.ac.in','sandhyaravikumar@tenet.res.in','arun.kumar@tenet.res.in'
-                        subject: 'EMS - Common Header Outlet Temparature breach',
-                        html: `<head>
-                        <style>
-                            .container {
-                            display: flex;
-                            align-items: center;
-                            justify-content: center
-                          }
-                          
-                          img {
-                            max-width: 100%;
-                            max-height:100%;
-                            border-radius: 50%;
-                        }
-                          
-                          .text {
-                            font-size: 20px;
-                            padding-left: 20px;
-                          }
-                          a:link, a:visited {
-                            background-color: #dbdae3;
-                            color: black;
-                            padding: 14px 25px;
-                            text-align: center;
-                            text-decoration: none;
-                            display: inline-block;
-                          }
-                          
-                          a:hover, a:active {
-                            background-color: #4c727d;
-                          }
-                            </style>  
-                    </head>
-                    <body style="background-color:#b8ccba;">
-                        <center>
-                        <div class="container">
-                            <div class="image">
-                                <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
-                            </div>
-                            <div class="text">
-                                <h3>  EMS Alert</h3>
-                            </div>
-                          </div>
-                        <hr>
-                            <table>
-                                <tr>
-                                <td><b>Alert : <b></td>
-                                <td>Common Header Outlet Temparature limit has crossed 10°C</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Severity : <b></td>
-                                    <td>High</td>
-                                </tr>
-                                <tr>
-                                <td><b>Limit : <b></td>
-                                 <td> Inlet : ${(response[i].commonHeaderinletTemp).toFixed(2)}°C , Outlet : ${(response[i].commonHeaderoutletTemp).toFixed(2)}°C</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Date : <b></td>
-                                    <td> ${timearr[0]}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Time : <b></td>
-                                    <td> ${timearr[1]}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>System : <b></td>
-                                    <td>Thermal Storage</td>
-                                </tr>
-                            </table> 
-                            <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
-                            <hr>
-                            <p>EMS team</p></center>
-                    </body>`
-                      }
-                      transporter.sendMail(mailOptions, function(error, info) {
-                        if (error) {
-                          console.log(error);
-                        } else {
-                            console.log(`Temperature is",${response[i].commonHeaderinletTemp}"°C since ${localtime}`)
-                            res.send(`Common Headrer Outlet ${outletTemp} Temparature limit has crossed 10°C since ${localtime}`)
-                        }
-                      })
-                   
-                }
-                
-            }
-            
-            
-        }
-
-        
-    })
-    
-})
-
-
-app.get("/PeakDemand",async(req,res)=>{
-    chakradb.query("select * from hvacSchneider7230Polling WHERE polledTime >= CURDATE() AND polledTime < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by polledTime desc limit 1",function(err,result,feilds){
-        if(err){
-            console.log(err)
-        }
-        else{
-            const response=(JSON.parse(JSON.stringify(result)))
-            //res.send(response)
-            for(let i=0;i<response.length;i++){
-                if(response[i].totalApparentPower2>=3900 && response[i].totalApparentPower2<=4199 ){
-                    const date = String(new Date(response[i].polledTime))
-                    const localTimeString = date.toLocaleString();
-                    let timearr = localTimeString.split(',')
-                    const transporter = nodemailer.createTransport({
-                            host: 'smtp.office365.com',
-                            port: 587,
-                            secure: false,
-                            auth: {
-                              user: email,
-                              pass: password
-                            }
-                          });
-                          
-                          const mailOptions = {
-                            from: email,
-                            to: emailto,
-                            subject: 'EMS - Peak Demand Limit-level 2 breach',
-                            html: `<head>
-                            <style>
-                                .container {
-                                display: flex;
-                                align-items: center;
-                                justify-content: center
-                              }
-                              
-                              img {
-                                max-width: 100%;
-                                max-height:100%;
-                                border-radius: 50%;
-                            }
-                              
-                              .text {
-                                font-size: 20px;
-                                padding-left: 20px;
-                              }
-                              a:link, a:visited {
-                                background-color: #dbdae3;
-                                color: black;
-                                padding: 14px 25px;
-                                text-align: center;
-                                text-decoration: none;
-                                display: inline-block;
-                              }
-                              
-                              a:hover, a:active {
-                                background-color: #4c727d;
-                              }
-                                </style>  
-                        </head>
-                        <body style="background-color:#b8ccba;">
-                            <center>
-                            <div class="container">
-                                <div class="image">
-                                    <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
-                                </div>
-                                <div class="text">
-                                    <h3>  EMS Alert</h3>
-                                </div>
-                              </div>
-                            <hr>
-                                <table>
-                                    <tr>
-                                    <td><b>Alert : <b></td>
-                                    <td>Peak Demand Limit - Level 2 Breach</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Severity : <b></td>
-                                        <td>Medium</td>
-                                    </tr>
-                                    <tr>
-                                    <td><b>Limit : <b></td>
-                                     <td> ${Math.round(response[i].totalApparentPower2)} KVA</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Date : <b></td>
-                                        <td> ${timearr[0]}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Time : <b></td>
-                                        <td> ${timearr[1]}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>System : <b></td>
-                                        <td>Building Load</td>
-                                    </tr>
-                                </table> 
-                                <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
-                                <hr>
-                                <p>EMS team</p></center>
-                        </body>`
-                          };
-                          //energyteam@respark.iitm.ac.in
-                          //faheera@respark.iitm.ac.in
-                          
-                          transporter.sendMail(mailOptions, function(error, info) {
-                            if (error) {
-                              console.log(error);
-                            } else {
-                               res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
-                            }
-                          });
-
-                }
-
-                else if(response[i].totalApparentPower2>=4200 && response[i].totalApparentPower2<=4499 ){
-                    const date = new Date(response[i].polledTime)
-                    const localTimeString = date.toLocaleString();
-                    const transporter = nodemailer.createTransport({
-                            host: 'smtp.office365.com',
-                            port: 587,
-                            secure: false,
-                            auth: {
-                              user: email,
-                              pass: password
-                            }
-                          });
-                          
-                          const mailOptions = {
-                            from: email,
-                            to: emailto,
-                            subject: 'EMS - Peak Demand Limit-level 2 breach',
-                            html: `<head>
-                            <style>
-                                .container {
-                                display: flex;
-                                align-items: center;
-                                justify-content: center
-                              }
-                              
-                              img {
-                                max-width: 100%;
-                                max-height:100%;
-                                border-radius: 50%;
-                            }
-                              
-                              .text {
-                                font-size: 20px;
-                                padding-left: 20px;
-                              }
-                              a:link, a:visited {
-                                background-color: #dbdae3;
-                                color: black;
-                                padding: 14px 25px;
-                                text-align: center;
-                                text-decoration: none;
-                                display: inline-block;
-                              }
-                              
-                              a:hover, a:active {
-                                background-color: #4c727d;
-                              }
-                                </style>  
-                        </head>
-                        <body style="background-color:#b8ccba;">
-                            <center>
-                            <div class="container">
-                                <div class="image">
-                                    <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
-                                </div>
-                                <div class="text">
-                                    <h3>  EMS Alert</h3>
-                                </div>
-                              </div>
-                            <hr>
-                                <table>
-                                    <tr>
-                                    <td><b>Alert : <b></td>
-                                    <td>Peak Demand Limit - Level 1 Breach</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Severity : <b></td>
-                                        <td>High</td>
-                                    </tr>
-                                    <tr>
-                                    <td><b>Limit : <b></td>
-                                     <td>  ${Math.round(response[i].totalApparentPower2)} KVA </td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Date : <b></td>
-                                        <td> ${timearr[0]}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Time : <b></td>
-                                        <td> ${timearr[1]}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>System : <b></td>
-                                        <td>Building Load</td>
-                                    </tr>
-                                </table> 
-                                <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
-                                <hr>
-                                <p>EMS team</p></center>
-                        </body>`
-                          };
-                          //energyteam@respark.iitm.ac.in
-                          //faheera@respark.iitm.ac.in
-                          
-                          transporter.sendMail(mailOptions, function(error, info) {
-                            if (error) {
-                              console.log(error);
-                            } else {
-                               res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
-                            }
-                          });
-
-                }
-
-                else if(response[i].totalApparentPower2>=4500){
-                    const date = new Date(response[i].polledTime)
-                    const localTimeString = date.toLocaleString();
-                    const transporter = nodemailer.createTransport({
-                            host: 'smtp.office365.com',
-                            port: 587,
-                            secure: false,
-                            auth: {
-                              user: email,
-                              pass: password
-                            }
-                          });
-                          
-                          const mailOptions = {
-                            from: email,
-                            to: emailto,
-                            subject: 'EMS - Peak Demand Limit-level 3 breach',
-                            html: `<head>
-                            <style>
-                                .container {
-                                display: flex;
-                                align-items: center;
-                                justify-content: center
-                              }
-                              
-                              img {
-                                max-width: 100%;
-                                max-height:100%;
-                                border-radius: 50%;
-                            }
-                              
-                              .text {
-                                font-size: 20px;
-                                padding-left: 20px;
-                              }
-                              a:link, a:visited {
-                                background-color: #dbdae3;
-                                color: black;
-                                padding: 14px 25px;
-                                text-align: center;
-                                text-decoration: none;
-                                display: inline-block;
-                              }
-                              
-                              a:hover, a:active {
-                                background-color: #4c727d;
-                              }
-                                </style>  
-                        </head>
-                        <body style="background-color:#b8ccba;">
-                            <center>
-                            <div class="container">
-                                <div class="image">
-                                    <img src="https://s3.amazonaws.com/tracxn-data-image/logo/company/f82e354c4ba7630cdd2e2dda9715bc" height="100px" width="100px" alt="None">
-                                </div>
-                                <div class="text">
-                                    <h3>  EMS Alert</h3>
-                                </div>
-                              </div>
-                            <hr>
-                                <table>
-                                    <tr>
-                                    <td><b>Alert : <b></td>
-                                    <td>Peak Demand Limit - Level 1 Breach</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Severity : <b></td>
-                                        <td>High</td>
-                                    </tr>
-                                    <tr>
-                                    <td><b>Limit : <b></td>
-                                     <td>  ${Math.round(response[i].totalApparentPower2)} KVA </td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Date : <b></td>
-                                        <td> ${timearr[0]}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>Time : <b></td>
-                                        <td> ${timearr[1]}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>System : <b></td>
-                                        <td>Building Load</td>
-                                    </tr>
-                                </table> 
-                                <center><a href="http://121.242.232.211:3000" target="_blank">View Dashboard</a></center>
-                                <hr>
-                                <p>EMS team</p></center>
-                        </body>` 
-                          };
-                          //energyteam@respark.iitm.ac.in
-                          //faheera@respark.iitm.ac.in
-                          
-                          transporter.sendMail(mailOptions, function(error, info) {
-                            if (error) {
-                              console.log(error);
-                            } else {
-                               res.send(`Peak Demand has crossed limit of ${response[i].totalApparentPower2} KVA at ${localTimeString}`);
-                            }
-                          });
-
-                }
-               
-            }
-
-            //console.log(response.length)
-        }
-    })
-    
-})
 
 
 
@@ -1258,13 +639,140 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
         return res.json(results);
       });
     });
+    
+     // wheeled in solar data filter according to datewise
+// data filtering for single days data
+app.post("/singleday/wheeledinsolr", (req, res) => {
+    const { date} = req.body;
+    const inverters=[]
+    const INV1=[]
+    const INV2=[]
+    const INV3=[]
+    const INV4=[]
+    const INV5=[]
+    const INV6=[]
+    const INV7=[]
+    const INV8=[]
+   
+    const query = `SELECT * FROM meterdata.inverterprocessinghourly WHERE DATE(invertertimestamp) = '${date}' `;
+    meterDb.query(query, (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
+     
+      for(let i=0;i<results.length;i++){
+        if(results[i].inverterrecordid===1){
+            INV1.push(results[i])
+        }
+        else if(results[i].inverterrecordid===2){
+            INV2.push(results[i])
+
+        }
+        else if(results[i].inverterrecordid===3){
+            INV3.push(results[i])
+
+        }
+        else if(results[i].inverterrecordid===4){
+            INV4.push(results[i])
+
+        }
+        else if(results[i].inverterrecordid===5){
+            INV5.push(results[i])
+
+        }
+        else if(results[i].inverterrecordid===6){
+            INV6.push(results[i])
+
+        }
+        else if(results[i].inverterrecordid===7){
+            INV7.push(results[i])
+
+        }
+        else if(results[i].inverterrecordid===8){
+            INV8.push(results[i])
+
+        }
+      }
+    inverters.push({"INV1":INV1,"INV2":INV2,"INV3":INV3,"INV4":INV4,"INV5":INV5,"INV6":INV6,"INV7":INV7,"INV8":INV8})
+    console.log(inverters[0].INV2.length)
+      return res.json(inverters);
+    });
+  });
 
 
+ //roofTop hourly data
+ app.post("/roofTopHourly", async (req, res) => {
+    const { date } = req.body;
+    meterDb.query(`SELECT * FROM rooftophourly WHERE DATE(polled_timestamp) = '${date}'`, function(err, qrres) {
+      if (err) {
+        console.log(err);
+      } else {
+        const response = JSON.parse(JSON.stringify(qrres));
+        const data = response.map(entry => {
+          const decimalval = Math.trunc(entry.total_cumulative_energy);
+          const radiation=entry.sensor_solar_radiation
+          const date = new Date(entry.polled_timestamp);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //const timestamp = `${hours}`;
+          return { timestamp, energy: decimalval,solarRadiation:radiation};
+        });
+        console.log(data);
+        res.send(data);
+      }
+    });
+  });
 
+      // wms/meter data hourly
+  app.post("/wmsMeter/graphs", (req, res) => {
+    const { date} = req.body;
+   
+    const query = `SELECT * FROM HourlyMeterData WHERE DATE(timestamp) = '${date}'`;
+    meterDb.query(query, (error, results) => {
+        const wmsMeterdata=[]
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
+      else{
+        const response = JSON.parse(JSON.stringify(results));
+        for(let i=0;i<response.length;i++){
+            const date = new Date(response[i].timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`;
 
+            // Splitting the time into hours and minutes
+          var [converthours, convertminutes] = timestamp.split(":");
 
+          // Converting the hours and minutes to integers
+           parsehours = parseInt(converthours, 10);
+           parseminutes = parseInt(convertminutes, 10);
 
+       // Rounding off the time
+       if (parseminutes >= 30) {
+        parsehours += 1;
+          }
 
+// Formatting the rounded time
+var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
+           
+            wmsMeterdata.push({"cumulativepower":response[i].cummulativemeterpower,"wmsirradiation":response[i].wmsirradiation,"timestamp":roundedTime})
+
+        }
+        console.log(wmsMeterdata)
+        res.send(wmsMeterdata)
+      }
+   
+    });
+  })
+    
+    
+    
 
 
 app.listen(5000,(err)=>{
