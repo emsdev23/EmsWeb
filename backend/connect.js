@@ -1,8 +1,8 @@
-const mysql=require('mysql')
+const mysql=require('mysql2')
 
 const con=mysql.createConnection({
-    host:'localhost',
-    user:'root',
+    host:'121.242.232.211',
+    user:'emsroot',
     password:'22@teneT',
     database:'EMS',
     port:3306
@@ -16,40 +16,21 @@ con.connect((err)=>{
     }
 })
 
-
 const meterDb=mysql.createConnection({
-    host:'localhost',
-    user:'root',
+    host:'121.242.232.211',
+    user:'emsroot',
     password:'22@teneT',
     database:'meterdata',
     port:3306
 })
 meterDb.connect((err)=>{
     if(err){
-        console.log("METERDATA DB not connected")
+        console.log("METER DB not connected")
     }
     else{
-        console.log(' METERDATA DB conneted......')
+        console.log(' METER  DB conneted......')
     }
 })
-
-
-const hashtic=mysql.createConnection({
-    host:'localhost',
-    user:'root',
-    password:'22@teneT',
-    database:'HASHTIC',
-    port:3306
-})
-hashtic.connect((err)=>{
-    if(err){
-        console.log("HASHTIC DB not connected")
-    }
-    else{
-        console.log(' HASHTIC DB conneted......')
-    }
-})
-
 
 
 const chakradb=mysql.createConnection({
@@ -88,10 +69,28 @@ unprocesseddata.connect((err)=>{
 })
 
 
+const hashticDb=mysql.createConnection({
+    host:'10.200.1.44',
+    user:'tenet1',
+    password:'22@kingdomS',
+    database:'HASTIC',
+    port:3306
+})
+hashticDb.connect((err)=>{
+    if(err){
+        console.log("HASTIC DB not connected")
+    }
+    else{
+        console.log(' HASTIC DB conneted......')
+    }
+})
+
+
+
 
 
 
 
 
  
-module.exports={con,chakradb,unprocesseddata,hashtic,meterDb};
+module.exports={con,chakradb,unprocesseddata,meterDb,hashticDb};

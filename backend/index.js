@@ -545,6 +545,38 @@ emptyArray.forEach(obj => {
 
 // --------------------------------------------------------------------------------------------------------------------------------------
 
+// --------------power factor card------------------
+app.get("/schneider7230readings",async(req,res)=>{
+    meterDb.query("select * from schneider7230readings  where DATE(polled_time) = curdate()  order by polled_time desc limit 1",function(err,result,feilds){
+        const powerfactor=[]
+        if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+
+            for(let i=0;i<response.length;i++){
+            const date = new Date(response[i].polled_time);
+            const timestamp = date.toLocaleString();
+            powerfactor.push({"polledTime":timestamp,"average_powerfactor":response[i].average_powerfactor,"minimum_powerfactor":response[i].minimum_powerfactor})
+            }
+            res.send(response)
+            console.log(powerfactor)
+        }
+    })
+    
+})
+
+
+
+
+
+
+
+
+
+
+
  //controlls post request
  app.post('/controlls', function (req, res) {
     const now = new Date();
@@ -629,6 +661,7 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
   // data filtering for single days data
   app.post("/singleday/hvacSchneider7230Polling", (req, res) => {
       const { date} = req.body;
+      //console.log(date)
      
       const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) = '${date}' And totalApparentPower2>2000 `;
       chakradb.query(query, (error, results) => {
@@ -639,6 +672,60 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
         return res.json(results);
       });
     });
+
+    app.post("/filter/hvacSchneider7230Polling", (req, res) => {
+        const { date, endDate } = req.body;
+        const filterData=[]
+        console.log(date,endDate)
+      
+        let query;
+        if (endDate) {
+          query = `SELECT * FROM peakdemandHourly WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}'`;
+        } else {
+          query = `SELECT * FROM peakdemandHourly WHERE DATE(polledTime) = '${date}'`;
+        }
+      
+        con.query(query, (error, results) => {
+          if (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'An error occurred' });
+          }
+          console.log(results.length)
+          for(let i=0;i<results.length;i++){
+               const date = new Date(results[i].polledTime);
+               let selecteddate = date.toLocaleString();
+               let times=selecteddate.split(',')
+               filterData.push({"timestamp":times,"peakdemand":results[i].peakdemand})
+            
+          }
+
+          return res.json(filterData);
+        });
+      });
+
+
+      app.get("/peak/hvacSchneider7230Polling",async(req,res)=>{
+        con.query("select * from peakdemandHourly  where DATE(polledTime) = curdate() ",function(err,result,feilds){
+            const viewData=[]
+            if(err){
+                console.log(err)
+            }
+            else{
+                const response=(JSON.parse(JSON.stringify(result)))
+                for(let i=0;i<response.length;i++){
+                    let date=new Date(response[i].polledTime)
+                    let stringdate=date.toLocaleString()
+                    let splitDate=stringdate.split(',')
+                    viewData.push({"polledTime":splitDate,"peakdemand":response[i].peakdemand})
+
+
+                }
+                res.send(viewData)
+                console.log(response.length)
+            }
+        })
+        
+    })
     
      // wheeled in solar data filter according to datewise
 // data filtering for single days data
@@ -717,7 +804,21 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
           const minutes = date.getMinutes().toString().padStart(2, '0');
           // const seconds = date.getSeconds().toString().padStart(2, '0');
           const timestamp = `${hours}:${minutes}`;
-          //const timestamp = `${hours}`;
+
+          // Splitting the time into hours and minutes
+        var [converthours, convertminutes] = timestamp.split(":");
+
+        // Converting the hours and minutes to integers
+         parsehours = parseInt(converthours, 10);
+         parseminutes = parseInt(convertminutes, 10);
+
+     // Rounding off the time
+     if (parseminutes = 1) {
+      parsehours -= 1;
+        }
+
+// Formatting the rounded time
+var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
           return { timestamp, energy: decimalval,solarRadiation:radiation};
         });
         console.log(data);
