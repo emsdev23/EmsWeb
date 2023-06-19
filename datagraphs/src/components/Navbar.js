@@ -6,9 +6,10 @@ import { SidebarData } from './SidebarData';
 import SubMenu from './SubMenu';
 import { IconContext } from 'react-icons/lib';
 import React, { useState } from 'react';
+import IITMRP from '../images/iitmlogo.png'
 
 const Nav = styled.div`
-  background: #237030;
+  background: white;
   height: 80px;
   display: flex;
   justify-content: flex-start;
@@ -20,8 +21,9 @@ const NavIcon = styled(Link)`
   font-size: 2rem;
   height: 80px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
+  margin-left: auto; /* Align to the right end */
 `;
 
 const SidebarNav = styled.nav`
@@ -41,84 +43,54 @@ const SidebarWrap = styled.div`
   width: 100%;
 `;
 
-// const Sidebar = () => {
+
+ //moving side bar to right
+// const SidebarNav = styled.nav`
+//   background: #15171c;
+//   width: 250px;
+//   height: 100vh;
+//   display: flex;
+//   justify-content: center;
+//   position: fixed;
+//   top: 0;
+//   right: ${({ sidebar }) => (sidebar ? '0' : '-100%')}; /* set right to 0 */
+//   transition: 350ms;
+//   z-index: 10;
+// `;
+
+// const SidebarWrap = styled.div`
+//   width: 100%;
+//   margin-right: 0; /* remove the margin-right */
+// `;
 
 function Navbar() {
   const [sidebar, setSidebar] = useState(false);
 
   const showSidebar = () => setSidebar(!sidebar);
 
-  
   return (
-    <> 
-     <IconContext.Provider value={{ color: '#fff' }}>
-        <Nav class="row" style={{display: 'flex',alignitems: 'center',justifycontent: 'center',height:"100px"}}> 
+    <IconContext.Provider value={{ color: '#fff' }}>
+  <Nav class="row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: "100px" }}>
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start",  flexGrow: 1 }}>
+    <img src={IITMRP} alt='iitmrp' style={{ width: "120px", height: "110px" }} />
+    <h1 style={{ textAlign: "center", color: "black", flexGrow: 1 }}><b>IITMRP Energy Management System</b></h1>
+  </div>
+  <NavIcon to='#'>
+    <FaIcons.FaBars onClick={showSidebar} color='green' />
+  </NavIcon>
+</Nav>
+      <SidebarNav sidebar={sidebar}  style={{background:"green"}}>
+        <SidebarWrap>
           <NavIcon to='#'>
-            <FaIcons.FaBars onClick={showSidebar} />
-
-           
+            <AiIcons.AiOutlineClose onClick={showSidebar} />
           </NavIcon>
-          <div  style={{display: "flex", alignItems: "center", justifyContent: "center"}}> 
-          <img src='https://respark.iitm.ac.in/wp-content/uploads/2019/07/iitm-logo-cirle.png' alt='iitmrp' style={{width:"150px",height:"100px",marginLeft:"150px"}}/>
-          <h1 style={{marginLeft: "20px", textAlign: "center",fontSize:"45px",color:"white"}}> <b>IITMRP Energy Management System</b></h1>
-          </div>
-          
-        </Nav>
-        <SidebarNav sidebar={sidebar}>
-          <SidebarWrap>
-            <NavIcon to='#'>
-              <AiIcons.AiOutlineClose onClick={showSidebar} />
-           
-            </NavIcon>
-            {SidebarData.map((item, index) => {
-              return <SubMenu item={item} key={index} />;
-            })}
-          </SidebarWrap>
-        </SidebarNav>
-      </IconContext.Provider>
-    </>
-  
+          {SidebarData.map((item, index) => {
+            return <SubMenu item={item} key={index} />;
+          })}
+        </SidebarWrap>
+      </SidebarNav>
+    </IconContext.Provider>
   )
 }
 
-export default Navbar
-
-
-
-
-
-
-
-
-
-
-
-
-//       <nav class=" navbar bg-success text-white" style={{height:"100px",width:"100%"}}>
-//   <div class="container-fluid">
-//     <button class="btn btn-dark  " type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling" > <FaIcons.FaBars size={40} style={{color:"white"}}/> </button> 
-//     <h3 style={{color:"white",marginRight:"460px",justifyContent:"center"}}><img src='https://respark.iitm.ac.in/wp-content/uploads/2019/07/iitm-logo-cirle.png' alt='iitmrp' style={{width:"fit-contenet",height:"90px",justifyContent:'center'}}/><b>IITMRP Energy Management System</b></h3>
-//   </div>
-// </nav>
-
-
-// <div class="offcanvas offcanvas-start show text-bg-dark" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" >
-//   <div class="offcanvas-header">
-//     <button type="button" class="btn-close  " data-bs-dismiss="offcanvas" aria-label="Close" style={{color:"wheat"}} ><AiIcons.AiOutlineClose size={40} style={{color:"white" }}/></button>
-//   </div>
-//   <div class="offcanvas-body">
-//   <ul className='nav-menu-items' >
-//             {SidebarData.map((item, index) => {
-//               return (
-//                 <li key={index} className={item.cName}>
-//                   <Link to={item.path}>
-//                     {item.icon}
-//                     <span>{item.title}</span>
-//                   </Link>
-//                 </li>
-//               );
-//             })}
-//           </ul>
-//   </div>
-  
-// </div>
+export default Navbar;

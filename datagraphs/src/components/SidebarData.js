@@ -9,6 +9,10 @@ import ThermostatIcon from '@mui/icons-material/Thermostat';
 import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import ThermostatAutoIcon from '@mui/icons-material/ThermostatAuto';
 import * as SiIcons from 'react-icons/si'
+import * as GiIcons from  'react-icons/gi'
+import * as TbIcons from  'react-icons/tb'
+
+
 
 
 export const SidebarData = [
@@ -27,8 +31,18 @@ export const SidebarData = [
     subNav: [
       {
         title: 'Building consumption',
-        path: '/Analytics/peakgraph',
+        path: '/peakgraph',
         icon: <SiIcons.SiGoogleanalytics />
+      },
+      {
+        title: 'Wheeled In Solar',
+        path: '/Wheeledgraph',
+        icon: <GiIcons.GiSolarPower />
+      },
+      {
+        title: 'RoofTop Solar',
+        path: '/RoofTopSolar',
+        icon: <TbIcons.TbSolarPanel2 />
       },
       
     ]
