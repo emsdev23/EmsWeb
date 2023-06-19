@@ -28,6 +28,8 @@ import { useState,useEffect } from 'react';
 import swal from 'sweetalert';
 import Thermalcontrol from './pages/Thermalcontrol';
 import Peakdemandgraph from './pages/Peakdemandgraph';
+import WheeledInsolar from './pages/WheeledInsolar';
+import RooftopSolar from './pages/RooftopSolar';
 
 
 
@@ -152,6 +154,9 @@ function App() {
       <Route  path ='/Alerts/Thermalalers' element={<Thermalalers/>}/>
       <Route  path ='/Alerts/ChillerAlerts' element={<ChillerAlerts/>}/>
       <Route  path ='/peakgraph' element={<Peakdemandgraph/>}/>
+      <Route  path ='/Wheeledgraph' element={<WheeledInsolar/>}/>
+      <Route  path ='/RoofTopSolar' element={<RooftopSolar/>}/>
+      
       
 
       </Routes>
