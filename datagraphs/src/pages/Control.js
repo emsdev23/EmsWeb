@@ -83,7 +83,7 @@ function Control() {
   packSoc.push(batterydata[i].pack_usable_soc)
  
   if(batterydata[i].batteryStatus==="CHG"){
-    CHG.push((batterydata[i].chargingAVG).toFixed(2))
+    CHG.push((batterydata[i].chargingAVG))
     chgtime.push(batterydata[i].timestamp)
     currentStatus.push("Charging")
    

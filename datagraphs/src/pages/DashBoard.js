@@ -15,12 +15,14 @@ import {Pie} from 'react-chartjs-2';
 import * as BsIcons from 'react-icons/bs';
 import axios from 'axios';
 import ReactApexChart from 'react-apexcharts';
+import Chart from 'react-apexcharts';
 import { useState,useEffect } from 'react';
 import { batteryData } from './Apicalling';
 import CircularProgress from '@mui/material/CircularProgress';
 import Thermal from './Thermal';
 import ForestIcon from '@mui/icons-material/Forest';
 import { TiWeatherSnow } from "react-icons/ti";
+import { BsFillCircleFill } from "react-icons/bs";
 
 
 //import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
@@ -89,6 +91,9 @@ function DashBoard() {
 
 
   const [temp,setTemp]=useState(null)
+
+
+  const [avgMinpowerfactor,setAvgMinpowerfactor]=useState([])
   
  
   const linestate  = {
@@ -140,6 +145,7 @@ function DashBoard() {
   const energysaved = `http://${host}:5000/peaksavings`
   const chillerstatus = `http://${host}:5000/chillerstatusd`
   const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
+  const powerFactor= `http://${host}:5000/schneider7230readings`
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -277,7 +283,7 @@ function DashBoard() {
   }
  let gridunprocess='';
   for(let i=0;i<grid.length;i++){
-    gridunprocess=(grid[i].Energy)
+    gridunprocess=(grid[i].cumulative_energy)
 
   }
   console.log(grid)
@@ -291,6 +297,19 @@ function DashBoard() {
       console.log(err)
     })
   } 
+
+  // powerfactor 
+  const PowerFactor=()=>{
+    axios.get(powerFactor).then((res)=>{
+      const dataresponse=res.data
+      setAvgMinpowerfactor(dataresponse)
+     
+    }).catch((err)=>{
+      console.log(err)
+    })
+  }
+
+
 
   // piedata()
   //   batterydata()
@@ -314,6 +333,7 @@ function DashBoard() {
     acmeterenergyfunction()
     gridfunction()
     TempData()
+    PowerFactor()
 
     const interval = setInterval(() => {
      
@@ -325,6 +345,7 @@ function DashBoard() {
       acmeterenergyfunction();
       gridfunction();
       TempData()
+      PowerFactor()
       console.log("running every 5min ............")
   }, 5 * 60 * 1000);
 
@@ -345,6 +366,19 @@ function DashBoard() {
   console.log(acenergy)
   console.log(grid)
   console.log(battery)
+  console.log(avgMinpowerfactor)
+ let  minimum_powerfactor=""
+ let  average_powerfactor=""
+ for(let i=0;i<avgMinpowerfactor.length;i++){
+  minimum_powerfactor=(avgMinpowerfactor[i].minimum_powerfactor)
+  average_powerfactor=(avgMinpowerfactor[i].average_powerfactor)
+ }
+
+
+
+
+
+
 
 
 
@@ -644,6 +678,12 @@ console.log(totaldaysumvalue)
 
 
 
+
+
+
+
+
+
 // console.log(emptyvalue); // Output total sum
 
 
@@ -708,73 +748,74 @@ console.log(totaldaysumvalue)
 
 
       //-------------------battery calculation----------------------
-      const batteryStaus=[]
-      const currentupsStatus=[]
-      const timeStamp=[]
-      const Status=[]
-      const packSoc=[]
-      const batteryresultdata=[]
-
-      for(let i=0;i<battery.length;i+=60){
-        if(battery[i].batteryStatus==="IDLE"){
-          batteryStaus.push(0)
-          currentupsStatus.push(battery[i].batteryStatus)
-          const date = new Date(battery[i].timestamp);
-          let hours = date.getHours();
-          const minutes = date.getMinutes();
-          const ampm = hours >= 12 ? 'pm' : 'am';
-          hours = hours % 12;
-          hours = hours ? hours : 12; // the hour '0' should be '12'
-          const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
-          timeStamp.push(timeString)
-
-          Status.push(battery[i].batteryStatus)
-          packSoc.push(Math.trunc(battery[i].pack_usable_soc))
-          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":'0',"timeStamp":timeString})
-
-          
-
-        }
-        else if(battery[i].batteryStatus==="DCHG"){
-          batteryStaus.push(battery[i].dischargingAVG)
-          currentupsStatus.push(battery[i].batteryStatus)
-          const date = new Date(battery[i].timestamp);
-          let hours = date.getHours();
-          const minutes = date.getMinutes();
-          const ampm = hours >= 12 ? 'pm' : 'am';
-          hours = hours % 12;
-          hours = hours ? hours : 12; // the hour '0' should be '12'
-          const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
-          timeStamp.push(timeString)
-          Status.push(battery[i].batteryStatus)
-          packSoc.push(Math.trunc(battery[i].pack_usable_soc))
-          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toFixed(2),"timeStamp":timeString})
-        }
-        else if(battery[i].batteryStatus==="CHG"){
-          batteryStaus.push(battery[i].chargingAVG)
-          const date = new Date(battery[i].timestamp);
-          currentupsStatus.push(battery[i].batteryStatus)
-          let hours = date.getHours();
-          const minutes = date.getMinutes();
-          const ampm = hours >= 12 ? 'pm' : 'am';
-          hours = hours % 12;
-          hours = hours ? hours : 12; // the hour '0' should be '12'
-          const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
-          timeStamp.push(timeString)
-          Status.push(battery[i].batteryStatus)
-          packSoc.push(Math.trunc(battery[i].pack_usable_soc))
-          if (battery[i].chargingAVG !== null){
-          batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toFixed(2),"timeStamp":timeString})
+          //-------------------battery calculation----------------------
+          const batteryStaus=[]
+          const currentupsStatus=[]
+          const timeStamp=[]
+          const Status=[]
+          const packSoc=[]
+          const batteryresultdata=[]
+    
+          for(let i=0;i<battery.length;i+=60){
+            if(battery[i].batteryStatus==="IDLE"){
+              batteryStaus.push(0)
+              currentupsStatus.push(battery[i].batteryStatus)
+              const date = new Date(battery[i].timestamp);
+              let hours = date.getHours();
+              const minutes = date.getMinutes();
+              const ampm = hours >= 12 ? 'pm' : 'am';
+              hours = hours % 12;
+              hours = hours ? hours : 12; // the hour '0' should be '12'
+              const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
+              timeStamp.push(timeString)
+    
+              Status.push(battery[i].batteryStatus)
+              packSoc.push(Math.trunc(battery[i].pack_usable_soc))
+              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":'0',"timeStamp":timeString})
+    
+             
+    
+            }
+            else if(battery[i].batteryStatus==="DCHG"){
+              batteryStaus.push(battery[i].dischargingAVG)
+              currentupsStatus.push(battery[i].batteryStatus)
+              const date = new Date(battery[i].timestamp);
+              let hours = date.getHours();
+              const minutes = date.getMinutes();
+              const ampm = hours >= 12 ? 'pm' : 'am';
+              hours = hours % 12;
+              hours = hours ? hours : 12; // the hour '0' should be '12'
+              const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
+              timeStamp.push(timeString)
+              Status.push(battery[i].batteryStatus)
+              packSoc.push(Math.trunc(battery[i].pack_usable_soc))
+              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toFixed(2),"timeStamp":timeString})
+            }
+            else if(battery[i].batteryStatus==="CHG"){
+              batteryStaus.push(battery[i].chargingAVG)
+              const date = new Date(battery[i].timestamp);
+              currentupsStatus.push(battery[i].batteryStatus)
+              let hours = date.getHours();
+              const minutes = date.getMinutes();
+              const ampm = hours >= 12 ? 'pm' : 'am';
+              hours = hours % 12;
+              hours = hours ? hours : 12; // the hour '0' should be '12'
+              const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
+              timeStamp.push(timeString)
+              Status.push(battery[i].batteryStatus)
+              packSoc.push(Math.trunc(battery[i].pack_usable_soc))
+              if (battery[i].chargingAVG !== null){
+              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toFixed(2),"timeStamp":timeString})
+              }
+            }
+    
           }
-        }
-
-      }
-      console.log(batteryStaus)
-      
-      console.log(timeStamp)
-      var time=timeStamp.map((res)=>res.split(",")[1])
-      console.log(time)
-      console.log(currentupsStatus)
+          console.log(batteryStaus)
+         
+          console.log(timeStamp)
+          var time=timeStamp.map((res)=>res.split(",")[1])
+          console.log(time)
+          console.log(currentupsStatus)
 
     //   var apexcharts = {
     //     series: [{ 
@@ -841,143 +882,79 @@ console.log(totaldaysumvalue)
     //   };
 
     var apexcharts = {
-      series: [{ 
-        name:"cumilative energy",
-        data: batteryresultdata.map((val)=>(val.batteryEnergy))
-      }],
-    
-      options: {
-        chart: {
-          type: 'area',
-          height: 350
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        colors: ['#152138', '	#00FF00'], // Red for positive values, green for negative values
-        // colors: ({ value }) => {
-        //   return value < 0 ? ['#00ff00'] : ['#ff0000'];
-        // },
-        yaxis: {
-          title: {
-            text: 'DCHG (-) | CHG (+) Energy ',
-          }
-        },
-        xaxis: {
-          categories: batteryresultdata.map((time) => time.timeStamp),
-          labels: {
-            style: {
-              colors: '#5A5A5A' // set the x-axis label color to red
-            }
-          },
-          title : {text:"Time in Hour"},
-        },
-        fill: {
-          opacity: 0.5,
-          type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.7,
-            opacityTo: 0.9,
-            stops: [0, 100]
-          },
-        
-          colors: ['#0000FF']
-        },
-        // fill:{
-        //   target:"origin",
-        //   below:'#00FF7F',
-        //   above:'#20B2AA'
-        // },
-        tooltip: {
-          enabled: true,
-          theme: 'dark',
-          style: {
-            background: '#222',
-            color: '#fff'
-          }
-        },
-        grid: {
-          yaxis: {
-            lines: {
-              offsetX: -30
-            }
-          },
-          padding: {
-            left: 20
-          }
-        },
-        // markers: {
-        //   fillColor: '#e3e3e3',
-        //   strokeColor: '#fff',
-        //   size: 3,
-        //   shape: "circle" 
-        // },
-      }
-    };
+      series: [{
+  name: "cumulative energy",
+  data: batteryresultdata.map((val) => (val.batteryEnergy))
+}],
 
-    // const apexcharts = {
-          
-    //   series: [{
-    //     name: 'Battery Status',
-    //     data: batteryStaus.map((val)=>val)
-    //   }],
-    //   options: {
-    //     chart: {
-    //       type: 'bar',
-    //       height: 350
-    //     },
-    //     plotOptions: {
-    //       bar: {
-    //         colors: {
-    //           ranges: [{
-    //             from: 0,
-    //             to: 100,
-    //             color: '#008000'
-    //           }, {
-    //             from: -0,
-    //             to: -100,
-    //             color: '#FF0000'
-    //           }]
-    //         },
-    //         columnWidth: '80%',
-    //       }
-    //     },
-    //     dataLabels: {
-    //       enabled: false,
-    //     },
-    //     yaxis: {
-    //       title: {
-    //         text: 'Growth',
-    //       },
-    //       labels: {
-    //         formatter: function (y) {
-    //           return y.toFixed(0) + "%";
-    //         }
-    //       }
-    //     },
-    //     xaxis: {
-    //       //type: 'datetime',
-    //       categories:time.map((time) => time),
-    //       labels: {
-    //         rotate: -90
-    //       }
-    //     },
-    //       tooltip: {
-    //           enabled: true,
-    //           theme: 'dark',
-    //           style: {
-    //             background: '#222',
-    //             color: '#fff'
-    //           }
-    //         },
-    //   },
-    
-    
-    // };
+options: {
+  chart: {
+    type: 'bar',
+    height: 350
+  },
+  dataLabels: {
+    enabled: false
+  },
+  stroke: {
+    curve: 'straight'
+  },
+  yaxis: {
+    title: {
+      text: 'discharge(-) , charge(+)',
+    }
+  },
+  xaxis: {
+    categories: batteryresultdata.map((time) => time.timeStamp),
+    labels: {
+      style: {
+        colors: '#5A5A5A' // set the x-axis label color to red
+      }
+    },
+    title: { text: "Time in Hour" },
+  },
+  fill: {
+    opacity: 0.5,
+   
+    gradient: {
+      shadeIntensity: 1,
+      opacityFrom: 0.7,
+      opacityTo: 0.9,
+      stops: [0, 100]
+    },
+  },
+  tooltip: {
+    enabled: true,
+    theme: 'dark',
+    style: {
+      background: '#222',
+      color: '#fff'
+    }
+  },
+  grid: {
+    yaxis: {
+      lines: {
+        offsetX: -30
+      }
+    },
+    padding: {
+      left: 20
+    }
+  },
+  colors: ['#152138'], // Default color for all bars
+  plotOptions: {
+    bar: {
+      colors: {
+        ranges: [{
+          from: Number.NEGATIVE_INFINITY,
+          to: 0,
+          color: '#00FF00' // Green color for negative values
+        }]
+      }
+    }
+  }
+}
+};
+
 
 
     //co2 reduction calculation
@@ -999,66 +976,116 @@ console.log(totaldaysumvalue)
 
 
 
-  const state = {
-          
-    series: values.map((data)=>data),
-            options: {
-              chart: {
-                width: '100%',
-                height: '100%' ,
-                type: 'pie',
+    const state = {
+      series: values.map((data) => data),
+      options: {
+        chart: {
+          width: '100%',
+          height: '100%',
+          type: 'donut',
+        },
+        zoom: {
+          enabled: true,
+        },
+        toolbar: {
+          show: true,
+        },
+        labels: ['Grid', 'Rooftop', 'wheeled_in_solar', 'Diesel'],
+        // title: {
+        //   text: 'Fruit Sales',
+        //   align: 'center',
+        //   style: {
+        //     fontSize: '20px',
+        //     fontWeight: 'bold',
+        //   }
+        // },
+        legend: {
+          show: false,
+          position: 'right',
+          labels: {
+            colors: 'black',
+            useSeriesColors: false,
+            horizontalAlign: 'left',
+            fontSize: '27px',
+            markers: {
+              fillColors: ['#1fc270', '#FFAE42', '#FF5349', '#546E7A']
+            }
+          }
+        },
+        plotOptions: {
+          pie: {
+            customScale: 0.9, // adjust the size of the donut circle
+            dataLabels: {
+              enabled: true,
+              position: 'center',
+              offsetX: 0,
+              offsetY: 0,
+              style: {
+                fontSize: '20px',
+                fontWeight: 'bold',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                colors: ['black'],
+                textAnchor: 'middle',
               },
-              zoom: {
-                enabled: true
-              },
-              toolbar: {
-                show: true
-              },
-              labels: ["Grid", "Rooftop","wheeled_in_solar","Diesel"],
-
-              legend:{
-                labels:{
-                  fontSize:"20px"
-                },
-      
-              },
-              //"wheeled_in_solar"
-              
-              plotOptions: {
-                pie: {
-                  dataLabels: {
-                    offset: -5
-                  }
-                }
-              },
-              // title: {
-              //   text: "Monochrome Pie"
-              // },
-              // dataLabels: {
-              //   formatter(val, opts) {
-              //     const name = opts.w.globals.labels[opts.seriesIndex]
-              //     return [name, val.toFixed(1) + '%']
-              //   }
-              // },
-              colors: ['#1fc270', '#FFAE42','#FF5349', '#546E7A'],
-              //
-              legend: {
-                show: true,
-                position:"top",
-                labels: {
-                  colors: "black",
-                  useSeriesColors: false
-              },
-              fontSize: '17px',
-              fontFamily: 'Helvetica, Arial',
-              fontWeight: 400,
-              
-
+              formatter: function(val) {
+                return '<tspan dy="0">' + state.options.title.text + '</tspan>';
               }
-            },
+            }
+          },
+        },      
+        colors: ['#1fc270', '#FFAE42', '#FF5349', '#546E7A'],
+      },
+    };
 
-  }
 
+  const gaugeChartData = {
+    series: [Math.trunc(prpercentage)], // Specify the value for the gauge chart
+  };
+  
+ var gaugeChartOptions = {
+    chart: {
+    height: 350,
+    type: 'radialBar',
+    offsetY: -10
+  },
+  plotOptions: {
+    radialBar: {
+      startAngle: -135,
+      endAngle: 135,
+      dataLabels: {
+        name: {
+          fontSize: '16px',
+          color: undefined,
+          offsetY: 120
+        },
+        value: {
+          offsetY: 76,
+          fontSize: '22px',
+          color: undefined,
+          formatter: function (val) {
+            return val + "%";
+          }
+        }
+      }
+    }
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+        shade: 'dark',
+        shadeIntensity: 0.15,
+        inverseColors: false,
+        opacityFrom: 1,
+        opacityTo: 1,
+        stops: [0, 50, 65, 91]
+    },
+  },
+  stroke: {
+    dashArray: 4
+  },
+  labels: ['Median Ratio'],
+  colors: ['#0000FF'],
+  };
   
 
 
@@ -1339,55 +1366,180 @@ console.log(totaldaysumvalue)
   // }).replace('/', '-');
 const currentdate=local.split(",")[0]
   
-  
+const calculatedHeight = `calc(100vh - 100px)`;
+
+
 
       
 
   return (
-    <div   className="main"  style={{ margin:'30px'}} >
-  
+    <div   className="main"  >
+  <hr style={{color:"green",border:"1px solid green"}}/>
   <div class="row"  >
-  <div class="col-sm-4 mb-3 mb-sm-0">
-    <div class="card" style={{width:"100%",marginTop:"5%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}} >
-      <div class="card-body" >
-        <div >  
-        <h5 class="card-title" style={{textAlign:"left",color:"black"}}><b>Building Consumption</b>  </h5>  
-        </div>
-        
-       
-        <hr/>
-    {/* <div></div> */}
-    <p style={{textAlign:"end",color:'black'}}>{currentdate}</p>
-<ReactApexChart options={state.options} series={state.series} type="pie" width={'100%'}/>
-{/* <br/> */}
-<table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
-  <tr>
-    <td style={{color:"#5e5d5c"}}><b>Wheeled in solar:</b></td>
-    <td style={{color:"black", textAlign: 'right'}}>{Math.trunc(totalsolargeneration)}</td>
-    <td style={{width: '30px'}}></td>
-    <td style={{color:"#5e5d5c"}}><b>Diesel:</b></td>
-    <td style={{color:"black", textAlign: 'right'}}>{0}</td>
-  </tr>
-  <tr>
-    <td style={{color:"#5e5d5c"}}><b>Rooftop:</b></td>
-    <td style={{color:"black", textAlign: 'right'}}>{Math.trunc(totalrooftopgeneration)}</td>
-    <td style={{width: '30px'}}></td>
-    <td style={{color:"#5e5d5c"}}><b>Grid:</b></td>
-    <td style={{color:"black", textAlign: 'right'}}>{Math.round(gridunprocess)}</td>
-  </tr>
-</table>
-    
+ 
+  <div class="col-sm-12 mb-3 mb-sm-0">
+  <div class="container-fluid">
+  <div class="card1" style={{width: "100%", height: calculatedHeight,justifyContent: 'center', marginTop: 0, background: 'white', color: "white"}} >
+<div   class="card-body d-flex flex-column justify-content-center">
+ 
+{/* <div></div> */}
+<div class="row" >
+<h3 style={{textAlign:"end",color:"black",textAlign:"center"}}><b>{currentdate}</b></h3>
+<div class="col-sm-6 mb-3 mb-sm-0"  >
+<div  style={{ position: 'relative' }}>
+
+        <ReactApexChart options={state.options} series={state.series} type="donut" width={'100%'} height={'450px'}  />
+        <h5 class="card-title" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'black', zIndex: 1 }}><b>Building Consumption</b></h5>
+      
       </div>
-    </div>
+{/* <div class="row" >
+
+</div> */}
+</div>
+<div  class="col-sm-6 mb-3 mb-sm-0" >
+<div style={{marginTop:"20px"}}> 
+<div class="data-container-legends">
+    <span>
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#1fc270'/> <b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Grid</b> </span>
+    {/* <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Grid</b></span>    */}
+    </span>
+    <span>
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FFAE42'/><b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Rooftop</b> </span>
+
+    </span>
+    <span>
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FF5349'/><b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Wheeledinsolar</b> </span>  
+
+    </span>
+    <span>
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#546E7A'/><b  style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Diesel</b> </span>  
+
+    </span>
   </div>
 
-  <div class="col-sm-4" >
-    <div class="card" style={{width:"auto",height:"96%",marginTop:"5%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+
+{/* <span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#1fc270'/></b> </span> <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Grid</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
+<span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#FFAE42'/></b> </span><span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Rooftop</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
+<span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#FF5349'/></b> </span>  <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Wheeledinsolar</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
+<span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#546E7A'/></b> </span>  <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Diesel</b></span> &nbsp; &nbsp; &nbsp; &nbsp;  */}
+</div>
+<br/>
+  <br/>
+  <br/>
+  <div class="data-container" style={{marginRight:"25%"}}>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "25px",}}>Wheeled in solar:</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
+        {Math.trunc(totalsolargeneration)}
+      </span>
+    </span>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "25px"}}>Diesel:</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
+        {0}
+      </span>
+    </span>
+  </div>
+
+  <br/>
+
+  <div class="data-container"style={{ marginTop:"10px",marginRight:"25%"}}>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "25px"}}>Rooftop:</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
+        {Math.trunc(totalrooftopgeneration)}
+      </span>
+    </span>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "25px"}}>Grid:</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
+        {Math.round(gridunprocess)}
+      </span>
+    </span>
+  </div>
+<br/>
+<div class="data-container"style={{ marginTop:"10px"}}>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "22px"}}>Power Factor(Min):</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
+      {minimum_powerfactor}
+      </span>
+    </span>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "22px"}}>Power Factor(Avg):</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px"}}>
+      {average_powerfactor}
+      </span>
+    </span>
+  </div>
+
+
+<div>
+{/* <table> 
+  <tr> 
+  <td style={{ color: '#5e5d5c'}}><h5><b style={{fontSize:"22px"}}>Min_powerfactor:</b></h5></td>
+    <td style={{ color: 'black', textAlign: 'right' }}><h4>{minimum_powerfactor}</h4></td>
+    <td style={{ width: '30px' }}></td>
+    <td>   </td>
+     <td>  </td>
+    <td style={{ color: '#5e5d5c'}}><h5><b style={{fontSize:"22px"}}>Avg_powerfactor:</b></h5></td>
+    <td style={{ color: 'black', textAlign: 'right' }}><h4>{average_powerfactor}</h4></td>
+   
+  </tr>
+  
+</table> */}
+
+</div>
+<br/>
+<div style={{ color: 'black', textAlign: 'right',justifyContent:"flex-end",justifyItems:"baseline" }}>
+<Link to='/peakgraph'>
+<button className="btn btn-primary">Analytics</button>
+</Link>
+</div>
+
+</div>
+
+
+</div>
+
+
+</div>
+</div>
+</div>
+  
+
+ 
+  </div>
+
+  <div class="col-sm-4" style={{border: '1px solid red top bottom left'}} >
+    <div class="card" style={{width:"auto",height:"90%",marginTop:"20%",background:'white',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'100px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> 
-        <hr/>
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
-        <GaugeChart 
+        <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
+        <h1 style={{fontSize:"150px",textAlign:"center",color:"tomato",marginTop:"30px",height:"200px"}}> 
+         {Math.trunc(wheeledinsolarprpercentage)}%
+         <br></br>
+         <hr style={{color:"green",border:"1px solid gray"}}/>
+         </h1>
+         
+        
+        </h5> 
+
+        
+       <br/>
+
+        {/* <GaugeChart 
           id="gauge-chart5"
           nrOfLevels={10}
           arcsLength={[0.3, 0.3, 0.3,0.3,0.3]}
@@ -1403,24 +1555,24 @@ const currentdate=local.split(",")[0]
           // style={{width:"fit-content",height:"100",alignItems:"center"}}
           // width={150}
           
-        />
-        <br/>
-        <br/>
-        <br/>
-        <br/>
+        /> */}
         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Generation (kWh):</b></td>
     <td><span style={{color:"black"}}>{Math.trunc(totalsolargeneration)}</span></td>
   </tr>
+
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Performance %:</b></td>
     <td><span style={{color:"black"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span></td>
   </tr>
+
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Specific yield (kWh/kWp):</b></td>
     <td><span style={{color:"black"}}>{WISspecificyeild}</span></td>
   </tr>
+
+
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Irradiation (kWh/m2):</b></td>
     <td><span style={{color:"black"}}>{(totalwmsirradiation/60000).toFixed(2)}</span></td>
@@ -1433,40 +1585,43 @@ const currentdate=local.split(",")[0]
   </div>
 
 
-  <div class="col-sm-4" style={{marginTop:"1.75%"}}>
-    <div class="card"  style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+  <div class="col-sm-4" >
+  <div class="card" style={{width:"auto",height:"90%",marginTop:"20%",background:'white',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5>
-        <hr/>
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
-        <GaugeChart 
-           id="gauge-chart5"
-          nrOfLevels={10}
-          colors={["#FF0000","#FF4500","#f9bd00","#9bf400","#008000"]}
-          arcsLength={[0.3, 0.3, 0.3,0.3,0.3]}
-          arcWidth={0.3}
-          percent={Math.trunc(prpercentage)/100}
-          needleColor="black"
-          textColor="black"
-          style={{width:"100",height:"100",alignItems:"center"}}
-          
-        />
+        {/* <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> */}
+        {/* <Chart
+        options={gaugeChartOptions}
+        series={gaugeChartData.series}
+        type="radialBar"
+        height={350}
+      /> */}
+      <h5 class="card-title" style={{color:"black"}}><b>Rooftop Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
+        <h1 style={{fontSize:"150px",textAlign:"center",color:"brown",marginTop:"30px",height:"200px"}}> 
+         {Math.trunc(prpercentage)}%
+         <br></br>
+         <hr style={{color:"green",border:"1px solid gray"}}/>
+         </h1>
+         
+        
+        </h5> 
         <br/>
-        <br/>
-        <br/>
+      
         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Generation (kWh):</b></td>
     <td><span style={{color:"black"}}>{Math.trunc(totalrooftopgeneration)}</span></td>
   </tr>
+
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Performance %:</b></td>
     <td><span style={{color:"black"}}>{Math.trunc(prpercentage)}%</span></td>
   </tr>
+
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Specific yield (kWh/kWp):</b></td>
     <td><span style={{color:"black"}}>{RTSspecificyeild}</span></td>
   </tr>
+ 
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Irradiation (kWh/m2):</b></td>
     <td><span style={{color:"black"}}>{(totalsensordata/4000).toFixed(2)}</span></td>
@@ -1480,8 +1635,8 @@ const currentdate=local.split(",")[0]
   
 
 
-  <div class="col-sm-4" style={{marginTop:"2.25%"}}>
-    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+  <div class="col-sm-4" >
+    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white",marginTop:"20%"}}>
       <div class="card-body">
       <h5 class="card-title"> <b style={{color:"black"}}>Thermal Storage</b></h5> 
       {/*<span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/>*/}
@@ -1505,7 +1660,7 @@ const currentdate=local.split(",")[0]
     </div>
   </div>
 
-  <div class="col-sm-4" style={{marginTop:"2.25%" }}>
+  <div class="col-sm-4" style={{marginTop:"5%" }}>
 <div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
   <div class="card-body">
   <h5 class="card-title"><b style={{color:'black'}}> Chiller Status</b><span style={{color:"black",marginLeft:'100px'}}></span></h5> 
@@ -1565,7 +1720,7 @@ const currentdate=local.split(",")[0]
 
   
 
-  <div class="col-sm-4" style={{marginTop:"2.25%"}}>
+  <div class="col-sm-4" style={{marginTop:"5%"}}>
     <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
       <div class="card-body">
       <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> 
@@ -1577,7 +1732,7 @@ const currentdate=local.split(",")[0]
         <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
         <div id="chart2"> 
    {
-      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="area" height='270px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="bar" height='270px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
    }
@@ -1663,7 +1818,7 @@ const currentdate=local.split(",")[0]
   </div>
    
   <div class="col-sm-4">
-    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"6.2%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"30%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
       <div class="card-body">
         <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>CO<sub>2</sub> Reduction</b></h4>
         <hr/>
@@ -1723,28 +1878,27 @@ const currentdate=local.split(",")[0]
   <div class="col-sm-4"  style={{marginTop:"2.25%",scrollpaddingbottom: '20px'}}>
     <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title"><b style={{color:'black'}}> Wheeled In Wind</b> <span style={{color:"black",marginLeft:'100px' }}>Status:</span><BsIcons.BsBatteryFull color="gray" fontSize="1.5em"/></h5>
+      <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Power Factor</b>  </h5>
         <hr/>
-        <GaugeChart 
-          id="gauge-chart3"
-          nrOfLevels={12}
-          colors={["gray"]}
-          arcWidth={0.3}
-          percent={0}
-          textColor={'black'}
-          style={{width:"fit-content",height:"100",justifyItems:"center"}}
-          
-        />
-        <div class="card-text"style={{color:"black",font:"icon",fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-           Generation(kWh):0
-           <br/>
-           Wind Speed:0
-        </div>
+        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto',marginTop:"30px"}}>
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>average_powerfactor (kWh):</b></td>
+    <td><span style={{color:"black"}}></span></td>
+  </tr>
+  <br/>
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>minimum_powerfactor:</b></td>
+    <td><span style={{color:"black"}}></span></td>
+{/*    
+    {avgMinpowerfactor[0].minimum_powerfactor} */}
+  </tr>
+  </table>
   
       </div>
     </div>
   </div>
 </div>
+
 
 
     
