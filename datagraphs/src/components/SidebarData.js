@@ -46,23 +46,22 @@ export const SidebarData = [
       },
       
     ]
-  },
-  {
-    title: 'Alert Logs',
-    path: '/Alertlogs',
-    icon: <GoIcons.GoAlert />,
-    cName: 'nav-text'
-  },
-  {
-    title: 'Active Alerts',
-    // path: '/Alerts',
+  },{
+    title: 'Alerts',
+    //path: '/Alertlogs',
     icon: <GoIcons.GoAlert />,
     cName: 'nav-text',
-    subNav: [
+    subNav:[
+      {
+        title: 'Alert Logs',
+        path: '/Alertlogs',
+        icon: <GoIcons.GoAlert />,
+        cName: 'nav-text'
+      },
       {
         title: 'Building consumption',
         path: '/Alerts/Peakdemand',
-        icon: <BatteryAlertIcon />
+        icon: <BatteryAlertIcon />,
       },
       {
         title: 'Chillers',
@@ -74,8 +73,36 @@ export const SidebarData = [
         path: '/Alerts/Thermalalers',
         icon: <ThermostatIcon />
       }
-    ]
+      
+    ],
+    
   },
+  // {
+  //   title: 'Active Alerts',
+  //   // path: '/Alerts',
+  //   icon: <GoIcons.GoAlert />,
+  //   cName: 'nav-text',
+  //   subNav: [
+  //     {
+  //       title: 'Building consumption',
+  //       path: '/Alerts/Peakdemand',
+  //       icon: <BatteryAlertIcon />
+  //     },
+  //     {
+  //       title: 'Chillers',
+  //       path: '/Alerts/ChillerAlerts',
+  //       icon: <SevereColdIcon />
+  //     },
+  //     {
+  //       title: 'Thermal',
+  //       path: '/Alerts/Thermalalers',
+  //       icon: <ThermostatIcon />
+  //     }
+  //   ]
+  // },
+  
+
+  
   {
     title: 'Controls',
     // path: '/Control',
