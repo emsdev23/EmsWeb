@@ -22,12 +22,12 @@ function RooftopSolar() {
         event.preventDefault();
         try {
           const formattedDate = selectedDate.toISOString().substring(0, 10);
-          const response = await axios.post('http://localhost:5000/roofTopHourly', { date: formattedDate });
+          const response = await axios.post('http://121.242.232.211:5000/roofTopHourly', { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
         }
-      }; 
+      };
 
       console.log(singledaydata)
       var apexcharts2 = {
@@ -39,9 +39,9 @@ function RooftopSolar() {
           name:"solar_radiation",
           data: singledaydata.map((val)=>(val.solarRadiation))
         }
-      
+     
       ],
-      
+     
         options: {
           chart: {
             type: 'area'
@@ -146,11 +146,11 @@ function RooftopSolar() {
           //   shape: "circle"
           // },
         }
-    } 
+    }
   return (
     <div>
         <div>
-      <div> 
+      <div>
       <h4 style={{textAlign:'center',marginTop:"15px"}}><b>RoofTop Solar </b></h4>
       </div>
        <form onSubmit={handlesingledaySubmit}  style={{border:'1px solid black'}} >
@@ -164,7 +164,7 @@ function RooftopSolar() {
           <h5 style={{color:"brown"}}><b>Select Date </b></h5>:<DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
         </label>
       </div>
-      
+     
     </div>
   </div>
 

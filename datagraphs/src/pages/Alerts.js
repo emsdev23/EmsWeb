@@ -1,12 +1,36 @@
 import React from 'react'
 import Table from 'react-bootstrap/Table';
 import Dropdown from 'react-bootstrap/Dropdown';
+import axios from 'axios';
+import { useState,useEffect } from 'react';
 
 function Alerts() {
+  
+const host = "121.242.232.211"
+const [alerts,setAlerts]=useState([])
+
+  const AlertsData=()=>{
+    axios.get(`http://${host}:5000/Alert/Logs`).then((res)=>{
+      const dataResponse=res.data
+      setAlerts(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
+  useEffect(()=>{
+    AlertsData()
+  },[])
+console.log(alerts)
+
+
+
   return (
-    <div>
-      <div style={{display: "flex",
-  alignitems: "flex-right"}}> 
+    <div> 
+    <div >
+        <h1 style={{textAlign:'center',marginTop:"30px"}}><b>Alert Logs</b></h1>
+      </div>
       {/* <Dropdown >
       <Dropdown.Toggle variant="warning" id="dropdown-basic" style={{marginTop:"30px",width:"300px"}} >
         <b> Active Alerts </b>
@@ -18,38 +42,33 @@ function Alerts() {
         <Dropdown.Item href="/Thermalalers">Thermal</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown> */}
-      </div>
+  
      
-    <Table striped bordered hover variant="dark"  style={{marginTop:"50px"}}>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>System Name</th>
-          <th>Alert</th>
-          <th>Time</th>
-          <th>Severity</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>13/4/2023</td>
-          <td>Chiller</td>
-          <td>Common Header Outlet Temparature limit has crossed 10°C</td>
-          <td> 9:36:40 am</td>
-          <td>High</td>
-          <td>Mail sent</td>
-        </tr>
-        <tr>
-          <td>13/4/2023</td>
-          <td>Chiller</td>
-          <td>Common Header Outlet Temparature limit has crossed 10°C</td>
-          <td>10:46:40 am</td>
-          <td>High</td>
-          <td>Mail sent</td>
-        </tr>
-      </tbody>
-    </Table>
+      <Table striped bordered hover variant="dark" style={{ marginTop: "50px" }}>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>System Name</th>
+      <th>Alert</th>
+      <th>Time</th>
+      <th>Severity</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {alerts.map((data) => (
+      <tr key={data.id}>
+        <td>{data.alerttimereceived[0]}</td>
+        <td>{data.systemName}</td>
+        <td>{data.alert}</td>
+        <td>{data.alerttimereceived[1]}</td>
+        <td>{data.severity}</td>
+        <td>{data.action}</td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
 
      
     </div>

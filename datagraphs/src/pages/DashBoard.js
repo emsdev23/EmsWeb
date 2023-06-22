@@ -61,7 +61,7 @@ ChartJS.register(
 // ChartJS.register(ArcElement, Tooltip, Legend);
 
 
-const host = "localhost"
+const host = "121.242.232.211"
 
 
 function DashBoard() {
@@ -283,7 +283,7 @@ function DashBoard() {
   }
  let gridunprocess='';
   for(let i=0;i<grid.length;i++){
-    gridunprocess=(grid[i].cumulative_energy)
+    gridunprocess=(grid[i].Energy)
 
   }
   console.log(grid)
@@ -747,7 +747,7 @@ console.log(totaldaysumvalue)
 
 
 
-      //-------------------battery calculation----------------------
+       //-------------------battery calculation----------------------
           //-------------------battery calculation----------------------
           const batteryStaus=[]
           const currentupsStatus=[]
@@ -755,7 +755,7 @@ console.log(totaldaysumvalue)
           const Status=[]
           const packSoc=[]
           const batteryresultdata=[]
-    
+   
           for(let i=0;i<battery.length;i+=60){
             if(battery[i].batteryStatus==="IDLE"){
               batteryStaus.push(0)
@@ -768,13 +768,13 @@ console.log(totaldaysumvalue)
               hours = hours ? hours : 12; // the hour '0' should be '12'
               const timeString = hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ' ' + ampm;
               timeStamp.push(timeString)
-    
+   
               Status.push(battery[i].batteryStatus)
               packSoc.push(Math.trunc(battery[i].pack_usable_soc))
               batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":'0',"timeStamp":timeString})
-    
+   
              
-    
+   
             }
             else if(battery[i].batteryStatus==="DCHG"){
               batteryStaus.push(battery[i].dischargingAVG)
@@ -789,7 +789,7 @@ console.log(totaldaysumvalue)
               timeStamp.push(timeString)
               Status.push(battery[i].batteryStatus)
               packSoc.push(Math.trunc(battery[i].pack_usable_soc))
-              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].dischargingAVG).toFixed(2),"timeStamp":timeString})
+              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":Math.trunc(battery[i].dischargingAVG),"timeStamp":timeString})
             }
             else if(battery[i].batteryStatus==="CHG"){
               batteryStaus.push(battery[i].chargingAVG)
@@ -805,10 +805,10 @@ console.log(totaldaysumvalue)
               Status.push(battery[i].batteryStatus)
               packSoc.push(Math.trunc(battery[i].pack_usable_soc))
               if (battery[i].chargingAVG !== null){
-              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":(battery[i].chargingAVG).toFixed(2),"timeStamp":timeString})
+              batteryresultdata.push({"batteryStatus":battery[i].batteryStatus,"batteryEnergy":Math.trunc(battery[i].chargingAVG),"timeStamp":timeString})
               }
             }
-    
+   
           }
           console.log(batteryStaus)
          
@@ -881,10 +881,12 @@ console.log(totaldaysumvalue)
     // }
     //   };
 
+      
+
     var apexcharts = {
       series: [{
   name: "cumulative energy",
-  data: batteryresultdata.map((val) => (val.batteryEnergy))
+  data: batteryresultdata.map((val) => (Math.trunc(val.batteryEnergy)))
 }],
 
 options: {
@@ -1024,7 +1026,7 @@ options: {
                 fontSize: '20px',
                 fontWeight: 'bold',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                colors: ['black'],
+                fill: 'black', // Set the text color to black
                 textAnchor: 'middle',
               },
               formatter: function(val) {
@@ -1198,140 +1200,6 @@ options: {
     ]
   }
 
-  const batterystate = {
-
-
-
-
-    series: [{
-      name: 'chargingenergy',
-      data:battery.map((val)=>val),
-    }, {
-      name: 'dischargingenergy',
-      data: battery.map((val)=>val.discharging)
-    }],
-    options: {
-      chart: {
-        height: 350,
-        type: 'area',
-        fill:true,
-        zoom: {
-          enabled: true
-        }
-      },
-      fill: {
-        // colors: ['#008FFB', '#00E396'],
-        type: "gradient",
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.7,
-          opacityTo: 0.9,
-          stops: [0, 90, 100]
-        },
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: 'smooth'
-        
-      },
-      
-      markers: {
-        size: [4, 4]
-      },
-      xaxis: {
-        // type: 'datetime',
-        categories: battery.map((time)=>time.hour )
-      },
-      tooltip: {
-        x: {
-          format: 'HH'
-        },
-        theme: 'dark',
-        style: {
-          background: '#222',
-          color: '#fff'
-        }
-      },
-    },
-          
-          
-  //     series: [{
-  //         name: "chargingenergy",
-  //         data:battery.map((val)=>val.chargingenergy),
-  //         yaxis: 'yaxis'
-  //     },
-  //   {
-  //     name: "discharging",
-  //     data:battery.map((val)=>val.discharging),
-  //     yaxis: 'yaxis2'
-  //   },
-    
-  // ],
-  //     options: {
-  //       chart: {
-  //         height: 350,
-  //         type: 'area',
-  //         zoom: {
-  //           enabled: true
-  //         }
-  //       },
-  //       dataLabels: {
-  //         enabled: false
-  //       },
-  //       stroke: {
-  //         curve: 'straight'
-  //       },
-        
-  //       labels: battery.map((time)=>time.hour ),
-  //       colors: ['#8B0000', '#008FFB'],
-  //       // title: {
-  //       //   text: 'Product Trends by Month',
-  //       //   align: 'left'
-  //       // },
-  //       // grid: {
-  //       //   row: {
-  //       //     colors: ['#f3f3f3'], // takes an array which will be repeated on columns
-  //       //     opacity: 0.5
-  //       //   },
-  //       // },
-  //       legend:{
-  //         show: true,
-  //         position: 'bottom',
-  //       },
-  //       xaxis: {
-  //         categories: battery.map((time)=>time.hour )
-  //       }
-  //     },
-  //     yaxis: [
-  //       {
-  //         id: 'yaxis',
-  //         title: {
-  //           text: 'Y Axis 1'
-  //         }
-  //       },
-  //       {
-  //         id: 'yaxis2',
-  //         opposite: true,
-  //         title: {
-  //           text: 'Y Axis 2'
-  //         }
-  //       }
-  //     ],
-  //     tooltip: {
-  //       enabled: true,
-  //       theme: 'dark',
-  //       style: {
-  //         background: '#222',
-  //         color: '#fff'
-  //       }
-  //     }
-    
-  
-  
-  };
-  // setBatterygraph(batterystate)
 
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -1353,8 +1221,14 @@ options: {
   
 
   // const localtime=now.toDateString()
+  // const now = new Date();
+  // const local=now.toLocaleString()
+  // const currentdate=local.split(",")[0]
   const now = new Date();
-  const local=now.toLocaleString()
+const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
+const [month, day, year] = local.split("/"); // Split the date by "/"
+const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
+
   // const formattedDate = now.toLocaleString('en-US', { 
   //   year: 'numeric', 
   //   month: '2-digit', 
@@ -1364,7 +1238,7 @@ options: {
   //   second: '2-digit', 
   //   hour12: false
   // }).replace('/', '-');
-const currentdate=local.split(",")[0]
+
   
 const calculatedHeight = `calc(100vh - 100px)`;
 
@@ -1373,9 +1247,9 @@ const calculatedHeight = `calc(100vh - 100px)`;
       
 
   return (
-    <div   className="main"  >
-  <hr style={{color:"green",border:"1px solid green"}}/>
-  <div class="row"  >
+    <div   className="main" style={{marginRight:"30px",marginLeft:"30px",marginBottom:"50px"}} >
+
+  <div class="row"   >
  
   <div class="col-sm-12 mb-3 mb-sm-0">
   <div class="container-fluid">
@@ -1384,11 +1258,11 @@ const calculatedHeight = `calc(100vh - 100px)`;
  
 {/* <div></div> */}
 <div class="row" >
-<h3 style={{textAlign:"end",color:"black",textAlign:"center"}}><b>{currentdate}</b></h3>
+<h3 style={{textAlign:"end",color:"#b03d2b",textAlign:"center"}}><b>{currentdate}</b></h3>
 <div class="col-sm-6 mb-3 mb-sm-0"  >
 <div  style={{ position: 'relative' }}>
 
-        <ReactApexChart options={state.options} series={state.series} type="donut" width={'100%'} height={'450px'}  />
+        <ReactApexChart options={state.options} series={state.series} type="donut" width={'100%'} height={'400px'}  />
         <h5 class="card-title" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'black', zIndex: 1 }}><b>Building Consumption</b></h5>
       
       </div>
@@ -1397,7 +1271,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 </div> */}
 </div>
 <div  class="col-sm-6 mb-3 mb-sm-0" >
-<div style={{marginTop:"20px"}}> 
+<div style={{marginTop:"10px"}}> 
 <div class="data-container-legends">
     <span>
     <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#1fc270'/> <b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Grid</b> </span>
@@ -1408,7 +1282,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
     </span>
     <span>
-    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FF5349'/><b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Wheeledinsolar</b> </span>  
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FF5349'/><b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Wheeled in  solar</b> </span>  
 
     </span>
     <span>
@@ -1424,7 +1298,6 @@ const calculatedHeight = `calc(100vh - 100px)`;
 <span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#546E7A'/></b> </span>  <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Diesel</b></span> &nbsp; &nbsp; &nbsp; &nbsp;  */}
 </div>
 <br/>
-  <br/>
   <br/>
   <div class="data-container" style={{marginRight:"25%"}}>
     <span>
@@ -1443,17 +1316,17 @@ const calculatedHeight = `calc(100vh - 100px)`;
         {0}
       </span>
     </span>
+    
   </div>
 
   <br/>
-
-  <div class="data-container"style={{ marginTop:"10px",marginRight:"25%"}}>
+  <div class="data-container" style={{marginRight:"20%"}}>
     <span>
       <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "25px"}}>Rooftop:</b>
+        <b style={{ fontSize: "25px",}}>Rooftop:</b>
       </span>
       <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-        {Math.trunc(totalrooftopgeneration)}
+      {Math.trunc(totalrooftopgeneration)}
       </span>
     </span>
     <span>
@@ -1461,12 +1334,19 @@ const calculatedHeight = `calc(100vh - 100px)`;
         <b style={{ fontSize: "25px"}}>Grid:</b>
       </span>
       <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-        {Math.round(gridunprocess)}
+      {Math.round(gridunprocess)}
       </span>
     </span>
   </div>
+
+   <div style={{ color: '#5e5d5c', textAlign: 'right', fontSize: "22px",marginTop:"20px" }}> 
+ 
+     <h5><b>*Energy in kWh</b></h5>
+ 
+  </div>
 <br/>
 <div class="data-container"style={{ marginTop:"10px"}}>
+  <div> 
     <span>
       <span style={{ color: '#5e5d5c' }}>
         <b style={{ fontSize: "22px"}}>Power Factor(Min):</b>
@@ -1475,6 +1355,9 @@ const calculatedHeight = `calc(100vh - 100px)`;
       {minimum_powerfactor}
       </span>
     </span>
+    </div>
+   
+  <div> 
     <span>
       <span style={{ color: '#5e5d5c' }}>
         <b style={{ fontSize: "22px"}}>Power Factor(Avg):</b>
@@ -1483,7 +1366,29 @@ const calculatedHeight = `calc(100vh - 100px)`;
       {average_powerfactor}
       </span>
     </span>
+    </div>
   </div>
+
+{/* <div class="data-container"style={{ marginTop:"10px",marginRight:"3%"}}>
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "22px"}}>Power Factor(Min):</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
+      {minimum_powerfactor}
+      </span>
+    </span>
+   
+  
+    <span>
+      <span style={{ color: '#5e5d5c' }}>
+        <b style={{ fontSize: "22px"}}>Power Factor(Avg):</b>
+      </span>
+      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px"}}>
+      {average_powerfactor}
+      </span>
+    </span>
+  </div> */}
 
 
 <div>
@@ -1503,11 +1408,11 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
 </div>
 <br/>
-<div style={{ color: 'black', textAlign: 'right',justifyContent:"flex-end",justifyItems:"baseline" }}>
+{/* <div style={{ color: 'black', textAlign: 'right',justifyContent:"flex-end",justifyItems:"baseline" }}>
 <Link to='/peakgraph'>
 <button className="btn btn-primary">Analytics</button>
 </Link>
-</div>
+</div> */}
 
 </div>
 
@@ -1526,8 +1431,13 @@ const calculatedHeight = `calc(100vh - 100px)`;
   <div class="col-sm-4" style={{border: '1px solid red top bottom left'}} >
     <div class="card" style={{width:"auto",height:"90%",marginTop:"20%",background:'white',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title" style={{color:"black"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
-        <h1 style={{fontSize:"150px",textAlign:"center",color:"tomato",marginTop:"30px",height:"200px"}}> 
+        <h5 class="card-title" style={{color:"#145369"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
+        <br/>
+        <br/>
+        <p style={{ textDecoration: 'underline !important', color: 'black' }}><b>Performance(%):</b></p>
+
+
+        <h1 style={{fontSize:"150px",textAlign:"center",color:"tomato",height:"200px"}}> 
          {Math.trunc(wheeledinsolarprpercentage)}%
          <br></br>
          <hr style={{color:"green",border:"1px solid gray"}}/>
@@ -1564,7 +1474,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Performance %:</b></td>
-    <td><span style={{color:"black"}}>{Math.trunc(wheeledinsolarprpercentage)}%</span></td>
+    <td><span style={{color:"black"}}>{Math.trunc(wheeledinsolarprpercentage)}</span></td>
   </tr>
 
   <tr>
@@ -1595,8 +1505,11 @@ const calculatedHeight = `calc(100vh - 100px)`;
         type="radialBar"
         height={350}
       /> */}
-      <h5 class="card-title" style={{color:"black"}}><b>Rooftop Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
-        <h1 style={{fontSize:"150px",textAlign:"center",color:"brown",marginTop:"30px",height:"200px"}}> 
+      <h5 class="card-title" style={{color:"#145369"}}><b>Rooftop Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
+      <br/>
+        <br/>
+      <p style={{ textDecoration: 'underline !important', color: 'black' }}><b>Performance(%):</b></p>
+        <h1 style={{fontSize:"150px",textAlign:"center",color:"brown",height:"200px"}}> 
          {Math.trunc(prpercentage)}%
          <br></br>
          <hr style={{color:"green",border:"1px solid gray"}}/>
@@ -1614,7 +1527,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Performance %:</b></td>
-    <td><span style={{color:"black"}}>{Math.trunc(prpercentage)}%</span></td>
+    <td><span style={{color:"black"}}>{Math.trunc(prpercentage)}</span></td>
   </tr>
 
   <tr>
@@ -1632,40 +1545,44 @@ const calculatedHeight = `calc(100vh - 100px)`;
     </div>
   </div>
 
-  
 
-
-  <div class="col-sm-4" >
-    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white",marginTop:"20%"}}>
+  <div class="col-sm-4">
+    <div class="card"  style={{width:"100%",height:"90%",marginTop:"20%", background: 'lineargradient(to top, rgb(184, 204, 195), white)',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"> <b style={{color:"black"}}>Thermal Storage</b></h5> 
-      {/*<span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/>*/}
+        <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>CO<sub>2</sub> Reduction</b></h4>
         <hr/>
-        {/* <Line data={data} options={optionsdata} /> */}
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
-        <Thermal />
-        <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-        {/* <b style={{color:"black"}}>Cooling Energy:</b> */}
-          <br/>
-          {/* <b style={{color:"#5e5d5c"}}>Stored Water Temperature(°C) : {temp}</b> */}
-          <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
-          <tr>
-    <td><b style={{color:"#5e5d5c"}}>Stored Water Temperature(°C):</b></td>
-    <td><span style={{color:"black"}}> {temp}</span></td>
-  </tr>
-</table>
+        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
+        {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
+        <h5 style={{color:"black",textAlign:"center",fontSize:"30px"}}> Today's</h5>
+        <h5 style={{color:"black",textAlign:"center",fontSize:"30px"}}> <b>CO<sub>2</sub> Reduction:</b></h5>
+        <div style={{textAlign:"center"}}  > 
+        {/* <ForestIcon  /> */}
+        <h1 style={{fontSize:"120px",textAlign:"center",color:"#2D5987",height:"170px",fontWeight:"bolder"}}> 
+        {co2}
+         <br></br>
+         </h1>
+
+         <h5 style={{textAlign:"center",color:"black",fontSize:"20px"}}><b> tCO2/MWh</b></h5>
+
+        {/* <img src="https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-flat-template-with-co2-leaves-for-concept-design-png-image_4674847.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"100px"}}/> */}
 
         </div>
+        
+        
+        
       </div>
     </div>
   </div>
 
-  <div class="col-sm-4" style={{marginTop:"5%" }}>
-<div class="card" style={{width:"100%",height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+  
+{/* ------- */}
+
+<div class="col-sm-4" style={{marginTop:"5%" }}>
+<div class="card" style={{width:"100%",height:"100%",background: 'lineargradient(to right, ligh, white)',color:"white",id:"chillercard"}}>
   <div class="card-body">
-  <h5 class="card-title"><b style={{color:'black'}}> Chiller Status</b><span style={{color:"black",marginLeft:'100px'}}></span></h5> 
+  <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Chiller Status</b></h4>
     <hr/>
-    <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
+    {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
     {/* <Line data={data} options={optionsdata}/> */}
     {/* <ReactApexChart options={batterystatus.options} series={batterystatus.series} type="line" height={190} /> */}
 
@@ -1678,7 +1595,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
         <td><b style={{color:"black"}}>&nbsp;&nbsp;4</b></td>
       </tr>
       <br/>
-      <tr>
+      <tr class="icon">
         <td><b style={{color:"black"}}></b></td>
         <td><span>{chillerval[0] === 0 || chillerval[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
         <td>{chillerval[1] === 0 || chillerval[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
@@ -1694,9 +1611,9 @@ const calculatedHeight = `calc(100vh - 100px)`;
         <td><b style={{color:"black"}}>&nbsp;&nbsp;8</b></td>
       </tr>
       <br/>
-      <tr>
+      <tr class="icon">
       <td><b style={{color:"black"}}></b></td>
-        <td><span>{chillerval2['chiller5'] <= 0.8 || chillerval2['chiller5'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td><span>{chillerval2['chiller5'] <= 1.2 || chillerval2['chiller5'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
         <td>{chillerval2['chiller6'] === 0 || chillerval2['chiller6'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
         <td>{chillerval2['chiller7'] === 0 || chillerval2['chiller7'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
         <td>{chillerval2['chiller8'] === 0 || chillerval2['chiller8'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
@@ -1715,21 +1632,47 @@ const calculatedHeight = `calc(100vh - 100px)`;
 </div>
 </div> 
 
-  
-
-
-  
-
-  <div class="col-sm-4" style={{marginTop:"5%"}}>
-    <div class="card" style={{height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+<div class="col-sm-8" style={{marginTop:"5%" }}>
+    <div class="card" style={{height:"100%",background:'white',color:"white"}}>
       <div class="card-body">
-      <h5 class="card-title"><b style={{color:"black"}}>Li-ion Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> 
+      <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Thermal Storage</b></h4>
+      {/*<span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/>*/}
+        <hr/>
+        {/* <Line data={data} options={optionsdata} /> */}
+        {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
+        <Thermal />
+        <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
+        {/* <b style={{color:"black"}}>Cooling Energy:</b> */}
+          <br/>
+          {/* <b style={{color:"#5e5d5c"}}>Stored Water Temperature(°C) : {temp}</b> */}
+          <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
+          <tr>
+    <td><b style={{color:"#5e5d5c"}}>Stored Water Temperature(°C):</b></td>
+    <td><span style={{color:"black"}}> {temp}</span></td>
+  </tr>
+</table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+
+  
+
+  <div class="col-sm-8" style={{marginTop:"5%"}}>
+    <div class="card" style={{height:"100%",background: 'lineargradient(to right, lightblue, white)',color:"white"}}>
+      <div class="card-body">
+      {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
+      <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>UPS Battery</b></h4> 
         <hr/>
         {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/>
            <span style={{color:"black"}}>{currentupsStatus[currentupsStatus.length-1]}</span>
         
          */}
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
+        {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
         <div id="chart2"> 
    {
       apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="bar" height='270px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
@@ -1738,70 +1681,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
    }
   
    </div>
-   {/* <Line data={data} options={optionsdata}/> */}
-   {/* <ResponsiveContainer width="100%" height="300px">
-        <LineChart
-          width={300}
-          height={100}
-          data={batteryresultdata}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="timeStamp" />
-          <YAxis yAxisId="left" />
-          <YAxis yAxisId="right" orientation="right" />
-          <Tooltip />
-          <Legend />
-          <Line yAxisId="left" type="monotone" dataKey="batteryEnergy" stroke="red" activeDot={{ r: 8 }}  />
-        </LineChart>
-      </ResponsiveContainer> */}
-
-{/* 
-        <LineChart
-          width={480} height={250} 
-          data={batteryresultdata}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="timeStamp" />
-          <YAxis yAxisId="left" />
-          <YAxis yAxisId="right" orientation="right" />
-          <Tooltip />
-          <Legend />
-          <Line yAxisId="left" type="monotone" dataKey="batteryEnergy" stroke="red" activeDot={{ r: 8 }}  />
-        </LineChart> */}
-
-{/* <AreaChart width={400} height={250} data={batteryresultdata}
-  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-  <defs>
-    <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-       <stop offset="55%" stopColor="#00C0F0" stopOpacity={0.7}/>
-      <stop offset="40%" stopColor="#32cd32" stopOpacity={0.7}/>
-    </linearGradient>
-  </defs>
-  <XAxis dataKey="timeStamp" tickFormatter={formatXAxis}/>
-  <YAxis />
-  <CartesianGrid strokeDasharray="3 3" />
-  <Tooltip />
-  <Area type="monotone" dataKey="batteryEnergy"  fillOpacity={3} fill="url(#colorUv)" activeDot={{ r: 4 }} />
-  
-   
-</AreaChart> */}
-
-   
-
-
-        <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
+   <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
         {/* <b style={{color:"black"}}>Pack Soc:  {packSoc[packSoc.length-1]}% </b> */}
         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
           <tr>
@@ -1810,36 +1690,13 @@ const calculatedHeight = `calc(100vh - 100px)`;
   </tr>
 </table>
           <br/>
-          {/* <b style={{color:"black"}}>Temparature:</b> */}
 
         </div>
       </div>
     </div>
   </div>
    
-  <div class="col-sm-4">
-    <div class="card"  style={{width:"100%", height:"93.6%",marginTop:"30%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
-      <div class="card-body">
-        <h4 class="card-title" style={{textAlign:"center",color:"black"}}><b>CO<sub>2</sub> Reduction</b></h4>
-        <hr/>
-        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
-        <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
-        <h5 style={{color:"black",textAlign:"center"}}> Today's CO<sub>2</sub> Reduction:</h5>
-       
-        <h5 style={{textAlign:"center",color:"black"}}><h5><b>{co2}</b></h5>tCO2/MWh</h5>
-        <br/>
-        <div style={{textAlign:"center"}}  > 
-        {/* <ForestIcon  /> */}
-
-        <img src="https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-flat-template-with-co2-leaves-for-concept-design-png-image_4674847.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"100px"}}/>
-
-        </div>
-        
-        
-        
-      </div>
-    </div>
-  </div>
+ 
 
 
 
@@ -1848,10 +1705,10 @@ const calculatedHeight = `calc(100vh - 100px)`;
  
 
 
-   <div class="col-sm-4"  style={{marginTop:"2.25%"}}>
-     <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
+   <div class="col-sm-4"  style={{marginTop:"5%"}}>
+     <div class="card" style={{width:"100%", height:"100%",background:'white',color:"white"}}>
        <div class="card-body">
-         <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Peak Shavings</b>  </h5>
+         <h5 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Peak Shavings</b>  </h5>
          
          <hr/>
          <p style={{textAlign:"end",color:"black"}}>{currentdate}</p>
@@ -1870,32 +1727,6 @@ const calculatedHeight = `calc(100vh - 100px)`;
          {/* <p> Shavings:</p> */}
        </div>
      </div>
-  </div>
-
-  
-
-  
-  <div class="col-sm-4"  style={{marginTop:"2.25%",scrollpaddingbottom: '20px'}}>
-    <div class="card" style={{width:"100%", height:"100%",background:'linear-gradient(45deg,#d5dbd6,rgba(86, 151, 211, 0.2))',color:"white"}}>
-      <div class="card-body">
-      <h5 class="card-title" style={{textAlign:"center",color:"black"}}><b>Power Factor</b>  </h5>
-        <hr/>
-        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto',marginTop:"30px"}}>
-  <tr>
-    <td><b style={{color:"#5e5d5c"}}>average_powerfactor (kWh):</b></td>
-    <td><span style={{color:"black"}}></span></td>
-  </tr>
-  <br/>
-  <tr>
-    <td><b style={{color:"#5e5d5c"}}>minimum_powerfactor:</b></td>
-    <td><span style={{color:"black"}}></span></td>
-{/*    
-    {avgMinpowerfactor[0].minimum_powerfactor} */}
-  </tr>
-  </table>
-  
-      </div>
-    </div>
   </div>
 </div>
 

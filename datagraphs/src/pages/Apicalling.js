@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const batteryurl="http://localhost:5000/battery"
+const batteryurl="http://121.242.232.211:5000/battery"
 
 
 export function batteryData() {

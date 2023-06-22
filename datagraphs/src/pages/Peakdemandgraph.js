@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import ReactApexChart from 'react-apexcharts';
 
 
-const host = "http://localhost:5000/peak/hvacSchneider7230Polling"
+const host = "http://121.242.232.211:5000/peak/hvacSchneider7230Polling"
 
 function Peakdemandgraphs() {
 
@@ -69,7 +69,7 @@ const CurrentGraph=()=>{
       const formattedStartDate = startDate ? new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       const formattedEndDate = endDate ? new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post('http://localhost:5000/filter/hvacSchneider7230Polling', {
+      const response = await axios.post('http://121.242.232.211:5000/filter/hvacSchneider7230Polling', {
         date: formattedStartDate,
         endDate: formattedEndDate
       });
@@ -207,7 +207,10 @@ console.log(initialGraph)
     
       options: {
         chart: {
-          type: graphChange
+          type: graphChange,
+          zoom: {
+            enabled: false
+          }
         },
         dataLabels: {
           enabled: false
@@ -300,6 +303,9 @@ console.log(initialGraph)
       chart: {
         type: 'area',
         height: '400px',
+        zoom: {
+          enabled: false
+        }
       },
       xaxis: {
         type: 'category',
@@ -347,7 +353,10 @@ console.log(initialGraph)
 
   options: {
     chart: {
-      type: 'area'
+      type: 'area',
+      zoom: {
+        enabled: false
+      }
     },
     dataLabels: {
       enabled: false
@@ -379,7 +388,7 @@ console.log(initialGraph)
       }
     },
     xaxis: {
-      categories: initialGraph.map((time) => time.polledTime[1]),
+      categories: initialGraph.map((time) => time.polledTime),
       labels: {
         style: {
           colors: 'black' // set the x-axis label color to red
