@@ -95,11 +95,11 @@ export const SidebarData = [
   //     },
   //     {
   //       title: 'Thermal',
-  //       path: '/Alerts/Thermalalers',
+  //       path: '/Alerts/Thermalalerts',
   //       icon: <ThermostatIcon />
   //     }
   //   ]
-  // },
+  // }
   
 
   
@@ -124,7 +124,7 @@ export const SidebarData = [
   },
   {
     title: 'Documentation',
-    path: '/Documentation',
+    path: '/Battery_Analytics',
     icon: <IoIcons.IoMdHelpCircle />,
     cName: 'nav-text'
   }
