@@ -23,6 +23,8 @@ import Thermal from './Thermal';
 import ForestIcon from '@mui/icons-material/Forest';
 import { TiWeatherSnow } from "react-icons/ti";
 import { BsFillCircleFill } from "react-icons/bs";
+import Evcharger from '../images/charging-station-on.png'
+import Navbar from '../components/Navbar';
 
 
 //import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
@@ -94,6 +96,12 @@ function DashBoard() {
 
 
   const [avgMinpowerfactor,setAvgMinpowerfactor]=useState([])
+
+
+  const [dieselEnergy,setDieselEnergy]=useState([])
+
+
+   const [EvCharger,setEvCharger]=useState([])
   
  
   const linestate  = {
@@ -145,7 +153,9 @@ function DashBoard() {
   const energysaved = `http://${host}:5000/peaksavings`
   const chillerstatus = `http://${host}:5000/chillerstatusd`
   const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
-  const powerFactor= `http://${host}:5000/schneider7230readings`
+  const powerFactor= `http://localhost:5000/schneider7230readings`
+  const diesel=`http://localhost:5000/dashboard/Deisel`
+  const chargerdate='http://localhost:5000/dashboard/EvCharger'
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -310,6 +320,28 @@ function DashBoard() {
   }
 
 
+  const DieselEnergyvalue=()=>{
+    axios.get(diesel).then((res)=>{
+      const dataresponse=res.data
+      setDieselEnergy(dataresponse)
+     
+    }).catch((err)=>{
+      console.log(err)
+    })
+  }
+
+
+  
+  const EvChargerData=()=>{
+    axios.get(chargerdate).then((res)=>{
+      const dataresponse=res.data
+      setEvCharger(dataresponse)
+     
+    }).catch((err)=>{
+      console.log(err)
+    })
+  }
+
 
   // piedata()
   //   batterydata()
@@ -334,6 +366,8 @@ function DashBoard() {
     gridfunction()
     TempData()
     PowerFactor()
+    DieselEnergyvalue()
+    EvChargerData()
 
     const interval = setInterval(() => {
      
@@ -346,6 +380,8 @@ function DashBoard() {
       gridfunction();
       TempData()
       PowerFactor()
+      DieselEnergyvalue()
+      EvChargerData()
       console.log("running every 5min ............")
   }, 5 * 60 * 1000);
 
@@ -367,6 +403,10 @@ function DashBoard() {
   console.log(grid)
   console.log(battery)
   console.log(avgMinpowerfactor)
+  console.log(dieselEnergy)
+  console.log(EvCharger)
+ 
+ //----------- for power factor card
  let  minimum_powerfactor=""
  let  average_powerfactor=""
  for(let i=0;i<avgMinpowerfactor.length;i++){
@@ -374,6 +414,26 @@ function DashBoard() {
   average_powerfactor=(avgMinpowerfactor[i].average_powerfactor)
  }
 
+ //---------for diesel card
+ let dieselvalue=""
+ for(let i=0;i<dieselEnergy.length;i++){
+  dieselvalue=(Math.round(dieselEnergy[i].total_energy_difference))
+  
+ }
+
+
+ //-------------------for Evcharger card
+ let totalEnergy=''
+ let totalSessions=''
+ let NoOfchargersused=''
+ let totalHours=''
+ for(let i=0;i<EvCharger.length;i++){
+  totalEnergy=((EvCharger[i].totalEnergy))
+  totalSessions=EvCharger[i].totalSessions
+  NoOfchargersused=EvCharger[i].NoOfChargersUsed
+  totalHours=EvCharger[i].totalTimeusage
+  
+ }
 
 
 
@@ -741,6 +801,15 @@ console.log(totaldaysumvalue)
           // const prpercentage=rooftopPR*100
           console.log(prpercentage, rooftopPR )
           const wheeledinsolarprpercentage=WheeledinsolarPR*100
+          let WheeledinsolarperformanceValue=0
+          if(wheeledinsolarprpercentage<100){
+            WheeledinsolarperformanceValue= wheeledinsolarprpercentage
+
+          }
+          else{
+            WheeledinsolarperformanceValue=0
+          }
+          console.log(WheeledinsolarperformanceValue)
 
            values.push(Math.round(gridunprocess),Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),0)
            console.log(values)
@@ -961,7 +1030,7 @@ options: {
 
     //co2 reduction calculation
     const co2=(((Math.trunc(totalsolargeneration)+totalrooftopgeneration)/1000)*0.81).toFixed(2)
-
+    let co2ErrorValue=co2>100?0:co2
 
     
 
@@ -1247,18 +1316,20 @@ const calculatedHeight = `calc(100vh - 100px)`;
       
 
   return (
+    <div>
+
+   
     <div   className="main" style={{marginRight:"30px",marginLeft:"30px",marginBottom:"50px"}} >
 
   <div class="row"   >
- 
   <div class="col-sm-12 mb-3 mb-sm-0">
   <div class="container-fluid">
-  <div class="card1" style={{width: "100%", height: calculatedHeight,justifyContent: 'center', marginTop: 0, background: 'white', color: "white"}} >
+  <div class="card1" style={{width: "100%", height: calculatedHeight,justifyContent: 'center', marginTop:0, background: 'white', color: "white"}} >
 <div   class="card-body d-flex flex-column justify-content-center">
  
 {/* <div></div> */}
 <div class="row" >
-<h3 style={{textAlign:"end",color:"#b03d2b",textAlign:"center"}}><b>{currentdate}</b></h3>
+<h3 style={{textAlign:"end",color:"#b03d2b",textAlign:"center",marginTop:"20px"}}><b>{currentdate}</b></h3>
 <div class="col-sm-6 mb-3 mb-sm-0"  >
 <div  style={{ position: 'relative' }}>
 
@@ -1274,19 +1345,19 @@ const calculatedHeight = `calc(100vh - 100px)`;
 <div style={{marginTop:"10px"}}> 
 <div class="data-container-legends">
     <span>
-    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#1fc270'/> <b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Grid</b> </span>
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#1fc270'/> &nbsp; <b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Grid</b> </span>
     {/* <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Grid</b></span>    */}
     </span>
     <span>
-    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FFAE42'/><b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Rooftop</b> </span>
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FFAE42'/> &nbsp;<b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Rooftop</b> </span>
 
     </span>
     <span>
-    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FF5349'/><b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Wheeled in  solar</b> </span>  
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FF5349'/>&nbsp;<b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Wheeled in  solar</b> </span>  
 
     </span>
     <span>
-    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#546E7A'/><b  style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Diesel</b> </span>  
+    <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#546E7A'/>&nbsp;<b  style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Diesel</b> </span>  
 
     </span>
   </div>
@@ -1313,7 +1384,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
         <b style={{ fontSize: "25px"}}>Diesel:</b>
       </span>
       <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-        {0}
+        {dieselvalue}
       </span>
     </span>
     
@@ -1429,16 +1500,16 @@ const calculatedHeight = `calc(100vh - 100px)`;
   </div>
 
   <div class="col-sm-4" style={{border: '1px solid red top bottom left'}} >
-    <div class="card" style={{width:"auto",height:"90%",marginTop:"20%",background:'white',color:"white"}}>
+    <div class="card" style={{width:"auto",height:"100%",marginTop:"0%",background:'white',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title" style={{color:"#145369"}}><b>Wheeled In Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
+        <h5 class="card-title" style={{color:"#145369"}}><b>Wheeled in Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
         <br/>
         <br/>
         <p style={{ textDecoration: 'underline !important', color: 'black' }}><b>Performance(%):</b></p>
 
 
         <h1 style={{fontSize:"150px",textAlign:"center",color:"tomato",height:"200px"}}> 
-         {Math.trunc(wheeledinsolarprpercentage)}%
+         {Math.trunc(WheeledinsolarperformanceValue)}%
          <br></br>
          <hr style={{color:"green",border:"1px solid gray"}}/>
          </h1>
@@ -1466,7 +1537,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
           // width={150}
           
         /> */}
-        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}>
+        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px',margin: '0 auto'}}>
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Generation (kWh):</b></td>
     <td><span style={{color:"black"}}>{Math.trunc(totalsolargeneration)}</span></td>
@@ -1496,7 +1567,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
 
   <div class="col-sm-4" >
-  <div class="card" style={{width:"auto",height:"90%",marginTop:"20%",background:'white',color:"white"}}>
+  <div class="card" style={{width:"auto",height:"100%",background:'white',color:"white"}}>
       <div class="card-body">
         {/* <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> */}
         {/* <Chart
@@ -1519,7 +1590,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
         </h5> 
         <br/>
       
-        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
+        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px', margin: '0 auto'}}>
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Generation (kWh):</b></td>
     <td><span style={{color:"black"}}>{Math.trunc(totalrooftopgeneration)}</span></td>
@@ -1547,7 +1618,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
 
   <div class="col-sm-4">
-    <div class="card"  style={{width:"100%",height:"90%",marginTop:"20%", background: 'lineargradient(to top, rgb(184, 204, 195), white)',color:"white"}}>
+    <div class="card"  style={{width:"100%",height:"100%", background: 'lineargradient(to top, rgb(184, 204, 195), white)',color:"white"}}>
       <div class="card-body">
         <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>CO<sub>2</sub> Reduction</b></h4>
         <hr/>
@@ -1558,7 +1629,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
         <div style={{textAlign:"center"}}  > 
         {/* <ForestIcon  /> */}
         <h1 style={{fontSize:"120px",textAlign:"center",color:"#2D5987",height:"170px",fontWeight:"bolder"}}> 
-        {co2}
+        {co2ErrorValue}
          <br></br>
          </h1>
 
@@ -1663,7 +1734,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
   
 
   <div class="col-sm-8" style={{marginTop:"5%"}}>
-    <div class="card" style={{height:"100%",background: 'lineargradient(to right, lightblue, white)',color:"white"}}>
+    <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
       <div class="card-body">
       {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
       <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>UPS Battery</b></h4> 
@@ -1695,17 +1766,61 @@ const calculatedHeight = `calc(100vh - 100px)`;
       </div>
     </div>
   </div>
+
+
+  {/* let totalEnergy=''
+ let totalSessions=''
+ let NoOfchargersused=''
+ let totalHours='' */}
+  <div class="col-sm-4"  style={{marginTop:"5%"}}>
+     <div class="card" style={{width:"100%", height:"100%",background: 'lineargradient(to right, lightblue, white)',color:"white"}}>
+       <div class="card-body">
+         <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>EV Charger</b>  </h4>
+         
+         <hr/>
+
+         <div style={{display: 'flex', justifyContent: 'center'}}>
+  <img src={Evcharger} alt="evcharger" width="200px" height="200px" />
+</div>
+<br/>
+         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px', margin: '0 auto'}}>
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>Total Energy Used (kWh):</b></td>
+    <td><span style={{color:"black"}}>{totalEnergy}</span></td>
+  </tr>
+
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>Total Session Today:</b></td>
+    <td><span style={{color:"black"}}>{totalSessions}</span></td>
+  </tr>
+
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>No.Of chargers used:</b></td>
+    <td><span style={{color:"black"}}>{NoOfchargersused}</span></td>
+  </tr>
+ 
+  <tr>
+    <td><b style={{color:"#5e5d5c"}}>Total hours of usage:</b></td>
+    <td><span style={{color:"black"}}>{totalHours}hr</span></td>
+  </tr>
+</table>
+         {/* <p> Shavings:</p> */}
+       </div>
+     </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
    
- 
 
-
-
-  
-
- 
-
-
-   <div class="col-sm-4"  style={{marginTop:"5%"}}>
+  <div class="col-sm-4"  style={{marginTop:"5%"}}>
      <div class="card" style={{width:"100%", height:"100%",background:'white',color:"white"}}>
        <div class="card-body">
          <h5 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Peak Shavings</b>  </h5>
@@ -1728,13 +1843,27 @@ const calculatedHeight = `calc(100vh - 100px)`;
        </div>
      </div>
   </div>
+ 
+
+
+
+  
+
+ 
+
+
+   
 </div>
+
+
+
 
 
 
     
 
 
+    </div>
     </div>
   )
 }
