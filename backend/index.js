@@ -79,25 +79,12 @@ app.use(
     
     
     app.get("/battery",async(req,res)=>{
-        con.query("SELECT * FROM EMSUPSbattery WHERE received_time >= CURDATE() AND received_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY) ",function(err,result,feilds){
+        con.query("SELECT * FROM EMSUPSbattery WHERE received_time >= CURDATE() AND received_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by received_time desc",function(err,result,feilds){
             if(err){
                 console.log(err)
             }
             else{
                 const response=(JSON.parse(JSON.stringify(result)))
-                //res.send(response)
-
-                // for(const i of response){
-                //     console.log((i.received_time))
-                //     const utcTimeString =i.received_time
-                //     const date = new Date(utcTimeString)
-                //     const localTimeString = date.toLocaleString();
-                //     const minutes = date.getUTCMinutes();
-                //     console.log(minutes);
-                //     console.log(localTimeString)
-                // }
-                
-                // console.log(response.length)
                 const emptyArray=[]
                 let data = []; // array to store the data
 
@@ -116,6 +103,8 @@ let groupedData = response.reduce((accumulator, currentValue) => {
       chargingenergy: [],
       dischargingenergy:[],
       pack_usable_soc:[],
+      batteryvoltage:[],
+      batterycurrent:[],
       count: 0,
       chargingenergyaverage:0,
       dischargingenergyavg:0,
@@ -129,6 +118,9 @@ let groupedData = response.reduce((accumulator, currentValue) => {
   accumulator[timeKey].chargingenergy.push(currentValue.upschargingenergy);
   accumulator[timeKey].dischargingenergy.push(currentValue.negative_energy);
   accumulator[timeKey].pack_usable_soc.push(currentValue.pack_usable_soc);
+  accumulator[timeKey].batteryvoltage.push(currentValue.batteryvoltage);
+  accumulator[timeKey].batterycurrent.push(currentValue.batterycurrent);
+
   accumulator[timeKey].count++;
              // taking average of chargingenergy
   let chargingenergysum = accumulator[timeKey].chargingenergy.reduce((acc, val) => acc + val, 0);
@@ -155,6 +147,7 @@ accumulator[timeKey].packsoc=packsocavg
 
 
 emptyArray.push(groupedData)
+//console.log(groupedData)
 //res.send(emptyArray)
 const minresult=[]
 //looping through the gruped
@@ -210,7 +203,8 @@ emptyArray.forEach(obj => {
     // console.log(`Discharging difference: ${dischargingDiff}`);
   }
   //console.log(calculated)
-  res.send(minresult)
+  res.send(groupedData)
+  console.log(minresult.length)
   //res.send(finalresult)
 
 
@@ -299,7 +293,7 @@ emptyArray.forEach(obj => {
     })
 
     app.get("/grid",async(req,res)=>{
-         meterDb.query("select * from EMS.GridProcessed where polledDate = curdate()",function(err,result,feilds){
+         meterDb.query("select * from GridProcessed where polledDate = curdate()",function(err,result,feilds){
              if(err){
                  console.log(err)
              }
@@ -540,7 +534,7 @@ emptyArray.forEach(obj => {
             
             
             app.get("/schneider7230readings",async(req,res)=>{
-    meterDb.query("select * from schneider7230readings  where DATE(polled_time) = curdate()  order by polled_time desc limit 1",function(err,result,feilds){
+    meterDb.query("select * from schneider7230readings  where DATE(schneiderpolledtimestamp) = curdate()  order by schneiderpolledtimestamp desc limit 1",function(err,result,feilds){
         const powerfactor=[]
         if(err){
             console.log(err)
@@ -548,7 +542,7 @@ emptyArray.forEach(obj => {
         else{
             const response=(JSON.parse(JSON.stringify(result)))
             for(let i=0;i<response.length;i++){
-            const date = new Date(response[i].polled_time);
+            const date = new Date(response[i].schneiderpolledtimestamp);
             const timestamp = date.toLocaleString();
             powerfactor.push({"polledTime":timestamp,"average_powerfactor":response[i].average_powerfactor,"minimum_powerfactor":response[i].minimum_powerfactor})
             }
@@ -558,6 +552,315 @@ emptyArray.forEach(obj => {
     })
    
 })
+
+
+//------------------ diselenergy api-------------------------//
+app.get("/dashboard/Deisel",async(req,res)=>{
+    meterDb.query("SELECT * FROM diselenergy where date(polled_time)=curdate() order by polled_time desc limit 1",function(error,result){
+        const deiseldata=[]
+        if(error){
+            console.log(error)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            console.log(response)
+            res.send(response)
+
+        }
+
+    })
+})
+
+
+//--------------------Ev charger card api--------------------//
+app.get("/dashboard/EvCharger",async(req,res)=>{
+    con.query("select * from evcharger where date(servertime)=curdate();",function(error,result){
+        //select * from evcharger where date(servertime)=curdate()
+        //SELECT * FROM evcharger WHERE DATE(servertime) = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+        const LEV1_1=[]
+        const LEV4_1=[]
+        const CP11_1=[]
+        const CP12_1=[]
+        const CP13_1=[]
+        const CP14_1=[]
+        const energyValue=[]
+
+        let resultval=0
+        if(error){
+            console.log(error)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+let LEV1_1= {'LEV1_1Energy':0,'LEV1_1TotalSession':0,'LEV1_1NoOf_chargers':0} 
+let LEV4_1= {'LEV4_1Energy':0,'LEV4_1TotalSession':0,'LEV4_NoOf_chargers':0}
+let CP11_1= {'CP11_1Energy':0,'CP11_1TotalSession':0,'CP11_1NoOf_chargers':0}
+let CP12_1= {'CP12_1Energy':0,'CP12_1TotalSession':0,'CP12_1NoOf_chargers':0}
+let CP13_1= {'CP13_11Energy':0,'CP13_1TotalSession':0,'CP13_1NoOf_chargers':0}
+let CP14_1= {'CP14_1Energy':0,'CP14_1TotalSession':0,'CP14_1NoOf_chargers':0}
+
+
+let ActiveChargingpoint=""
+let NoOfChargers=0
+let previousTimestamp = null;
+let totalUsageTime = 0;
+
+
+
+for(let i=0;i<response.length;i++){
+    
+    if(response[i].chargpointname==="LEV1_1"){
+        LEV1_1.LEV1_1Energy+=parseFloat(response[i].energyconsumption)
+         LEV1_1.LEV1_1TotalSession+=(response[i].totalsessions)
+         if(parseFloat(response[i].energyconsumption)>0){
+            LEV1_1.LEV1_1NoOf_chargers="Active"
+            ActiveChargingpoint=(response[i].chargpointname)
+            NoOfChargers+=1
+         }
+         if (response[i].totalsessions === 1) {
+            if (previousTimestamp) {
+              const currentTimestamp = new Date(response[i].servertime);
+              const timeDifference = currentTimestamp - previousTimestamp;
+              console.log(timeDifference)
+              console.log(response[i].chargpointname)
+              totalUsageTime += timeDifference;
+            }
+            previousTimestamp = new Date(response[i].servertime);
+          }
+         
+         
+        
+        //console.log(LEV1_1,"line number 81")
+    }
+    if(response[i].chargpointname==="LEV4_1"){
+        LEV4_1.LEV4_1Energy+=parseFloat(response[i].energyconsumption)
+        LEV4_1.LEV4_1TotalSession+=(response[i].totalsessions)
+        if(parseFloat(response[i].energyconsumption)>0){
+            LEV4_1.LEV4_NoOf_chargers="Active"
+            ActiveChargingpoint=(response[i].chargpointname)
+            NoOfChargers+=1
+        }
+         if (response[i].totalsessions === 1) {
+            if (previousTimestamp) {
+              const currentTimestamp = new Date(response[i].servertime);
+              const timeDifference = currentTimestamp - previousTimestamp;
+              console.log(timeDifference)
+              totalUsageTime += timeDifference;
+            }
+            previousTimestamp = new Date(response[i].servertime);
+          }
+        
+        //console.log(LEV4_1,"line number 85")
+    }
+    
+    if(response[i].chargpointname==="CP11_1"){
+        CP11_1.CP11_1Energy+=parseFloat(response[i].energyconsumption)
+        CP11_1.CP11_1TotalSession+=(response[i].totalsessions)
+        if(parseFloat(response[i].energyconsumption)>0){
+            CP11_1.CP11_1NoOf_chargers="Active"
+            ActiveChargingpoint=(response[i].chargpointname)
+            NoOfChargers+=1
+         }
+         if (response[i].totalsessions === 1) {
+            if (previousTimestamp) {
+              const currentTimestamp = new Date(response[i].servertime);
+              const timeDifference = currentTimestamp - previousTimestamp;
+              console.log(timeDifference)
+              console.log(response[i].chargpointname)
+              totalUsageTime += timeDifference;
+            }
+            previousTimestamp = new Date(response[i].servertime);
+          }
+        //console.log(LEV4_1,"line number 90")
+    }
+    if(response[i].chargpointname==="CP12_1"){
+        CP12_1.CP12_1Energy+=parseFloat(response[i].energyconsumption)
+        CP12_1.CP12_1TotalSession+=(response[i].totalsessions)
+        //console.log(LEV4_1,"line number 94")
+        if(parseFloat(response[i].energyconsumption)>0){
+            CP12_1.CP12_1NoOf_chargers="Active"
+            ActiveChargingpoint=(response[i].chargpointname)
+            NoOfChargers+=1
+         }
+         if (response[i].totalsessions === 1) {
+            if (previousTimestamp) {
+              const currentTimestamp = new Date(response[i].servertime);
+              const timeDifference = currentTimestamp - previousTimestamp;
+              console.log(timeDifference)
+              console.log(response[i].chargpointname)
+              totalUsageTime += timeDifference;
+            }
+            previousTimestamp = new Date(response[i].servertime);
+          }
+    }
+    if(response[i].chargpointname==="CP13_1"){
+        CP13_1.CP13_11Energy+=parseFloat(response[i].energyconsumption)
+        CP13_1.CP13_1TotalSession+=(response[i].totalsessions)
+        if(parseFloat(response[i].energyconsumption)>0){
+            CP13_1.CP13_1NoOf_chargers="Active"
+            ActiveChargingpoint=(`${response[i].chargpointname}`)
+            NoOfChargers+=1
+         }
+         if (response[i].totalsessions === 1) {
+            if (previousTimestamp) {
+              const currentTimestamp = new Date(response[i].servertime);
+              const timeDifference = currentTimestamp - previousTimestamp;
+              console.log(timeDifference)
+              console.log(response[i].chargpointname)
+              totalUsageTime += timeDifference;
+            }
+            previousTimestamp = new Date(response[i].servertime);
+          }
+        
+       // console.log(LEV4_1,"line number 98")
+    }
+    if(response[i].chargpointname==="CP14_1"){
+        CP14_1.CP14_1Energy+=parseFloat(response[i].energyconsumption)
+        CP14_1.CP14_1TotalSession+=(response[i].totalsessions)
+        if(parseFloat(response[i].energyconsumption)>0){
+            CP14_1.CP14_1NoOf_chargers="Active"
+            ActiveChargingpoint=(response[i].chargpointname)
+            NoOfChargers+=1
+         }
+         if (response[i].totalsessions === 1) {
+            if (previousTimestamp) {
+              const currentTimestamp = new Date(response[i].servertime);
+              const timeDifference = currentTimestamp - previousTimestamp;
+              console.log(timeDifference)
+              console.log(response[i].chargpointname)
+              totalUsageTime += timeDifference;
+            }
+            previousTimestamp = new Date(response[i].servertime);
+          }
+        //console.log(LEV4_1,"line number 102")
+    }
+    
+}
+
+// let LEV1_1= {'LEV1_1Energy':0,'LEV1_1TotalSession':0,'LEV1_1NoOf_chargers':0} 
+// let LEV4_1= {'LEV4_1Energy':0,'LEV4_1TotalSession':0,'LEV4_NoOf_chargers':0}
+// let CP11_1= {'CP11_1Energy':0,'CP11_1TotalSession':0,'CP11_1NoOf_chargers':0}
+// let CP12_1= {'CP12_1Energy':0,'CP12_1TotalSession':0,'CP12_1NoOf_chargers':0}
+// let CP13_1= {'CP13_11Energy':0,'CP13_1TotalSession':0,'CP13_1NoOf_chargers':0}
+// let CP14_1= {'CP14_1Energy':0,'CP14_1TotalSession':0,'CP14_1NoOf_chargers':0}
+const finalresult=[]
+const totalEnergy=(LEV1_1.LEV1_1Energy+LEV4_1.LEV4_1Energy+CP11_1.CP11_1Energy+CP12_1.CP12_1Energy+CP13_1.CP13_11Energy+CP14_1.CP14_1Energy)
+const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.CP11_1TotalSession+CP12_1.CP12_1TotalSession+CP13_1.CP13_1TotalSession+CP14_1.CP14_1Energy)
+//   let LEV1_1=0
+//     let LEV4_1=0
+//     let CP11_1=0
+//     let CP12_1=0
+//     let CP13_1=0
+//     let CP14_1=0
+
+//console.log(LEV1_1+LEV4_1+CP11_1+CP12_1+CP13_1+CP14_1)
+const totalUsageTimeHours = Math.round(totalUsageTime / 3600000);
+
+
+finalresult.push({"totalEnergy":totalEnergy,"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"currentActiveDevice":ActiveChargingpoint,"totalTimeusage":totalUsageTimeHours})
+//console.log(LEV1_1.LEV1_1Energy+LEV4_1.LEV4_1Energy+CP12_1.CP12_1Energy+CP13_1.CP13_11Energy+ CP13_1.CP13_11Energy+CP13_1.CP14_1Energy)
+            //res.status(200).send( result );
+            res.status(200).send( finalresult );
+            console.log(finalresult)
+            console.log('Total Usage Time (hours):', totalUsageTimeHours);
+            //console.log(totalEnergy)
+
+        }
+
+    })
+})
+//------------------------------battery 5min analystics  ------------------------------//
+app.get("/analytics/battery", async (req, res) => {
+    meterDb.query("select * from meterdata.batteryfiveminute where date(received_time)=curdate() order by received_time asc", function (error, result) {
+      const batteryData = [];
+      const energy = [];
+      const packsoc = [];
+      const timestamp = [];
+      const resultData=[]
+  
+      if (error) {
+        console.log(error);
+      } else {
+        const response = JSON.parse(JSON.stringify(result));
+        for (let i = 0; i < response.length; i++) {
+          if (response[i].max_pacsoc) {
+            if (response[i].upsbatterystatus==="IDLE") {
+              energy.push(response[i].idle_energystatues);
+              packsoc.push(response[i].max_pacsoc);
+              let date = new Date(response[i].received_time);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+              resultData.push({"packsoc":response[i].max_pacsoc,"batteryEnergy":"0.01","timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+
+            }
+            if (response[i].upsbatterystatus==="DCHG") {
+              energy.push((response[i].total_upsdidchargingenergy_diff)*-1);
+              packsoc.push(response[i].max_pacsoc);
+              let date = new Date(response[i].received_time);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+              resultData.push({"packsoc":response[i].max_pacsoc,"batteryEnergy":(response[i].total_upsdidchargingenergy_diff)*-1,"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+            }
+            if (response[i].upsbatterystatus==="CHG") {
+              energy.push(response[i].total_upschargingenergy_diff);
+              packsoc.push(response[i].max_pacsoc);
+              let date = new Date(response[i].received_time);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+
+              resultData.push({"packsoc":response[i].max_pacsoc,"batteryEnergy":response[i].total_upschargingenergy_diff,"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+            }
+          }
+        }
+  
+  
+        res.send(resultData);
+        console.log(result.length)
+      }
+    });
+  });
+
+//----------------------------------------------------------------------//
+
+//--------------------------------battery voltage vs current graph-------------------------------//
+app.get("/analytics/battery/voltage&current", async (req, res) => {
+  meterDb.query("select * from batteryoneminute where date(received_time)=curdate() order by received_time asc", function (error, result) {
+    const resultData=[]
+
+    if (error) {
+      console.log(error);
+    } else {
+      const response = JSON.parse(JSON.stringify(result));
+
+       for (let i = 0; i < response.length; i++) {
+        if(response[i].batteryVoltage){}
+        let date = new Date(response[i].received_time);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        // const seconds = date.getSeconds().toString().padStart(2, '0');
+        const timestamp = `${hours}:${minutes}`;
+        
+        resultData.push({"timestamp":timestamp,"batteryVoltage":parseInt(response[i].batteryvoltage),"batteryCurrent":parseFloat(response[i].batterycurrent)})
+      }
+
+
+      res.send(resultData);
+      console.log(response.length)
+    }
+  });
+});
+
+
+
+//-------------------------------------end of api------------------------------------------//
 
 
 
@@ -572,6 +875,7 @@ app.get("/Alert/Logs",async(req,res)=>{
         }
         else{
             const response=(JSON.parse(JSON.stringify(result)))
+            console.log(response.length,"alert logs  executed");
 
             for(let i=0;i<response.length;i++){
             const date = new Date(response[i].alerttime);
@@ -585,6 +889,48 @@ app.get("/Alert/Logs",async(req,res)=>{
     })
    
 }) 
+
+// alerts filtering data api
+
+app.post("/Alerts/filter", async (req, res) => {
+    const { systemName } = req.body;
+    const AlertFilter = [];
+    // let query;
+    // if (systemName==="Building Load") {
+    //     query = `select * from alertLogs where systemName ='${systemName}'`;
+    //   }
+    //   if (systemName==="Chillers") {
+    //     query = `select * from alertLogs where systemName ='${systemName}'`;
+    //     console.log("filtered chillers alert")
+    //   }
+    //   if (systemName==="Thermal") {
+    //     query = `select * from alertLogs where systemName ='${systemName}'`;
+    //     console.log("filtered thermal alert")
+    //   }
+    const query=`select * from alertLogs where systemName ='${systemName}'`
+      con.query(query, (error, results) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ message: 'An error occurred' });
+        }
+        console.log(results.length,`filter for ${systemName}  alert executed`);
+        for (let i = 0; i < results.length; i++) {
+          const date = new Date(results[i].alerttime);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          const year = date.getFullYear().toString();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          const formattedDate = `${day}/${month}/${year}`;
+          const timeview = [formattedDate, timestamp];
+    
+          AlertFilter.push({"id":results[i].recordId,"alerttimereceived":timeview,"alert":results[i].alert,"limitvalue":results[i].limitvalue,"systemName":results[i].systemName,"severity":results[i].severity,"action":results[i].action});
+        }
+        //console.log(AlertFilter);
+        return res.json(AlertFilter);
+      });
+  });
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 //Thermal alert api
@@ -687,53 +1033,75 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
         return res.json(results);
       });
     });
+
+    //---------------------------//
     
     
     
     app.post("/filter/hvacSchneider7230Polling", (req, res) => {
-        const { date, endDate } = req.body;
-        const filterData=[]
-        console.log(date,endDate)
-     
-        let query;
-        if (endDate) {
-          query = `SELECT * FROM peakdemandHourly WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}'`;
-        } else {
-          query = `SELECT * FROM peakdemandHourly WHERE DATE(polledTime) = '${date}'`;
-        }
-     
-        con.query(query, (error, results) => {
-          if (error) {
-            console.error(error);
-            return res.status(500).json({ message: 'An error occurred' });
-          }
-          console.log(results.length)
-          for(let i=0;i<results.length;i++){
-               const date = new Date(results[i].polledTime);
-               const hours = date.getHours().toString().padStart(2, '0');
-               const minutes = date.getMinutes().toString().padStart(2, '0');
-               // const seconds = date.getSeconds().toString().padStart(2, '0');
-               const timestamp = `${hours}`;
-               const year = date.getFullYear().toString();
-               const month = (date.getMonth() + 1).toString().padStart(2, '0');
-               const day = date.getDate().toString().padStart(2, '0');
-               const formattedDate = `${day}/${month}/${year}`;
-                const timeview=[formattedDate,timestamp]
+  const { date, endDate,month } = req.body;
+  const filterData = [];
+  console.log(date, endDate);
 
-            //    let selecteddate = date.toLocaleString();
-            //    let times=selecteddate.split(',')
-               filterData.push({"timestamp":timeview,"peakdemand":results[i].peakdemand})
-           
-          }
-          console.log(filterData)
-          return res.json(filterData);
-        });
-      });
+  let query;
+  if (endDate) {
+    query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}'`;
+    console.log('bar graph executed');
+  }
+//   else if(month){
+//     query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
+//     console.log("month query executed")
+//   }
+  else {
+      if(month){
+    query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
+    console.log("month query executed")
+  }
+  else{
+    query = `SELECT * FROM peakdemandquarter WHERE DATE(polledTime) = '${date}'`;
+    console.log('single day filter executed')
+
+  }
+    // Filter by month
+    // const year = date.substring(0, 4);
+    // const month = date.substring(5, 7);
+    // const firstDayOfMonth = `${year}-${month}-01`;
+    // const lastDayOfMonth = `${year}-${month}-31`; // Assuming maximum 31 days per month
+
+    // query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${firstDayOfMonth}' AND '${lastDayOfMonth}'`;
+    // console.log('line graph executed');
+    
+  }
+
+  con.query(query, (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred' });
+    }
+    console.log(results.length);
+    for (let i = 0; i < results.length; i++) {
+      const date = new Date(results[i].polledTime);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const timestamp = `${hours}:${minutes}`;
+      const year = date.getFullYear().toString();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${day}/${month}/${year}`;
+      const timeview = [formattedDate, timestamp];
+
+      filterData.push({ "timestamp": timeview, "peakdemand": Math.trunc(results[i].peakdemand) });
+    }
+    console.log(filterData);
+    return res.json(filterData);
+  });
+});
+
       
       
       
        app.get("/peak/hvacSchneider7230Polling",async(req,res)=>{
-        con.query("select * from peakdemandHourly  where DATE(polledTime) = curdate() ",function(err,result,feilds){
+        con.query("select * from peakdemandquarter where DATE(polledTime)=curdate();",function(err,result,feilds){
             const viewData=[]
             if(err){
                 console.log(err)
@@ -745,13 +1113,13 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
                     const hours = date.getHours().toString().padStart(2, '0');
                const minutes = date.getMinutes().toString().padStart(2, '0');
                // const seconds = date.getSeconds().toString().padStart(2, '0');
-               const timestamp = `${hours}`;
-                    viewData.push({"polledTime":timestamp,"peakdemand":response[i].peakdemand})
+               const timestamp = `${hours}:${minutes}`;
+                    viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].peakdemand)})
 
 
                 }
                 res.send(viewData)
-                console.log(response.length)
+                console.log(viewData)
             }
         })
         
@@ -832,7 +1200,7 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
           const date = new Date(entry.polled_timestamp);
           const hours = date.getHours().toString().padStart(2, '0');
           const minutes = date.getMinutes().toString().padStart(2, '0');
-          // const seconds = date.getSeconds().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padevchargerStart(2, '0');
           const timestamp = `${hours}:${minutes}`;
           //const timestamp = `${hours}`;
           return { timestamp, energy: decimalval,solarRadiation:radiation};
@@ -878,7 +1246,7 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
 // Formatting the rounded time
 var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
            
-            wmsMeterdata.push({"cumulativepower":response[i].cummulativemeterpower,"wmsirradiation":response[i].wmsirradiation,"timestamp":roundedTime})
+            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":roundedTime})
 
         }
         console.log(wmsMeterdata)
