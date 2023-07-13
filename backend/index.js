@@ -79,12 +79,25 @@ app.use(
     
     
     app.get("/battery",async(req,res)=>{
-        con.query("SELECT * FROM EMSUPSbattery WHERE received_time >= CURDATE() AND received_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by received_time desc",function(err,result,feilds){
+        con.query("SELECT * FROM EMSUPSbattery WHERE received_time >= CURDATE() AND received_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY) ",function(err,result,feilds){
             if(err){
                 console.log(err)
             }
             else{
                 const response=(JSON.parse(JSON.stringify(result)))
+                //res.send(response)
+
+                // for(const i of response){
+                //     console.log((i.received_time))
+                //     const utcTimeString =i.received_time
+                //     const date = new Date(utcTimeString)
+                //     const localTimeString = date.toLocaleString();
+                //     const minutes = date.getUTCMinutes();
+                //     console.log(minutes);
+                //     console.log(localTimeString)
+                // }
+                
+                // console.log(response.length)
                 const emptyArray=[]
                 let data = []; // array to store the data
 
@@ -103,8 +116,6 @@ let groupedData = response.reduce((accumulator, currentValue) => {
       chargingenergy: [],
       dischargingenergy:[],
       pack_usable_soc:[],
-      batteryvoltage:[],
-      batterycurrent:[],
       count: 0,
       chargingenergyaverage:0,
       dischargingenergyavg:0,
@@ -118,9 +129,6 @@ let groupedData = response.reduce((accumulator, currentValue) => {
   accumulator[timeKey].chargingenergy.push(currentValue.upschargingenergy);
   accumulator[timeKey].dischargingenergy.push(currentValue.negative_energy);
   accumulator[timeKey].pack_usable_soc.push(currentValue.pack_usable_soc);
-  accumulator[timeKey].batteryvoltage.push(currentValue.batteryvoltage);
-  accumulator[timeKey].batterycurrent.push(currentValue.batterycurrent);
-
   accumulator[timeKey].count++;
              // taking average of chargingenergy
   let chargingenergysum = accumulator[timeKey].chargingenergy.reduce((acc, val) => acc + val, 0);
@@ -147,7 +155,6 @@ accumulator[timeKey].packsoc=packsocavg
 
 
 emptyArray.push(groupedData)
-//console.log(groupedData)
 //res.send(emptyArray)
 const minresult=[]
 //looping through the gruped
@@ -203,8 +210,7 @@ emptyArray.forEach(obj => {
     // console.log(`Discharging difference: ${dischargingDiff}`);
   }
   //console.log(calculated)
-  res.send(groupedData)
-  console.log(minresult.length)
+  res.send(minresult)
   //res.send(finalresult)
 
 
@@ -293,7 +299,7 @@ emptyArray.forEach(obj => {
     })
 
     app.get("/grid",async(req,res)=>{
-         meterDb.query("select * from GridProcessed where polledDate = curdate()",function(err,result,feilds){
+         con.query("select cumulative_energy,polled_timestamp from meterdata.gridenergytoday where date(polled_timestamp)=curdate() order by polled_timestamp desc limit 1;",function(err,result,feilds){
              if(err){
                  console.log(err)
              }
@@ -451,12 +457,12 @@ emptyArray.forEach(obj => {
         // rooftop
         app.get("/rooftop",(req,res)=>{
             var rooftop = 0 
-            con.query(`select acEnergy from RooftopProcessed where polledDate = curdate()`,function(err,qrres){
+            meterDb.query("select cumulative_energy,polled_timestamp from meterdata.rooftopreadingtoday where Date(polled_timestamp)=curdate() order by polled_timestamp desc limit 1;",function(err,qrres){
                 if(err){
                     console.log(err)
                 }else{
                     for (const result of qrres){
-                        rooftop = result["acEnergy"]
+                        rooftop = result["cumulative_energy"]
                     }
                 }
                 res.send([rooftop])
@@ -768,6 +774,7 @@ finalresult.push({"totalEnergy":totalEnergy,"totalSessions":TotalSessions,"NoOfC
 
     })
 })
+
 //------------------------------battery 5min analystics  ------------------------------//
 app.get("/analytics/battery", async (req, res) => {
     meterDb.query("select * from meterdata.batteryfiveminute where date(received_time)=curdate() order by received_time asc", function (error, result) {
@@ -792,7 +799,7 @@ app.get("/analytics/battery", async (req, res) => {
               // const seconds = date.getSeconds().toString().padStart(2, '0');
               const timestamp = `${hours}:${minutes}`;
               //timestamp.push(date);
-              resultData.push({"packsoc":response[i].max_pacsoc,"batteryEnergy":"0.01","timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+              resultData.push({"packsoc":parseInt(response[i].max_pacsoc),"batteryEnergy":0.01,"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
 
             }
             if (response[i].upsbatterystatus==="DCHG") {
@@ -804,7 +811,7 @@ app.get("/analytics/battery", async (req, res) => {
               // const seconds = date.getSeconds().toString().padStart(2, '0');
               const timestamp = `${hours}:${minutes}`;
               //timestamp.push(date);
-              resultData.push({"packsoc":response[i].max_pacsoc,"batteryEnergy":(response[i].total_upsdidchargingenergy_diff)*-1,"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+              resultData.push({"packsoc":parseInt(response[i].max_pacsoc),"batteryEnergy":parseFloat((response[i].total_upsdidchargingenergy_diff)*-1),"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
             }
             if (response[i].upsbatterystatus==="CHG") {
               energy.push(response[i].total_upschargingenergy_diff);
@@ -816,7 +823,7 @@ app.get("/analytics/battery", async (req, res) => {
               const timestamp = `${hours}:${minutes}`;
               //timestamp.push(date);
 
-              resultData.push({"packsoc":response[i].max_pacsoc,"batteryEnergy":response[i].total_upschargingenergy_diff,"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+              resultData.push({"packsoc":parseInt(response[i].max_pacsoc),"batteryEnergy":parseFloat(response[i].total_upschargingenergy_diff),"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
             }
           }
         }
@@ -859,8 +866,98 @@ app.get("/analytics/battery/voltage&current", async (req, res) => {
 });
 
 
-
 //-------------------------------------end of api------------------------------------------//
+//-------------------------filtering the battery --------------------------//
+//-----------------------filter api for energy vs packsoc-------------------//
+app.post("/analytics/fivemingraphs", (req, res) => {
+  const { date} = req.body;
+  const endResult=[]
+  const batteryData = [];
+   const energy = [];
+   const packsoc = [];
+   const timestamp = [];
+  const resultData=[]
+  const query = `select * from meterdata.batteryfiveminute where date(received_time)='${date}' order by received_time asc`;
+  meterDb.query(query, (error, response) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred' });
+    }
+    for (let i = 0; i < response.length; i++) {
+      if (response[i].max_pacsoc) {
+        if (response[i].upsbatterystatus==="IDLE") {
+          energy.push(response[i].idle_energystatues);
+          packsoc.push(response[i].max_pacsoc);
+          let date = new Date(response[i].received_time);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //timestamp.push(date);
+          endResult.push({"packsoc":parseInt(response[i].max_pacsoc),"batteryEnergy":0.01,"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+
+        }
+        if (response[i].upsbatterystatus==="DCHG") {
+          energy.push((response[i].total_upsdidchargingenergy_diff)*-1);
+          packsoc.push(response[i].max_pacsoc);
+          let date = new Date(response[i].received_time);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //timestamp.push(date);
+          endResult.push({"packsoc":parseInt(response[i].max_pacsoc),"batteryEnergy":parseFloat((response[i].total_upsdidchargingenergy_diff)*-1),"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+        }
+        if (response[i].upsbatterystatus==="CHG") {
+          energy.push(response[i].total_upschargingenergy_diff);
+          packsoc.push(response[i].max_pacsoc);
+          let date = new Date(response[i].received_time);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //timestamp.push(date);
+
+          endResult.push({"packsoc":parseInt(response[i].max_pacsoc),"batteryEnergy":parseFloat(response[i].total_upschargingenergy_diff),"timestamp":timestamp,"batteryStatus":response[i].upsbatterystatus})
+        }
+      }
+    }
+      console.log(endResult.length)
+    return res.json(endResult);
+  });
+});
+//-----------------------end of filter----------------//
+
+//------------------------filter api for voltage vs current for 1min table---------------//
+app.post("/analytics/onemingraph", (req, res) => {
+  const { date} = req.body;
+  const currentvolt=[]
+  
+  const query = `select * from batteryoneminute where date(received_time)= '${date}'order by received_time asc`;
+  meterDb.query(query, (error, response) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred' });
+    }
+    for (let i = 0; i < response.length; i++) {
+      if(response[i].batteryVoltage){}
+      let date = new Date(response[i].received_time);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      // const seconds = date.getSeconds().toString().padStart(2, '0');
+      const timestamp = `${hours}:${minutes}`;
+      
+      currentvolt.push({"timestamp":timestamp,"batteryVoltage":parseInt(response[i].batteryvoltage),"batteryCurrent":parseFloat(response[i].batterycurrent)})
+    }
+    console.log(currentvolt)
+    return res.json(currentvolt);
+  });
+});
+//-------------------------end of api-------------------------//
+
+
+//-----------------------------end of api-------------------------------//
+
 
 
 
