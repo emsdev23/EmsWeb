@@ -8,6 +8,13 @@ import { IconContext } from 'react-icons/lib';
 import React, { useState,useEffect } from 'react';
 import IITMRP from '../images/iitmlogo.png'
 import CeetLog from "../images/Ceet.png"
+import * as GiIcons  from 'react-icons/gi'
+import * as BsIcons  from 'react-icons/bs'
+import Menu from '../images/menu.png'
+
+
+
+
 
 const Nav = styled.div`
   background: white;
@@ -104,15 +111,21 @@ function Navbar() {
     <IconContext.Provider value={{ color: "#fff" }}>
       <Nav class="row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: "100px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", flexGrow: 1 }}>
-          <img src={IITMRP} alt='iitmrp' style={{ width: "150px", height: "110px" }} />
+           <Link to='/'>
+      <img src={IITMRP} alt='iitmrp' style={{ width: "150px", height: "110px" }} />
+      </Link> 
+          
           <h1 style={{ textAlign: "center", color: "black", flexGrow: 1 }}><b> Energy Management System</b></h1>
           <img src={CeetLog} alt='iitmrp' style={{ width: "100px", height: "50px",marginRight:"50px" }} />
           
         </div>
         <NavIcon onClick={showSidebar}>
-          <FaIcons.FaBars color='green' />
+          {/* <GiIcons.GiHamburgerMenu color='black' /> */}
+          <img src={Menu} alt="menu" width="70px" height="60px"  />
+          
         </NavIcon>
       </Nav>
+      <hr style={{border:"1px solid black",marginLeft:"50px",marginRight:"50px"}}/>
       <SidebarNav className="sidebar" sidebar={sidebar} style={{ background: "black" }}>
         <SidebarWrap>
           {/* <NavIcon onClick={closeSidebar}>
