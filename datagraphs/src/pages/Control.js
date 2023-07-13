@@ -19,7 +19,7 @@ import batteryfull from '../images/smartphone-charger.png'
 
 
 
-const host = 'localhost'
+const host = '121.242.232.211'
 
 function Control() {
   const [formData, setFormData] = useState({
@@ -83,7 +83,7 @@ function Control() {
   packSoc.push(batterydata[i].pack_usable_soc)
  
   if(batterydata[i].batteryStatus==="CHG"){
-    CHG.push((batterydata[i].chargingAVG))
+    CHG.push((batterydata[i].chargingAVG).toFixed(2))
     chgtime.push(batterydata[i].timestamp)
     currentStatus.push("Charging")
    
@@ -528,7 +528,7 @@ console.log(distime)
         /> */}
   </div>
   <br/>
-  <button type="submit" class="btn btn-primary" style={{height:"40px"}}>Submit</button>
+  <button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
 
   </form>
 

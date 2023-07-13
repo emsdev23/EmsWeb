@@ -16,26 +16,26 @@ function WheeledInsolar() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [singledaydata,setSingledaydata]=useState([])
     const [wmsMeterdata,setWmsMeterdata]=useState([])
- 
-   
+  
+    
     const handleDateChange = (singledaydata) => {
       setSelectedDate(singledaydata);
     };
- 
+  
     const handlesingledaySubmit = async (event) => {
       event.preventDefault();
       try {
         const formattedDate = selectedDate.toISOString().substring(0, 10);
         const response = await axios.post('http://121.242.232.211:5000/singleday/wheeledinsolr', { date: formattedDate });
         const meterresponse = await axios.post('http://121.242.232.211:5000/wmsMeter/graphs', { date: formattedDate });
-       
+        
         setSingledaydata(response.data);
         setWmsMeterdata(meterresponse.data)
       } catch (error) {
         console.error(error);
       }
     };
- 
+  
     const graphdata=[]
     const singlegrahdata=[]
      let  INV1=[]
@@ -57,8 +57,8 @@ function WheeledInsolar() {
     const inverterSeven=[]
     const inverterEight=[]
 
-   
-   
+    
+    
   for(let i=0;i<singledaydata.length;i++){
     INV1.push(singledaydata[i].INV1)
     INV2.push(singledaydata[i].INV2)
@@ -131,9 +131,9 @@ function WheeledInsolar() {
 var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
       graphdata.push({"inverterTimestamp":roundedTime})
     }
- 
+  
    
-   
+    
     // const minutes = date.getMinutes();
     // const ampm = hours >= 12 ? 'pm' : 'am';
     // hours = hours % 12;
@@ -148,7 +148,7 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
   handlesingledaySubmit()
   console.log(singledaydata)
   console.log(graphdata)
- 
+  
   console.log(wmsMeterdata)
 
 
@@ -186,12 +186,15 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
       name:"INV8",
       data: inverterEight.map((val)=>(val.cumulativeactivepower))
     },
- 
+  
   ],
- 
+  
     options: {
       chart: {
-        type: 'line'
+        type: 'line',
+        zoom: {
+          enabled: false
+        },
       },
       dataLabels: {
         enabled: false
@@ -298,62 +301,64 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
     }
   };
 
-
   var wmsMetergraph = {
-    series: [{
-      name:"cumulativepower",
-      data: wmsMeterdata.map((val)=>(val.cumulativepower))
-    },
-    {
-      name:"wmsirradiation",
-      data: wmsMeterdata.map((val)=>(val.wmsirradiation))
-    }],
- 
+    series: [
+      {
+        name: "Energy",
+        data: wmsMeterdata.map((val) => (val.instantaniousEnergy)),
+        yAxis: 1
+      },
+      {
+        name: "Irradiation (kWh/m2)",
+        data: wmsMeterdata.map((val) => val.wmsirradiation),
+        yAxis: 0
+      }
+    ],
+  
     options: {
       chart: {
-        type: 'area'
+        type: 'area',
+        zoom: {
+          enabled: true
+        }
       },
       dataLabels: {
         enabled: false
       },
-      zoom: {
-        enabled:false,
-        autoScaleYaxis: true
-      },
       title: {
-        // text: "Wheeled In Solar",
         align: 'center',
         margin: 10,
         offsetX: 0,
         offsetY: 0,
         floating: false,
         style: {
-          fontSize:  '14px',
-          fontWeight:  'bold',
-          fontFamily:  undefined,
-          color:  '#263238'
-        },
-    },
-      stroke: {
-        curve: 'straight'
-      },
-      // colors: ['#152138', ' #00FF00'], // Red for positive values, green for negative values
-      // colors: ({ value }) => {
-      //   return value < 0 ? ['#00ff00'] : ['#ff0000'];
-      // },
-      yaxis: {
-        title: {
-          text: 'Active Power (kW)',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          fontFamily: undefined,
+          color: '#263238'
         }
       },
-      xaxis: {
-        categories: wmsMeterdata.map((val)=>(val.timestamp)),
-        labels: {
-          style: {
-            colors: 'black' // set the x-axis label color to red
+      yaxis: [
+        {
+          title: {
+            text: 'Energy (kW)'
           }
         },
-        title : {text:"Time in HOURS"},
+        {
+          opposite: true,
+          title: {
+            text: 'Irradiation (kWh/m2)'
+          }
+        }
+      ],
+      xaxis: {
+        categories: wmsMeterdata.map((val) => val.timestamp),
+        labels: {
+          style: {
+            colors: 'black'
+          }
+        },
+        title: { text: 'Time in HOURS' }
       },
       fill: {
         opacity: 0.5,
@@ -364,29 +369,31 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
           opacityTo: 0.9,
           stops: [0, 100]
         },
-     
         colors: ['#0000FF']
       },
       plotOptions: {
         bar: {
           colors: {
-            ranges: [{
-              from: -9999,
-              to: 0,
-              color: '#F15B46'
-            }, {
-              from: 0,
-              to: 9999,
-              color: '#28abf7'  
-            }]
+            ranges: [
+              {
+                from: -9999,
+                to: 0,
+                color: '#F15B46'
+              },
+              {
+                from: 0,
+                to: 9999,
+                color: '#28abf7'
+              }
+            ]
           },
-          columnWidth: '80%',
+          columnWidth: '80%'
         }
       },
-      fill:{
-        target:"origin",
-        below:'#00FF7F',
-        above:'#20B2AA'
+      fill: {
+        target: 'origin',
+        below: '#00FF7F',
+        above: '#20B2AA'
       },
       tooltip: {
         enabled: true,
@@ -396,9 +403,9 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
           color: '#fff'
         }
       },
-      legend:{
+      legend: {
         show: true,
-        position: 'top',
+        position: 'top'
       },
       grid: {
         yaxis: {
@@ -409,19 +416,14 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
         padding: {
           left: 20
         }
-      },
-      // markers: {
-      //   fillColor: '#e3e3e3',
-      //   strokeColor: '#fff',
-      //   size: 3,
-      //   shape: "circle"
-      // },
+      }
     }
   };
+  
   return (
     <div>
-      <div>
-      <h4 style={{textAlign:'center',marginTop:"15px"}}><b>Wheeled In Solar </b></h4>
+      <div> 
+      <h4 style={{textAlign:'center',marginTop:"15px"}}><b style={{fontSize:"30px"}}>Wheeled In Solar </b></h4>
       </div>
        <form onSubmit={handlesingledaySubmit}   >
       {/* <div class='row' style={{display:'flex'}}>
@@ -431,12 +433,12 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
     <div className="row" style={{ marginLeft: "20px", marginTop: "10px" }}>
   <div className="col">
     <div className="input-group mb-4" style={{ display: "flex" }}>
-     
+      
         <label className="input-group-text" htmlFor="inputGroupSelect01">
         <h5 style={{color:"brown"}}><b>Select Date :</b></h5> <DatePicker id="date" className="form-control" selected={selectedDate} onChange={handleDateChange} style={{ width: "200px" }}   />
         </label>
        
-     
+      
      
     </div>
   </div>
@@ -455,7 +457,20 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
 
    </form>
    <Grid sx={{ flexGrow: 1 }} container spacing={2} >
-  <Grid item xs={12} sm={6} >
+
+   <Grid item xs={12} sm={6} >
+    <div> 
+    <h4 style={{textAlign:"center",color:"brown"}}><b>Daily Solar data</b></h4>
+   {
+     
+     wmsMetergraph?<ReactApexChart options={wmsMetergraph.options} series={wmsMetergraph.series} type='area' height='400px' />:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+
+    
+  }
+    </div>
+    </Grid>
+
+  <Grid item xs={12} sm={6} > 
   <div id="chart2">
   <h4 style={{textAlign:"center",color:"brown"}}><b>Inverter Active Power</b></h4>
 {
@@ -467,25 +482,15 @@ apexcharts2?<ReactApexChart options={apexcharts2.options} series={apexcharts2.se
 
 </div>
 </Grid>
- 
-    <Grid item xs={12} sm={6} >
-    <div>
-    <h4 style={{textAlign:"center",color:"brown"}}><b>MeterData </b></h4>
-   {
-     
-     wmsMetergraph?<ReactApexChart options={wmsMetergraph.options} series={wmsMetergraph.series} type='area' height='400px'  />:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
-
+  
    
-  }
-    </div>
     </Grid>
-    </Grid>
- 
-   
- 
+  
+    
+  
 
 
- 
+  
    
 
     </div>
@@ -493,5 +498,3 @@ apexcharts2?<ReactApexChart options={apexcharts2.options} series={apexcharts2.se
 }
 
 export default WheeledInsolar
-
-

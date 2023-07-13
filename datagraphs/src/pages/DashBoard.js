@@ -153,9 +153,9 @@ function DashBoard() {
   const energysaved = `http://${host}:5000/peaksavings`
   const chillerstatus = `http://${host}:5000/chillerstatusd`
   const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
-  const powerFactor= `http://localhost:5000/schneider7230readings`
-  const diesel=`http://localhost:5000/dashboard/Deisel`
-  const chargerdate='http://localhost:5000/dashboard/EvCharger'
+  const powerFactor= `http://${host}:5000/schneider7230readings`
+  const diesel=`http://${host}:5000/dashboard/Deisel`
+  const chargerdate=`http://${host}:5000/dashboard/EvCharger`
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -293,7 +293,7 @@ function DashBoard() {
   }
  let gridunprocess='';
   for(let i=0;i<grid.length;i++){
-    gridunprocess=(grid[i].Energy)
+    gridunprocess=(grid[i].cumulative_energy)
 
   }
   console.log(grid)
@@ -450,6 +450,7 @@ function DashBoard() {
 let previousValue = null;
 let currentValue = null;
 const differenceValue=[]
+const finalDifference=[]
 
 // loop over the array of data and perform subtraction
 for (let i = 0; i < meter.length; i++) {
@@ -470,9 +471,16 @@ for (let i = 0; i < meter.length; i++) {
 }
 
 
+for(let i=0;i<differenceValue.length;i++){
+  if(differenceValue[i]>0 && differenceValue[i]<1){
+   finalDifference.push(differenceValue[i])
+
+}
+}
 
 
-const totalgeneration= differenceValue.reduce((accumulator, currentValue) => {
+
+const totalgeneration= finalDifference.reduce((accumulator, currentValue) => {
   return accumulator + currentValue;
 }, 0);
 const totalsolargeneration=(totalgeneration*1000)

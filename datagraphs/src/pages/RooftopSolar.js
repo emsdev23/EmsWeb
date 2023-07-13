@@ -33,18 +33,23 @@ function RooftopSolar() {
       var apexcharts2 = {
         series: [{
           name:"energy",
-          data: singledaydata.map((val)=>(val.energy))
+          data: singledaydata.map((val)=>(val.energy)),
+          yAxis: 1
         },
         {
           name:"solar_radiation",
-          data: singledaydata.map((val)=>(val.solarRadiation))
+          data: singledaydata.map((val)=>(val.solarRadiation)),
+          yAxis: 0
         }
      
       ],
      
         options: {
           chart: {
-            type: 'area'
+            type: 'area',
+            zoom: {
+                      enabled: false
+                    }
           },
           dataLabels: {
             enabled: false
@@ -70,11 +75,24 @@ function RooftopSolar() {
           // colors: ({ value }) => {
           //   return value < 0 ? ['#00ff00'] : ['#ff0000'];
           // },
-          yaxis: {
-            title: {
-              text: 'Active Power (kW)',
+          // yaxis: {
+          //   title: {
+          //     text: 'Active Power (kW)',
+          //   }
+          // },
+          yaxis: [
+            {
+              title: {
+                text: 'Energy (kW)'
+              }
+            },
+            {
+              opposite: true,
+              title: {
+                text: 'Irradiation (kWh/m2)'
+              }
             }
-          },
+          ],
           xaxis: {
             categories: singledaydata.map((val)=>(val.timestamp)),
             labels: {
@@ -147,13 +165,132 @@ function RooftopSolar() {
           // },
         }
     }
+
+    // var wmsMetergraph = {
+    //   series: [
+    //     {
+    //       name: "Energy",
+    //       data: wmsMeterdata.map((val) => (val.instantaniousEnergy)),
+    //       yAxis: 1
+    //     },
+    //     {
+    //       name: "Irradiation (kWh/m2)",
+    //       data: wmsMeterdata.map((val) => val.wmsirradiation),
+    //       yAxis: 0
+    //     }
+    //   ],
+    
+    //   options: {
+    //     chart: {
+    //       type: 'area',
+    //       zoom: {
+    //         enabled: true
+    //       }
+    //     },
+    //     dataLabels: {
+    //       enabled: false
+    //     },
+    //     title: {
+    //       align: 'center',
+    //       margin: 10,
+    //       offsetX: 0,
+    //       offsetY: 0,
+    //       floating: false,
+    //       style: {
+    //         fontSize: '14px',
+    //         fontWeight: 'bold',
+    //         fontFamily: undefined,
+    //         color: '#263238'
+    //       }
+    //     },
+    //     yaxis: [
+    //       {
+    //         title: {
+    //           text: 'Energy (kW)'
+    //         }
+    //       },
+    //       {
+    //         opposite: true,
+    //         title: {
+    //           text: 'Irradiation (kWh/m2)'
+    //         }
+    //       }
+    //     ],
+    //     xaxis: {
+    //       categories: wmsMeterdata.map((val) => val.timestamp),
+    //       labels: {
+    //         style: {
+    //           colors: 'black'
+    //         }
+    //       },
+    //       title: { text: 'Time in HOURS' }
+    //     },
+    //     fill: {
+    //       opacity: 0.5,
+    //       type: 'gradient',
+    //       gradient: {
+    //         shadeIntensity: 1,
+    //         opacityFrom: 0.7,
+    //         opacityTo: 0.9,
+    //         stops: [0, 100]
+    //       },
+    //       colors: ['#0000FF']
+    //     },
+    //     plotOptions: {
+    //       bar: {
+    //         colors: {
+    //           ranges: [
+    //             {
+    //               from: -9999,
+    //               to: 0,
+    //               color: '#F15B46'
+    //             },
+    //             {
+    //               from: 0,
+    //               to: 9999,
+    //               color: '#28abf7'
+    //             }
+    //           ]
+    //         },
+    //         columnWidth: '80%'
+    //       }
+    //     },
+    //     fill: {
+    //       target: 'origin',
+    //       below: '#00FF7F',
+    //       above: '#20B2AA'
+    //     },
+    //     tooltip: {
+    //       enabled: true,
+    //       theme: 'dark',
+    //       style: {
+    //         background: '#222',
+    //         color: '#fff'
+    //       }
+    //     },
+    //     legend: {
+    //       show: true,
+    //       position: 'top'
+    //     },
+    //     grid: {
+    //       yaxis: {
+    //         lines: {
+    //           offsetX: -30
+    //         }
+    //       },
+    //       padding: {
+    //         left: 20
+    //       }
+    //     }
+    //   }
+    // };
   return (
     <div>
         <div>
       <div>
       <h4 style={{textAlign:'center',marginTop:"15px"}}><b>RoofTop Solar </b></h4>
       </div>
-       <form onSubmit={handlesingledaySubmit}  style={{border:'1px solid black'}} >
+       <form onSubmit={handlesingledaySubmit}   >
       {/* <div class='row' style={{display:'flex'}}>
         <div>  */}
       <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>

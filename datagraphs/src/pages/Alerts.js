@@ -30,7 +30,7 @@ const [receivedData,setReceivedDate]=useState([])
 
   const FilterAlertsData = async () => {
 
-    axios.post('http://localhost:5000/Alerts/filter', { systemName: filterAlert })
+    axios.post(`http://${host}:5000/Alerts/filter`, { systemName: filterAlert })
     .then(response => {
       const Dataresponse=response.data
           //console.log(response.data);
