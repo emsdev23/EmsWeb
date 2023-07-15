@@ -12,8 +12,11 @@ import * as SiIcons from 'react-icons/si'
 import * as GiIcons from  'react-icons/gi'
 import * as TbIcons from  'react-icons/tb'
 
+//import * as FaIcons from 'react-icons/fa'
 
 
+
+//FaIcons.FaCarBattery
 
 export const SidebarData = [
   {
@@ -43,6 +46,11 @@ export const SidebarData = [
         title: 'RoofTop Solar',
         path: '/RoofTopSolar',
         icon: <TbIcons.TbSolarPanel2 />
+      },
+      {
+        title: 'UPS Battery',
+        path: '/Battery_Analytics',
+        icon: <TbIcons.TbBatteryAutomotive />
       },
       
     ]
@@ -124,7 +132,7 @@ export const SidebarData = [
   },
   {
     title: 'Documentation',
-    path: '/Battery_Analytics',
+    path: '/Documentation',
     icon: <IoIcons.IoMdHelpCircle />,
     cName: 'nav-text'
   }
