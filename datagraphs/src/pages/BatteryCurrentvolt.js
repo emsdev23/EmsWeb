@@ -301,10 +301,10 @@ const option = {
     <div>
               <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
   <div className="col">
-    <div className="input-group mb-3" style={{ width: "300px"}}>
+  <div className="input-group-prepend" style={{width:"300px",marginLeft:"30px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b>Select Date </b></h5>:<DatePicker id="date" selected={voltcurrentfilterDate} onChange={handleEndDateChange} placeholderText='select Date' />
+          <h5 style={{color:"brown"}}><b>Date :-</b></h5><DatePicker id="date" selected={voltcurrentfilterDate} onChange={handleEndDateChange} />
         </label>
       </div>
      

@@ -61,6 +61,9 @@ function BatteryEnergyPac() {
     }, [filterDate]);
 
     console.log(data)
+
+  
+
 // Render the Highcharts line graph using the fetched data
   const options = {
     // Highcharts configuration options
@@ -116,6 +119,7 @@ function BatteryEnergyPac() {
           const batteryStatus = graphData[this.point.index].batteryStatus;
           const timestamp = graphData[this.point.index].timestamp;
           tooltipText += ` | Battery Status: ${batteryStatus} | Time: ${timestamp}`;
+          
     
           return tooltipText;
         },
@@ -317,12 +321,17 @@ function BatteryEnergyPac() {
   };
 
   
-const now = new Date();
-const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
-const [day, month, year] = local.split("/"); // Split the date by "/"
-const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
-  
+  const now = new Date();
+  const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
+  const [month, day, year] = local.split("/"); // Split the date by "/"
+  const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
 const dateValue = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
+
+
+let  currentBatteryStatus=[]
+for(let i=0;i<graphData.length;i++){
+  currentBatteryStatus.push(graphData[i].batteryStatus)
+}
   return (
     <div>
 
@@ -330,10 +339,18 @@ const dateValue = filterDate ? new Date(filterDate.getTime() - filterDate.getTim
 
 <div class="row">
   <div class="col-10" > 
-  <div className="input-group-prepend" style={{width:"300px",marginLeft:"30px"}}>
+  <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b>Select Date </b></h5>:<DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} placeholderText='select Date' />
+          <h5 style={{color:"brown"}}><b> Date :-</b></h5><DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} />
+          {
+            filterDate===null?<button type="button" class="btn btn-warning" style={{marginLeft:"70px"}}> 
+            <h5 ><b style={{color:"black"}}>Current status:{currentBatteryStatus[currentBatteryStatus.length-1]}</b></h5>
+            </button>:""
+          }
+      
+          
         </label>
+        
       </div>
   </div>
   <div class="col-2"><h3>{dateValue}</h3></div>

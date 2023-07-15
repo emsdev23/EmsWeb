@@ -25,6 +25,7 @@ import { TiWeatherSnow } from "react-icons/ti";
 import { BsFillCircleFill } from "react-icons/bs";
 import Evcharger from '../images/charging-station-on.png'
 import Navbar from '../components/Navbar';
+import BatteryHourly from './BatteryHourly';
 
 
 //import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
@@ -1747,27 +1748,22 @@ const calculatedHeight = `calc(100vh - 100px)`;
       {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
       <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>UPS Battery</b></h4> 
         <hr/>
-        {/* <Line data={batterychart} options={optionsdata} type="area" height='200px'/>
-           <span style={{color:"black"}}>{currentupsStatus[currentupsStatus.length-1]}</span>
-        
-         */}
-        {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
         <div id="chart2"> 
-   {
+   {/* {
       apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="bar" height='270px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
 
      
-   }
+   } */}
+       <BatteryHourly/>
   
    </div>
    <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
-        {/* <b style={{color:"black"}}>Pack Soc:  {packSoc[packSoc.length-1]}% </b> */}
-        <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
+        {/* <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
           <tr>
     <td><b style={{color:"#5e5d5c"}}>Pack Soc(%):</b></td>
     <td><span style={{color:"black"}}> {packSoc[packSoc.length-1]}</span></td>
   </tr>
-</table>
+</table> */}
           <br/>
 
         </div>
@@ -1788,8 +1784,10 @@ const calculatedHeight = `calc(100vh - 100px)`;
          <hr/>
 
          <div style={{display: 'flex', justifyContent: 'center'}}>
-  <img src={Evcharger} alt="evcharger" width="200px" height="200px" />
+  <img src={Evcharger} alt="evcharger" width="250px" height="250px" />
 </div>
+<br/>
+<br/>
 <br/>
          <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px', margin: '0 auto'}}>
   <tr>
@@ -1827,7 +1825,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
 
    
-
+{/* 
   <div class="col-sm-4"  style={{marginTop:"5%"}}>
      <div class="card" style={{width:"100%", height:"100%",background:'white',color:"white"}}>
        <div class="card-body">
@@ -1847,10 +1845,9 @@ const calculatedHeight = `calc(100vh - 100px)`;
     <td><span style={{color:"black"}}>-</span></td>
   </tr>
   </table>
-         {/* <p> Shavings:</p> */}
        </div>
      </div>
-  </div>
+  </div> */}
  
 
 
