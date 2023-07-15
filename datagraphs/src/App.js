@@ -19,10 +19,11 @@ import { useState, useEffect } from 'react';
 import swal from 'sweetalert';
 import Thermalcontrol from './pages/Thermalcontrol';
 import Peakdemandgraph from './pages/Peakdemandgraph';
+import BatteryAnalytics from './pages/BatteryAnalytics';
 
 function LocationContext(props) {
   const location = useLocation();
-  const isDocumentationRoute = location.pathname === '/Battery_Analytics';
+  const isDocumentationRoute = location.pathname === '/Battery';
 
   return (
     <>
@@ -44,13 +45,14 @@ function App() {
             <Route path="/Control/upsbattery" element={<Control />} />
             <Route path="/Control/thermal" element={<Thermalcontrol />} />
             <Route path="/Alertlogs" element={<Alerts />} />
-            <Route path="/Battery_Analytics" element={<Documentation />} />
+            <Route path="/Documentation" element={<Documentation />} />
             <Route path="/Alerts/Peakdemand" element={<Peakdemand />} />
             <Route path="/Alerts/Thermalalers" element={<Thermalalers />} />
             <Route path="/Alerts/ChillerAlerts" element={<ChillerAlerts />} />
             <Route path="/peakgraph" element={<Peakdemandgraph />} />
             <Route path="/Wheeledgraph" element={<Wheeledinsolar />} />
             <Route path="/RoofTopSolar" element={<RooftopSolar />} />
+            <Route path="/Battery_Analytics" element={<BatteryAnalytics/>}/>
           </Routes>
         </div>
       </LocationContext>
