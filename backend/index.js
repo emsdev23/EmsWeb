@@ -171,17 +171,6 @@ emptyArray.forEach(obj => {
         minresult.push({'chargingAVG':chargingEnergyAvg,"dischargingAVG":dischargingenergy,"batteryStatus":batterystaus,"timestamp":date,"pack_usable_soc":packSoc})
     }
   });
-
-  
-
-
-
-
-
-
-
-
-
   
   const finalresult=[]
   const calculated=[]
@@ -238,6 +227,37 @@ emptyArray.forEach(obj => {
         })
         
     })
+
+
+
+    //---------------------------battery Dashboard--------------------//
+    app.get("/dashboard/Battery",async(req,res)=>{
+      const resultValue=[]
+      meterDb.query("select * from meterdata.batteryhourly where date(received_time) = curdate();",function(err,result,feilds){
+          if(err){
+              console.log(err)
+          }
+          else{
+              const response=(JSON.parse(JSON.stringify(result)))
+              for(let i=0;i<response.length;i++){
+                let date = new Date(response[i].received_time);
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                // const seconds = date.getSeconds().toString().padStart(2, '0');
+                const timestamp = `${hours}:${minutes}`;
+                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].total_upschargingenergy_diff),"dischargingEnergy":parseFloat(response[i].total_upsdidchargingenergy_diff)*-1,"idleEnergy":0.01,"Pacsoc":parseInt(response[i].max_pacsoc),"energy_available":response[i].energy_available})
+
+              }
+              res.send(resultValue)
+              console.log(resultValue.length)
+          }
+      })
+      
+  })
+
+
+
+    //-----------------------end of api---------------------//
 
     //SELECT * FROM EMSUPSbattery WHERE upstimestamp >= CURDATE() AND upstimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by upstimestamp desc
 
@@ -1223,7 +1243,69 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
     })
     
      // wheeled in solar data filter according to datewise
-// data filtering for single days data
+
+//---------initial graph--------------//
+app.get("/initial/wheeledinsolr", (req, res) => {
+  const { date} = req.body;
+  const inverters=[]
+  const INV1=[]
+  const INV2=[]
+  const INV3=[]
+  const INV4=[]
+  const INV5=[]
+  const INV6=[]
+  const INV7=[]
+  const INV8=[]
+ 
+  const query = 'SELECT * FROM inverterprocessinghourly WHERE DATE(invertertimestamp) = curdate();'
+  meterDb.query(query, (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred' });
+    }
+   
+    for(let i=0;i<results.length;i++){
+      if(results[i].inverterrecordid===1){
+          INV1.push(results[i])
+      }
+      else if(results[i].inverterrecordid===2){
+          INV2.push(results[i])
+
+      }
+      else if(results[i].inverterrecordid===3){
+          INV3.push(results[i])
+
+      }
+      else if(results[i].inverterrecordid===4){
+          INV4.push(results[i])
+
+      }
+      else if(results[i].inverterrecordid===5){
+          INV5.push(results[i])
+
+      }
+      else if(results[i].inverterrecordid===6){
+          INV6.push(results[i])
+
+      }
+      else if(results[i].inverterrecordid===7){
+          INV7.push(results[i])
+
+      }
+      else if(results[i].inverterrecordid===8){
+          INV8.push(results[i])
+
+      }
+    }
+  inverters.push({"INV1":INV1,"INV2":INV2,"INV3":INV3,"INV4":INV4,"INV5":INV5,"INV6":INV6,"INV7":INV7,"INV8":INV8})
+  console.log(inverters[0].INV2.length)
+    return res.json(inverters);
+  });
+});
+//-------------end api-------------//
+
+
+// ----------------data filtering for single days data-------------------------//
 app.post("/singleday/wheeledinsolr", (req, res) => {
     const { date} = req.body;
     const inverters=[]
@@ -1278,9 +1360,10 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
       }
     inverters.push({"INV1":INV1,"INV2":INV2,"INV3":INV3,"INV4":INV4,"INV5":INV5,"INV6":INV6,"INV7":INV7,"INV8":INV8})
     console.log(inverters[0].INV2.length)
-      return res.json(inverters);
+      return res.json(results);
     });
   });
+  //------------------------end of api------------------------------//
 
 
  //roofTop hourly data
