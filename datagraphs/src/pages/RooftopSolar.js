@@ -13,26 +13,77 @@ import { Link } from "react-router-dom";
 
 
 function RooftopSolar() {
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
-    const handleDateChange = (singledaydata) => {
-        setSelectedDate(singledaydata);
+
+    const [currentRooftopData,setCurrentRooftopData]=useState([])
+
+    //---------function to handle change in inputTag----------------//
+    const handleDateChange = (selectedDate) => {
+        setSelectedDate(selectedDate);
       };
-      const handlesingledaySubmit = async (event) => {
+
+
+      //---------------function to submit the selected date----------------//
+      const handleSubmit = (event) => {
         event.preventDefault();
+        handlesingledaySubmit();
+      };
+
+
+
+      //------------function to post request according selected date------------------//
+      const handlesingledaySubmit = async () => {
+       
         try {
-          const formattedDate = selectedDate.toISOString().substring(0, 10);
-          const response = await axios.post('http://121.242.232.211:5000/roofTopHourly', { date: formattedDate });
+          const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
+          const response = await axios.post('http://localhost:5000/roofTopHourly', { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
         }
       };
+      //--------------------------end of function------------//
+       //-------calling the post request function inside the useEffect----------//
+       useEffect(()=>{
+        handlesingledaySubmit()
+
+      },[selectedDate])
+
+
+
+
+      //----------function to get request for initial graph befor date filters------------//
+      const RooftopDataFetch=()=>{
+        axios.get("http://localhost:5000/current/roofTopHourlygraph").then((res)=>{
+          const response=res.data
+          setCurrentRooftopData(response)
+        
+
+        }).catch((error)=>{
+          console.log(error)
+        })
+
+      }
+
+      useEffect(()=>{
+        RooftopDataFetch()
+      },[])
+
+console.log(currentRooftopData)
+
+
+   
+
+
 
       console.log(singledaydata)
+
+
+      //----------filter graph for selected date-----------//
       var apexcharts2 = {
         series: [{
-          name:"energy",
+          name:"energy(kWh)",
           data: singledaydata.map((val)=>(val.energy)),
           yAxis: 1
         },
@@ -52,7 +103,7 @@ function RooftopSolar() {
                     }
           },
           dataLabels: {
-            enabled: false
+            enabled: true
           },
           title: {
             // text: "Wheeled In Solar",
@@ -83,7 +134,7 @@ function RooftopSolar() {
           yaxis: [
             {
               title: {
-                text: 'Energy (kW)'
+                text: 'Energy (kWh)'
               }
             },
             {
@@ -165,132 +216,150 @@ function RooftopSolar() {
           // },
         }
     }
+//-------------currentGraph when page loads--------------//
+var CurrentRoofTop = {
+  series: [{
+    name:"energy(kWh)",
+    data: currentRooftopData.map((val)=>(val.energy)),
+    yAxis: 1
+  },
+  {
+    name:"solar_radiation",
+    data: currentRooftopData.map((val)=>(val.solarRadiation)),
+    yAxis: 0
+  }
 
-    // var wmsMetergraph = {
-    //   series: [
-    //     {
-    //       name: "Energy",
-    //       data: wmsMeterdata.map((val) => (val.instantaniousEnergy)),
-    //       yAxis: 1
-    //     },
-    //     {
-    //       name: "Irradiation (kWh/m2)",
-    //       data: wmsMeterdata.map((val) => val.wmsirradiation),
-    //       yAxis: 0
-    //     }
-    //   ],
-    
-    //   options: {
-    //     chart: {
-    //       type: 'area',
-    //       zoom: {
-    //         enabled: true
-    //       }
-    //     },
-    //     dataLabels: {
-    //       enabled: false
-    //     },
-    //     title: {
-    //       align: 'center',
-    //       margin: 10,
-    //       offsetX: 0,
-    //       offsetY: 0,
-    //       floating: false,
-    //       style: {
-    //         fontSize: '14px',
-    //         fontWeight: 'bold',
-    //         fontFamily: undefined,
-    //         color: '#263238'
-    //       }
-    //     },
-    //     yaxis: [
-    //       {
-    //         title: {
-    //           text: 'Energy (kW)'
-    //         }
-    //       },
-    //       {
-    //         opposite: true,
-    //         title: {
-    //           text: 'Irradiation (kWh/m2)'
-    //         }
-    //       }
-    //     ],
-    //     xaxis: {
-    //       categories: wmsMeterdata.map((val) => val.timestamp),
-    //       labels: {
-    //         style: {
-    //           colors: 'black'
-    //         }
-    //       },
-    //       title: { text: 'Time in HOURS' }
-    //     },
-    //     fill: {
-    //       opacity: 0.5,
-    //       type: 'gradient',
-    //       gradient: {
-    //         shadeIntensity: 1,
-    //         opacityFrom: 0.7,
-    //         opacityTo: 0.9,
-    //         stops: [0, 100]
-    //       },
-    //       colors: ['#0000FF']
-    //     },
-    //     plotOptions: {
-    //       bar: {
-    //         colors: {
-    //           ranges: [
-    //             {
-    //               from: -9999,
-    //               to: 0,
-    //               color: '#F15B46'
-    //             },
-    //             {
-    //               from: 0,
-    //               to: 9999,
-    //               color: '#28abf7'
-    //             }
-    //           ]
-    //         },
-    //         columnWidth: '80%'
-    //       }
-    //     },
-    //     fill: {
-    //       target: 'origin',
-    //       below: '#00FF7F',
-    //       above: '#20B2AA'
-    //     },
-    //     tooltip: {
-    //       enabled: true,
-    //       theme: 'dark',
-    //       style: {
-    //         background: '#222',
-    //         color: '#fff'
-    //       }
-    //     },
-    //     legend: {
-    //       show: true,
-    //       position: 'top'
-    //     },
-    //     grid: {
-    //       yaxis: {
-    //         lines: {
-    //           offsetX: -30
-    //         }
-    //       },
-    //       padding: {
-    //         left: 20
-    //       }
-    //     }
+],
+
+  options: {
+    chart: {
+      type: 'area',
+      zoom: {
+                enabled: false
+              }
+    },
+    dataLabels: {
+      enabled: true
+    },
+    title: {
+      // text: "Wheeled In Solar",
+      align: 'center',
+      margin: 10,
+      offsetX: 0,
+      offsetY: 0,
+      floating: false,
+      style: {
+        fontSize:  '14px',
+        fontWeight:  'bold',
+        fontFamily:  undefined,
+        color:  '#263238'
+      },
+  },
+    stroke: {
+      curve: 'straight'
+    },
+    // colors: ['#152138', ' #00FF00'], // Red for positive values, green for negative values
+    // colors: ({ value }) => {
+    //   return value < 0 ? ['#00ff00'] : ['#ff0000'];
+    // },
+    // yaxis: {
+    //   title: {
+    //     text: 'Active Power (kW)',
     //   }
-    // };
+    // },
+    yaxis: [
+      {
+        title: {
+          text: 'Energy (kWh)'
+        }
+      },
+      {
+        opposite: true,
+        title: {
+          text: 'Irradiation (kWh/m2)'
+        }
+      }
+    ],
+    xaxis: {
+      categories: currentRooftopData.map((val)=>(val.timestamp)),
+      labels: {
+        style: {
+          colors: 'black' // set the x-axis label color to red
+        }
+      },
+      title : {text:"Time in HOURS"},
+    },
+    fill: {
+      opacity: 0.5,
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.7,
+        opacityTo: 0.9,
+        stops: [0, 100]
+      },
+   
+      colors: ['#0000FF']
+    },
+    plotOptions: {
+      bar: {
+        colors: {
+          ranges: [{
+            from: -9999,
+            to: 0,
+            color: '#F15B46'
+          }, {
+            from: 0,
+            to: 9999,
+            color: '#28abf7'  
+          }]
+        },
+        columnWidth: '80%',
+      }
+    },
+    fill:{
+      target:"origin",
+      below:'#00FF7F',
+      above:'#20B2AA'
+    },
+    tooltip: {
+      enabled: true,
+      theme: 'dark',
+      style: {
+        background: '#222',
+        color: '#fff'
+      }
+    },
+    legend:{
+      show: true,
+      position: 'top',
+    },
+    grid: {
+      yaxis: {
+        lines: {
+          offsetX: -30
+        }
+      },
+      padding: {
+        left: 20
+      }
+    },
+    // markers: {
+    //   fillColor: '#e3e3e3',
+    //   strokeColor: '#fff',
+    //   size: 3,
+    //   shape: "circle"
+    // },
+  }
+}
+
   return (
     <div>
         <div>
       <div>
       <h4 style={{textAlign:'center',marginTop:"15px"}}><b>RoofTop Solar </b></h4>
       </div>
-       <form onSubmit={handlesingledaySubmit}   >
+       <form onSubmit={handleSubmit}   >
       {/* <div class='row' style={{display:'flex'}}>
         <div>  */}
       <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
@@ -298,7 +367,7 @@ function RooftopSolar() {
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b>Select Date </b></h5>:<DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
+          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
         </label>
       </div>
      
@@ -307,34 +376,10 @@ function RooftopSolar() {
 
  
 </div>
-        {/* <div class="input-group mb-3"  style={{width:"300px",marginTop:"50px"}}>
-       
-         
-        </div> */}
-        {/* </div>
-      </div> */}
-       
-        <button type="submit" class="btn btn-danger btn-lg" style={{height:"40px"}}>View Data</button>
-
-{/*      
-      <label htmlFor="date">Select a date:</label>
-      <DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
-      <button type="submit">Filter Data</button> */}
-
-{/* <div>
-  <h4>  <span>{startDate}</span> to  <span>{endDate}</span></h4>
-</div> */}
-{/* <h4 style={{textAlign:"center",color:"brown"}}><b>Inverter Active Power</b></h4> */}
-
 <div id="chart2">
-
-
-            {/* {data.length > 0 && (
-
-            )} */}
    {
      
-      apexcharts2?<ReactApexChart options={apexcharts2.options} series={apexcharts2.series} type='area' height='400px'  />:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
+     selectedDate===null?<ReactApexChart options={CurrentRoofTop.options} series={CurrentRoofTop.series} type='area' height='400px'/>:<ReactApexChart options={apexcharts2.options} series={apexcharts2.series} type='area' height='400px'/>
 
      
    }

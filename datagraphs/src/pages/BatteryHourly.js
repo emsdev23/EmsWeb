@@ -37,8 +37,12 @@ function BatteryHourly() {
 
      const options= {
         chart: {
-            type: 'column'
+            type: 'column',
+            zoomType: 'x'
         },
+      //   chart: {
+         
+      // },
         title: {
             text:null
         },

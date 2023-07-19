@@ -67,6 +67,9 @@ function BatteryEnergyPac() {
 // Render the Highcharts line graph using the fetched data
   const options = {
     // Highcharts configuration options
+    chart: {
+      zoomType: 'x'
+  },
     series: [   {
         name: "Energy(kWh)",
         data: graphData.map((val) => val.batteryEnergy),
@@ -132,6 +135,7 @@ function BatteryEnergyPac() {
         line: {
           lineWidth: 2, // Increase the line thickness
         },
+        
       },
       exporting: {
         enabled: true, // Enable exporting
@@ -191,6 +195,9 @@ function BatteryEnergyPac() {
   //---------executing for selected date graph------------//
   const option = {
     // Highcharts configuration options
+    chart: {
+      zoomType: 'x'
+  },
     series: [   {
         name: "Energy(kWh)",
         data: data.map((val) => val.batteryEnergy),

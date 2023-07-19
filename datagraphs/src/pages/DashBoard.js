@@ -154,22 +154,25 @@ function DashBoard() {
   const energysaved = `http://${host}:5000/peaksavings`
   const chillerstatus = `http://${host}:5000/chillerstatusd`
   const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
-  const powerFactor= `http://${host}:5000/schneider7230readings`
-  const diesel=`http://${host}:5000/dashboard/Deisel`
-  const chargerdate=`http://${host}:5000/dashboard/EvCharger`
+  const powerFactor= `http://localhost:5000/schneider7230readings`
+  const diesel=`http://localhost:5000/dashboard/Deisel`
+  const chargerdate=`http://localhost:5000/dashboard/EvCharger`
 
   var totalrooftopgeneration
   const Roof = () => {
     const [result, setResult] = useState([])
+
   
     const namelist = () =>{
      axios.get(rooftopac).then((res)=>setResult(res.data))
     }
 
+
+  
     useEffect(()=>{ 
       namelist()
+ 
     },[])
-
     totalrooftopgeneration = result[0]
     // console.log("rooftop : ",totalrooftopgeneration)
   }
@@ -313,6 +316,7 @@ function DashBoard() {
   const PowerFactor=()=>{
     axios.get(powerFactor).then((res)=>{
       const dataresponse=res.data
+      console.log(dataresponse)
       setAvgMinpowerfactor(dataresponse)
      
     }).catch((err)=>{
@@ -320,6 +324,18 @@ function DashBoard() {
     })
   }
 
+
+    // powerfactor 
+    const  PowerValue=()=>{
+      axios.get("http://121.242.232.211:5000/schneider7230readings").then((res)=>{
+        const dataresponse=res.data
+        console.log(dataresponse)
+       
+       
+      }).catch((err)=>{
+        console.log(err)
+      })
+    }
 
   const DieselEnergyvalue=()=>{
     axios.get(diesel).then((res)=>{
@@ -369,6 +385,7 @@ function DashBoard() {
     PowerFactor()
     DieselEnergyvalue()
     EvChargerData()
+    PowerValue()
 
     const interval = setInterval(() => {
      
@@ -1370,6 +1387,12 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
     </span>
   </div>
+  
+  <div style={{ color: '#5e5d5c', textAlign: 'right', fontSize: "22px",marginTop:"30px" }}> 
+ 
+ <h5><b>*Energy in kWh</b></h5>
+
+</div>
 
 
 {/* <span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#1fc270'/></b> </span> <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Grid</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
@@ -1378,7 +1401,6 @@ const calculatedHeight = `calc(100vh - 100px)`;
 <span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#546E7A'/></b> </span>  <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Diesel</b></span> &nbsp; &nbsp; &nbsp; &nbsp;  */}
 </div>
 <br/>
-  <br/>
   <div class="data-container" style={{marginRight:"25%"}}>
     <span>
       <span style={{ color: '#5e5d5c' }}>
@@ -1419,11 +1441,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
     </span>
   </div>
 
-   <div style={{ color: '#5e5d5c', textAlign: 'right', fontSize: "22px",marginTop:"20px" }}> 
- 
-     <h5><b>*Energy in kWh</b></h5>
- 
-  </div>
+
 <br/>
 <div class="data-container"style={{ marginTop:"10px"}}>
   <div> 
@@ -1807,7 +1825,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
  
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Total hours of usage:</b></td>
-    <td><span style={{color:"black"}}>{totalHours}hr</span></td>
+    <td><span style={{color:"black"}}>{totalHours}</span></td>
   </tr>
 </table>
          {/* <p> Shavings:</p> */}
