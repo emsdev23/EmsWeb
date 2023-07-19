@@ -559,24 +559,44 @@ emptyArray.forEach(obj => {
             
             
             
-            app.get("/schneider7230readings",async(req,res)=>{
-    meterDb.query("select * from schneider7230readings  where DATE(schneiderpolledtimestamp) = curdate()  order by schneiderpolledtimestamp desc limit 1",function(err,result,feilds){
-        const powerfactor=[]
-        if(err){
-            console.log(err)
-        }
-        else{
-            const response=(JSON.parse(JSON.stringify(result)))
-            for(let i=0;i<response.length;i++){
-            const date = new Date(response[i].schneiderpolledtimestamp);
-            const timestamp = date.toLocaleString();
-            powerfactor.push({"polledTime":timestamp,"average_powerfactor":response[i].average_powerfactor,"minimum_powerfactor":response[i].minimum_powerfactor})
-            }
-            res.send(powerfactor)
-            console.log(powerfactor)
-        }
-    })
+//             app.get("/schneider7230readings",async(req,res)=>{
+//     meterDb.query("select * from schneider7230readings  where DATE(schneiderpolledtimestamp) = curdate()  order by schneiderpolledtimestamp desc limit 1",function(err,result,feilds){
+//         const powerfactor=[]
+//         if(err){
+//             console.log(err)
+//         }
+//         else{
+//             const response=(JSON.parse(JSON.stringify(result)))
+//             for(let i=0;i<response.length;i++){
+//             const date = new Date(response[i].schneiderpolledtimestamp);
+//             const timestamp = date.toLocaleString();
+//             powerfactor.push({"polledTime":timestamp,"average_powerfactor":response[i].average_powerfactor,"minimum_powerfactor":response[i].minimum_powerfactor})
+//             }
+//             res.send(powerfactor)
+//             console.log(powerfactor)
+//         }
+//     })
    
+// })
+
+app.get("/schneider7230readings",async(req,res)=>{
+  meterDb.query("select * from schneider7230readings  where DATE(schneiderpolledtimestamp) = curdate()  order by schneiderpolledtimestamp desc limit 1",function(err,result,feilds){
+      const powerfactor=[]
+      if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+          const date = new Date(response[i].schneiderpolledtimestamp);
+          const timestamp = date.toLocaleString();
+          powerfactor.push({"polledTime":timestamp,"average_powerfactor":response[i].average_powerfactor,"minimum_powerfactor":response[i].minimum_powerfactor})
+          }
+          res.send(powerfactor)
+          console.log(powerfactor)
+      }
+  })
+ 
 })
 
 
@@ -1169,28 +1189,29 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
 //     query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
 //     console.log("month query executed")
 //   }
-  else {
-      if(month){
-    query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
-    console.log("month query executed")
-  }
+  // else {
+  //     if(month){
+  //   query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
+  //   console.log("month query executed")
+  // }
+
+  //   // Filter by month
+  //   // const year = date.substring(0, 4);
+  //   // const month = date.substring(5, 7);
+  //   // const firstDayOfMonth = `${year}-${month}-01`;
+  //   // const lastDayOfMonth = `${year}-${month}-31`; // Assuming maximum 31 days per month
+
+  //   // query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${firstDayOfMonth}' AND '${lastDayOfMonth}'`;
+  //   // console.log('line graph executed');
+    
+  // }
   else{
     query = `SELECT * FROM peakdemandquarter WHERE DATE(polledTime) = '${date}'`;
     console.log('single day filter executed')
 
   }
-    // Filter by month
-    // const year = date.substring(0, 4);
-    // const month = date.substring(5, 7);
-    // const firstDayOfMonth = `${year}-${month}-01`;
-    // const lastDayOfMonth = `${year}-${month}-31`; // Assuming maximum 31 days per month
 
-    // query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${firstDayOfMonth}' AND '${lastDayOfMonth}'`;
-    // console.log('line graph executed');
-    
-  }
-
-  con.query(query, (error, results) => {
+  meterDb.query(query, (error, results) => {
     if (error) {
       console.error(error);
       return res.status(500).json({ message: 'An error occurred' });
@@ -1218,7 +1239,7 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
       
       
        app.get("/peak/hvacSchneider7230Polling",async(req,res)=>{
-        con.query("select * from peakdemandquarter where DATE(polledTime)=curdate();",function(err,result,feilds){
+        meterDb.query("select * from peakdemandquarter where DATE(polledTime)=curdate();",function(err,result,feilds){
             const viewData=[]
             if(err){
                 console.log(err)
@@ -1298,7 +1319,7 @@ app.get("/initial/wheeledinsolr", (req, res) => {
       }
     }
   inverters.push({"INV1":INV1,"INV2":INV2,"INV3":INV3,"INV4":INV4,"INV5":INV5,"INV6":INV6,"INV7":INV7,"INV8":INV8})
-  console.log(inverters[0].INV2.length)
+  console.log(inverters[0].INV1.length)
     return res.json(inverters);
   });
 });
@@ -1360,16 +1381,16 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
       }
     inverters.push({"INV1":INV1,"INV2":INV2,"INV3":INV3,"INV4":INV4,"INV5":INV5,"INV6":INV6,"INV7":INV7,"INV8":INV8})
     console.log(inverters[0].INV2.length)
-      return res.json(results);
+      return res.json(inverters);
     });
   });
   //------------------------end of api------------------------------//
 
 
- //roofTop hourly data
+ //------------------roofTop hourly data post request-------------------//
  app.post("/roofTopHourly", async (req, res) => {
     const { date } = req.body;
-    meterDb.query(`SELECT * FROM rooftophourly WHERE DATE(polled_timestamp) = '${date}'`, function(err, qrres) {
+    meterDb.query(`SELECT * FROM rooftophourly WHERE DATE(timestamp) = '${date}'`, function(err, qrres) {
       if (err) {
         console.log(err);
       } else {
@@ -1377,7 +1398,31 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
         const data = response.map(entry => {
           const decimalval = Math.trunc(entry.total_cumulative_energy);
           const radiation=entry.sensor_solar_radiation
-          const date = new Date(entry.polled_timestamp);
+          const date = new Date(entry.timestamp);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padevchargerStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //const timestamp = `${hours}`;
+          return { timestamp, energy: decimalval,solarRadiation:radiation};
+        });
+        console.log(data);
+        res.send(data);
+      }
+    });
+  });
+  //------------------------end of api--------------------------------//
+  app.get("/current/roofTopHourlygraph", async (req, res) => {
+    const { date } = req.body;
+    meterDb.query(`SELECT * FROM rooftophourly WHERE DATE(timestamp) = curdate()`, function(err, qrres) {
+      if (err) {
+        console.log(err);
+      } else {
+        const response = JSON.parse(JSON.stringify(qrres));
+        const data = response.map(entry => {
+          const decimalval = Math.trunc(entry.total_cumulative_energy);
+          const radiation=entry.sensor_solar_radiation
+          const date = new Date(entry.timestamp);
           const hours = date.getHours().toString().padStart(2, '0');
           const minutes = date.getMinutes().toString().padStart(2, '0');
           // const seconds = date.getSeconds().toString().padevchargerStart(2, '0');
@@ -1391,7 +1436,12 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
     });
   });
 
-      // wms/meter data hourly
+
+  //-----------------------------------------------------------------//
+
+
+
+  //-------------analytics page of wmsMeter graph(post request according to date)------------//
   app.post("/wmsMeter/graphs", (req, res) => {
     const { date} = req.body;
    
@@ -1426,7 +1476,7 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
 // Formatting the rounded time
 var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
            
-            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":roundedTime})
+            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":timestamp})
 
         }
         console.log(wmsMeterdata)
@@ -1435,7 +1485,53 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
    
     });
   })
+  //----------------------------------- end of API-------------------------//
+  //----------------------get request for wmsMeter data for analytics page graph-----------
+  app.get("/initialgraph/wmsMeter", (req, res) => {
+    const { date} = req.body;
+   
+    const query = 'SELECT * FROM HourlyMeterData WHERE DATE(timestamp) = curdate()';
+    meterDb.query(query, (error, results) => {
+        const wmsMeterdata=[]
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
+      else{
+        const response = JSON.parse(JSON.stringify(results));
+        for(let i=0;i<response.length;i++){
+            const date = new Date(response[i].timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`;
+
+            // Splitting the time into hours and minutes
+          var [converthours, convertminutes] = timestamp.split(":");
+
+          // Converting the hours and minutes to integers
+           parsehours = parseInt(converthours, 10);
+           parseminutes = parseInt(convertminutes, 10);
+
+       // Rounding off the time
+       if (parseminutes >= 30) {
+        parsehours += 1;
+          }
+
+// Formatting the rounded time
+var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
+           
+            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":timestamp})
+
+        }
+        //console.log(wmsMeterdata)
+        res.send(wmsMeterdata)
+      }
+   
+    });
+  })
     
+  //-------------------------end of API---------------------------------//
     
     
 

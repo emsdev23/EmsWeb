@@ -1,8 +1,8 @@
-const mysql=require('mysql')
+const mysql=require('mysql2')
 
 const con=mysql.createConnection({
-    host:'localhost',
-    user:'root',
+    host:'121.242.232.211',
+    user:'emsroot',
     password:'22@teneT',
     database:'EMS',
     port:3306
@@ -18,8 +18,8 @@ con.connect((err)=>{
 
 
 const meterDb=mysql.createConnection({
-    host:'localhost',
-    user:'root',
+    host:'121.242.232.211',
+    user:'emsroot',
     password:'22@teneT',
     database:'meterdata',
     port:3306
@@ -54,8 +54,8 @@ hashtic.connect((err)=>{
 
 const chakradb=mysql.createConnection({
     host:'121.242.232.151',
-    user:'bmsrouser6',
-    password:'bmsrouser6@151',
+    user:'emsrouser',
+    password:'emsrouser@151',
     database:'bmsmgmt_olap_prod_v13',
     port:3306
 })
@@ -71,8 +71,8 @@ chakradb.connect((err)=>{
 
 const unprocesseddata=mysql.createConnection({
     host:'121.242.232.151',
-    user:'bmsrouser6',
-    password:'bmsrouser6@151',
+    user:'emsrouser',
+    password:'emsrouser@151',
     database:'bmsmgmtprodv13',
     port:3306
 
