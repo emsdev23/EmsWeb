@@ -228,13 +228,36 @@ emptyArray.forEach(obj => {
         
     })
 
+  app.get("/Batterydata",async(req,res)=>{
+    const finalresultValue=[]
+    con.query("select * from EMSUPSbattery where date(received_time)=curdate();",function(err,result,feilds){
+      if(err){
+        console.log(err)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          const date = new Date(response[i].received_time)
+          const localTimeString = date.toLocaleString();
+          finalresultValue.push({'chargingAVG':response[i].upschargingenergy,"dischargingAVG":response[i].negative_energy,"batteryStatus":response[i].upsbatterystatus,"timestamp":localTimeString,"pack_usable_soc":response[i].packsoc})
+
+        }
+        res.send(finalresultValue)
+        console.log(finalresultValue.length)
+      }
+
+    })
+   
+  })
+
 
 
     //---------------------------battery Dashboard--------------------//
     app.get("/dashboard/Battery",async(req,res)=>{
       const resultValue=[]
       meterDb.query("select * from meterdata.batteryhourly where date(received_time) = curdate();",function(err,result,feilds){
-          if(err){
+       // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+        if(err){
               console.log(err)
           }
           else{
@@ -245,7 +268,7 @@ emptyArray.forEach(obj => {
                 const minutes = date.getMinutes().toString().padStart(2, '0');
                 // const seconds = date.getSeconds().toString().padStart(2, '0');
                 const timestamp = `${hours}:${minutes}`;
-                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].total_upschargingenergy_diff),"dischargingEnergy":parseFloat(response[i].total_upsdidchargingenergy_diff)*-1,"idleEnergy":0.01,"Pacsoc":parseInt(response[i].max_pacsoc),"energy_available":response[i].energy_available})
+                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].total_upschargingenergy_diff),"dischargingEnergy":parseFloat(response[i].total_upsdidchargingenergy_diff)*-1,"idleEnergy":parseFloat(response[i].idle_energystatues),"Pacsoc":parseInt(response[i].max_pacsoc),"energy_available":response[i].energy_available})
 
               }
               res.send(resultValue)
@@ -319,7 +342,7 @@ emptyArray.forEach(obj => {
     })
 
     app.get("/grid",async(req,res)=>{
-         con.query("select cumulative_energy,polled_timestamp from meterdata.gridenergytoday where date(polled_timestamp)=curdate() order by polled_timestamp desc limit 1;",function(err,result,feilds){
+      meterDb.query("select cumulative_energy,polled_timestamp from gridenergytoday where date(polled_timestamp)=curdate() order by polled_timestamp desc limit 1;",function(err,result,feilds){
              if(err){
                  console.log(err)
              }
@@ -332,6 +355,59 @@ emptyArray.forEach(obj => {
 
  
         
+    })
+
+    app.get("/Buildingconsumption/grid",async(req,res)=>{
+      const resultValue=[]
+      meterDb.query("select cumulative_energy,timestamp from gridenergyhourly where date(timestamp)=curdate() ",function(err,result,feilds){
+             if(err){
+                 console.log(err)
+             }
+             else{
+                 const response=(JSON.parse(JSON.stringify(result)))
+                 for(let i=0;i<response.length;i++){
+                  let date = new Date(response[i].timestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestampVal = `${hours}:${minutes}`;
+              resultValue.push({"polledTime":timestampVal,"cumulative_energy":parseFloat(response[i].cumulative_energy)})
+
+                 }
+                 res.send(resultValue)
+                 console.log(response.length)
+             }
+         })
+
+ 
+        
+    })
+
+    app.get('/BuildingConsumptionPage2',async(req,res)=>{
+      const finalValue=[]
+      con.query("SELECT Gridhourly.Energy as GridEnergy, UPSbatteryHourly.polledTime as timestamp , UPSbatteryHourly.discharhingEnergy as BatteryDischarEnergy, UPSbatteryHourly.chargingEnergy as BatteryChargeEnergy,Wheeledhourly.Energy as WheeledEnergy,rooftopHourly.Energy as RooftopEnergy FROM Gridhourly JOIN UPSbatteryHourly ON Gridhourly.polledTime = UPSbatteryHourly.polledTime  JOIN Wheeledhourly ON Wheeledhourly.polledTime=Gridhourly.polledTime JOIN rooftopHourly on rooftopHourly.polledTime=Gridhourly.polledTime  where date(UPSbatteryHourly.polledTime)=CURDATE();",function(err,result,feilds){
+        //DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        
+        //SELECT Gridhourly.Energy as GridEnergy, Gridhourly.polledTime as timestamp, rooftopHourly.energy as RooftopEnergy , UPSbatteryHourly.discharhingEnergy as BatteryDischarEnergy, chargingEnergy as BatteryChargeEnergy,Wheeledhourly.Energy as WheeledEnergy FROM Gridhourly JOIN rooftopHourly ON Gridhourly.polledTime = rooftopHourly.polledTime JOIN UPSbatteryHourly ON rooftopHourly.polledTime = UPSbatteryHourly.polledTime JOIN Wheeledhourly ON Wheeledhourly.polledTime=rooftopHourly.polledTime  where date(Gridhourly.polledTime)=CURDATE();
+        if(err){
+          console.log(err)
+        }
+        else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestampVal = `${hours}:${minutes}`;
+            finalValue.push({"Timestamp":timestampVal,"GridEnergy":Math.trunc(response[i].GridEnergy),"RooftopEnergy":Math.trunc(response[i].RooftopEnergy),"BatteryDischarEnergy":response[i].BatteryDischarEnergy,"BatteryChargeEnergy":response[i].BatteryChargeEnergy,"WheeledInSolar":response[i].WheeledEnergy})
+            
+          }
+          res.send(finalValue)
+           console.log(response.length)
+
+        }
+      })
     })
 
 
@@ -1092,8 +1168,8 @@ console.log(formattedDate);
 
     const { functioncode, starttime,endtime,capacity } = req.body;
     console.log(req.body.functioncode)
-    const sql = 'INSERT INTO EMSUPSbatterycontrol (functioncode, starttime,endtime,capacity) VALUES (?, ?, ?, ?)';
-    con.query(sql, [functioncode, starttime,endtime,capacity], function (error, results, fields) {
+    const sql = 'INSERT INTO EMSUPSshedulebatterycontrol (functioncode, starttime,endtime) VALUES (?, ?, ?)';
+    con.query(sql, [functioncode, starttime,endtime], function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
         }
