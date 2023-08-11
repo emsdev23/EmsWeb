@@ -52,6 +52,11 @@ export const SidebarData = [
         path: '/Battery_Analytics',
         icon: <TbIcons.TbBatteryAutomotive />
       },
+      {
+        title: 'Chillers ',
+        path: '/chillersDashboard',
+        icon: <SevereColdIcon />
+      },
       
     ]
   },{
