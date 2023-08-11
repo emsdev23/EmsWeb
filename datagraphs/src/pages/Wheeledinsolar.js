@@ -906,7 +906,7 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
 
    <Grid item xs={12} sm={6} >
     <div> 
-    <h4 style={{textAlign:"center",color:"brown"}}><b>Daily Solar data</b></h4>
+    <h3 style={{textAlign:"center",color:"brown"}}><b>Daily Solar data</b></h3>
    {
      
      selectedDate===null?<ReactApexChart options={CurrentWmsMetergraph.options} series={CurrentWmsMetergraph.series} type='area' height='400px' />:<ReactApexChart options={wmsMetergraph.options} series={wmsMetergraph.series} type='area' height='400px' />
@@ -918,7 +918,7 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
 
   <Grid item xs={12} sm={6} > 
   <div id="chart2">
-  <h4 style={{textAlign:"center",color:"brown"}}><b>Inverter Active Power</b></h4>
+  <h3 style={{textAlign:"center",color:"brown"}}><b>Inverter Active Power</b></h3>
 {
 
 selectedDate===null?<ReactApexChart options={CurrentGrapgh.options} series={CurrentGrapgh.series} type='line' height='400px'  />:<ReactApexChart options={apexcharts2.options} series={apexcharts2.series} type='line' height='400px'  />

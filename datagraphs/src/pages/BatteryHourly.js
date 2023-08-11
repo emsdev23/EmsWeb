@@ -57,7 +57,7 @@ function BatteryHourly() {
                 borderRadius: '50%',
                 pointWidth: 20,
                 dataLabels: {
-                    enabled: true, // Enable data labels for the columns
+                    enabled: false, // Enable data labels for the columns
                   },
             },
 

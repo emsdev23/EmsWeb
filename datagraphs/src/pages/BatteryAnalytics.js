@@ -5,7 +5,7 @@ import BatteryEnergyPac from './BatteryEnergyPac';
 function BatteryAnalytics() {
   return (
     <div> 
-    <div > <h2 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"35px",fontWeight:"bold",fontFamily:undefined, }}>48 kWh UPS Battery</h2></div>
+    <div > <h4 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"30px",fontWeight:"bold",fontFamily:undefined, }}>48 kWh UPS Battery</h4></div>
 <br/>
 
 <div> 

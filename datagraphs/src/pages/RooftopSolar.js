@@ -357,7 +357,7 @@ var CurrentRoofTop = {
     <div>
         <div>
       <div>
-      <h4 style={{textAlign:'center',marginTop:"15px"}}><b>RoofTop Solar </b></h4>
+      <h4 style={{textAlign:'center',marginTop:"15px"}}><b  style={{fontSize:"30px"}} >RoofTop Solar </b></h4>
       </div>
        <form onSubmit={handleSubmit}   >
       {/* <div class='row' style={{display:'flex'}}>

@@ -15,6 +15,7 @@ function BatteryCurrentvolt() {
   const [loading, setLoading] = useState(false);
   const voltage="http://121.242.232.211:5000/analytics/battery/voltage&current"
   const [voltcurrent,setVoltcurrent]=useState([])
+  console.log(voltcurrent)
 
     exportingInit(Highcharts);
 exportDataInit(Highcharts);
@@ -25,6 +26,7 @@ exportDataInit(Highcharts);
           .then((res) => {
             const dataResponse = res.data;
             setVoltcurrent(dataResponse);
+
           })
           .catch((err) => {
             console.log(err);
@@ -36,6 +38,7 @@ exportDataInit(Highcharts);
         setVoltcurrentfilterDate(date);
       };
 
+      console.log(voltcurrent)
 
       const fetchData = async () => {
         setLoading(true);
@@ -314,7 +317,7 @@ const option = {
  
 </div>
 <div> 
-<div > <h3 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"30px",fontWeight:"bold",fontFamily:undefined, }}>Votage v/s Current</h3></div>
+<div > <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Votage v/s Current</h5></div>
 {
     voltcurrentfilterDate===null? <HighchartsReact highcharts={Highcharts} options={options} />: <HighchartsReact highcharts={Highcharts} options={option} />
 }

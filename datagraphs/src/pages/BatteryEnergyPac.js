@@ -345,25 +345,26 @@ for(let i=0;i<graphData.length;i++){
         <div> 
 
 <div class="row">
-  <div class="col-10" > 
+  <div class="col-9" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">
           <h5 style={{color:"brown"}}><b> Date :-</b></h5><DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} />
-          {
-            filterDate===null?<button type="button" class="btn btn-warning" style={{marginLeft:"70px"}}> 
-            <h5 ><b style={{color:"black"}}>Current status:{currentBatteryStatus[currentBatteryStatus.length-1]}</b></h5>
-            </button>:""
-          }
+          
+          <h3 style={{marginLeft:"135%"}}>{dateValue}</h3>
       
           
         </label>
         
       </div>
   </div>
-  <div class="col-2"><h3>{dateValue}</h3></div>
+  <div class="col-3">{
+            filterDate===null?<button type="button" class="btn btn-warning" style={{marginLeft:"70px"}}> 
+            <h5 ><b style={{color:"black"}}>Current status:{currentBatteryStatus[currentBatteryStatus.length-1]}</b></h5>
+            </button>:""
+          }</div>
 </div>
 <div> 
- <div> <h3 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"30px",fontWeight:"bold",fontFamily:undefined, }}>Daily Energy cycle v/s SoC</h3></div>
+ <div> <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Daily Energy cycle v/s SoC</h5></div>
  {
     filterDate===null?<HighchartsReact highcharts={Highcharts} options={options} />:<HighchartsReact highcharts={Highcharts} options={option} />
 }

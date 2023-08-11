@@ -3,6 +3,7 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ReactApexChart from 'react-apexcharts';
+import BuildindConsumptionPage2 from './BuildindConsumptionPage2';
 
 
 const host = "http://localhost:5000/peak/hvacSchneider7230Polling"
@@ -473,8 +474,8 @@ console.log(testing)
       <br/>
       <br/>
 
-      <div className="row" style={{marginTop:'20px',marginLeft:"10px"}}>
-  <div className="col">
+      <div className="row" style={{marginTop:'20px',marginLeft:"20px"}}>
+  <div className="col-3">
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
@@ -485,7 +486,7 @@ console.log(testing)
     </div>
   </div>
 
-  <div className="col">
+  <div className="col-3">
     <div className="input-group mb-3" style={{ width: "300px" }}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
@@ -505,6 +506,9 @@ console.log(testing)
         <ReactApexChart options={curdGraph.options} series={curdGraph.series} type={graphChange} height="400px" />
       </div>
     )}
+  </div>
+  <div> 
+    <BuildindConsumptionPage2/>
   </div>
 
     </div>

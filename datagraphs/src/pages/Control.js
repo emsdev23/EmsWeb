@@ -25,8 +25,7 @@ function Control() {
   const [formData, setFormData] = useState({
     functioncode: "",
     starttime: "",
-    endtime: "",
-    capacity: "",
+    endtime: ""
   });
 
   const [insformData,setInsformData]=useState({
@@ -38,7 +37,7 @@ function Control() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 
-  const batteryurl=`http://${host}:5000/battery`
+  const batteryurl='http://localhost:5000/Batterydata'
 
 
 //  function batteryData() {
@@ -64,12 +63,24 @@ function Control() {
 
   // batteryData()
 
-  useEffect(()=>{
-    // setInterval(()=>{},30000)
-      batteryData()
-    
-   
-  },[])
+  // useEffect(()=>{
+  //   setInterval(()=>{
+  //     batteryData()
+  //   },30000)
+  // },[])
+  useEffect(() => {
+    // Call the function initially
+    batteryData();
+
+    // Set up the interval and store its ID
+    const intervalId = setInterval(() => {
+      batteryData();
+    }, 30000);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array to run the effect only once
+
 
   console.log(batterydata)
  const packSoc=[]
@@ -83,13 +94,13 @@ function Control() {
   packSoc.push(batterydata[i].pack_usable_soc)
  
   if(batterydata[i].batteryStatus==="CHG"){
-    CHG.push((batterydata[i].chargingAVG).toFixed(2))
+    CHG.push((batterydata[i].chargingAVG))
     chgtime.push(batterydata[i].timestamp)
     currentStatus.push("Charging")
    
   }
   if(batterydata[i].batteryStatus==="DCHG"){
-    DCHG.push((batterydata[i].dischargingAVG).toFixed(2))
+    DCHG.push((batterydata[i].dischargingAVG))
     dscgtime.push(batterydata[i].timestamp)
     currentStatus.push("Discharging")
    
@@ -138,8 +149,8 @@ console.log(distime)
       functioncode: Number(formData.functioncode),
       starttime: formData.starttime,
       endtime: formData.endtime,
-      capacity: Number(formData.capacity),
     };
+    console.log(formattedData)
     swal({
       title: "Are you sure?",
       text: `the given parameters ${formattedData.functioncode},${formattedData.starttime},${formattedData.endtime}be set for battery!`,
@@ -151,14 +162,13 @@ console.log(distime)
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://${host}:5000/controlls`, formattedData)
+        axios.post(`http://localhost:5000/controlls`, formattedData)
           .then((response) => {
             const result = response.data;
             setFormData({
               functioncode: "",
               starttime: "",
               endtime: "",
-              capacity: "",
             });
             swal({
               title: formattedData.functioncode === 1 ? "battery set to charge mode" : "battery set to discharge mode",
@@ -528,8 +538,7 @@ console.log(distime)
         /> */}
   </div>
   <br/>
-  <button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
-
+  <button type="submit" class="btn btn-primary bt-lg" style={{height:"40px"}}>Submit</button>
   </form>
 
       </div>
