@@ -20,6 +20,7 @@ import swal from 'sweetalert';
 import Thermalcontrol from './pages/Thermalcontrol';
 import Peakdemandgraph from './pages/Peakdemandgraph';
 import BatteryAnalytics from './pages/BatteryAnalytics';
+import ChillerDashboard from './pages/ChillerDashboard';
 
 function LocationContext(props) {
   const location = useLocation();
@@ -53,6 +54,8 @@ function App() {
             <Route path="/Wheeledgraph" element={<Wheeledinsolar />} />
             <Route path="/RoofTopSolar" element={<RooftopSolar />} />
             <Route path="/Battery_Analytics" element={<BatteryAnalytics/>}/>
+            <Route path="/chillersDashboard" element={<ChillerDashboard/>}/>
+            
           </Routes>
         </div>
       </LocationContext>
