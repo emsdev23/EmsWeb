@@ -11,6 +11,12 @@ import ThermostatAutoIcon from '@mui/icons-material/ThermostatAuto';
 import * as SiIcons from 'react-icons/si'
 import * as GiIcons from  'react-icons/gi'
 import * as TbIcons from  'react-icons/tb'
+import * as Gricons from 'react-icons/gr'
+import AddchartRoundedIcon from '@mui/icons-material/AddchartRounded';
+import ThermostatAutoRoundedIcon from '@mui/icons-material/ThermostatAutoRounded';
+import DownloadingIcon from '@mui/icons-material/Downloading';
+
+
 
 //import * as FaIcons from 'react-icons/fa'
 
@@ -53,69 +59,72 @@ export const SidebarData = [
         icon: <TbIcons.TbBatteryAutomotive />
       },
       {
-        title: 'Chillers ',
-        path: '/chillersDashboard',
-        icon: <SevereColdIcon />
+        title: 'ChillersDashboard',
+        path: '/chillers/chillersDashboard',
+        icon: <SevereColdIcon />,
       },
-      
-    ]
-  },{
+      {
+        title: 'Chillers',
+        // path: '/chillersDashboard',
+        icon: <DownloadingIcon />,
+        subNav:[
+        
+          {
+            title: 'ChillersStatus',
+            path: '/Status/chillersStatus',
+            icon: <SevereColdIcon />,
+          },
+
+        ]
+      },
+      {
+        title: 'Thermal',
+        // path: '/chillersDashboard',
+        icon: <DownloadingIcon />,
+        subNav:[
+          {
+            title: 'ThermalStatus',
+            path: '/Status/thermalStatus',
+            icon: <ThermostatAutoRoundedIcon />,
+          },
+
+        ]
+      },
+    ],
+  },  {
     title: 'Alerts',
-    //path: '/Alertlogs',
     icon: <GoIcons.GoAlert />,
     cName: 'nav-text',
-    subNav:[
+    subNav: [
       {
         title: 'Alert Logs',
         path: '/Alertlogs',
         icon: <GoIcons.GoAlert />,
-        cName: 'nav-text'
+        cName: 'nav-text',
       },
       {
-        title: 'Building consumption',
-        path: '/Alerts/Peakdemand',
-        icon: <BatteryAlertIcon />,
+        title: 'Active Alerts',
+        icon: <GoIcons.GoAlert />,
+        subNav: [
+          {
+            title: 'Chillers',
+            path: '/Alerts/ActiveAlerts/Chillers',
+            icon: <SevereColdIcon />,
+          },
+          {
+            title: 'Thermal',
+            path: '/Alerts/ActiveAlerts/Thermal',
+            icon: <ThermostatIcon />,
+          },
+          {
+            title: 'Building consumption',
+            path: '/Alerts/Peakdemand',
+            icon: <BatteryAlertIcon />,
+          },
+        ],
       },
-      {
-        title: 'Chillers',
-        path: '/Alerts/ChillerAlerts',
-        icon: <SevereColdIcon />
-      },
-      {
-        title: 'Thermal',
-        path: '/Alerts/Thermalalers',
-        icon: <ThermostatIcon />
-      }
-      
     ],
-    
   },
-  // {
-  //   title: 'Active Alerts',
-  //   // path: '/Alerts',
-  //   icon: <GoIcons.GoAlert />,
-  //   cName: 'nav-text',
-  //   subNav: [
-  //     {
-  //       title: 'Building consumption',
-  //       path: '/Alerts/Peakdemand',
-  //       icon: <BatteryAlertIcon />
-  //     },
-  //     {
-  //       title: 'Chillers',
-  //       path: '/Alerts/ChillerAlerts',
-  //       icon: <SevereColdIcon />
-  //     },
-  //     {
-  //       title: 'Thermal',
-  //       path: '/Alerts/Thermalalerts',
-  //       icon: <ThermostatIcon />
-  //     }
-  //   ]
-  // }
-  
-
-  
   {
     title: 'Controls',
     // path: '/Control',
