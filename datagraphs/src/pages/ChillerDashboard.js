@@ -1,14 +1,38 @@
-import React from 'react'
+import React, { useState, useEffect,useRef  } from 'react';
 import Highcharts from 'highcharts';
 import exportingInit from 'highcharts/modules/exporting';
 import exportDataInit from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
+import axios from 'axios';
 
 function ChillerDashboard() {
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
+     //declaring empty array to fetch data
+    const [thermalStoredwaterTemp,setThermalStoredWaterTemp]=useState([])
+    const thermalTempApi="http://localhost:5000/thermal/storedWaterTemp"
+
+    //defining functions for fetching data(get request)
+
+    useEffect(() => {
+        axios.get(thermalTempApi)
+          .then((res) => {
+            const dataResponse = res.data;
+            setThermalStoredWaterTemp(dataResponse);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }, []);
+
+
+
+    console.log(thermalStoredwaterTemp)
 
  const options={
+
+
+
     chart: {
         type: 'column'
     },
@@ -84,7 +108,7 @@ const optionsLine={
     //     align: 'left'
     // },
     xAxis: {
-        categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        categories: thermalStoredwaterTemp.map((timeStamp)=>timeStamp.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -97,7 +121,7 @@ const optionsLine={
         }
     },
     tooltip: {
-        valueSuffix: ' (1000 MT)'
+        valueSuffix: '(degrees celsius)'
     },
     plotOptions: {
         column: {
@@ -108,7 +132,7 @@ const optionsLine={
     series: [
         {
             name: 'Ts Water tempararture',
-            data: [406292, 260000, 107000, 68300, 27500, 14500,406292, 260000, 107000, 68300, 27500, 14500,406292, 260000, 107000, 68300, 27500, 14500,406292, 260000, 107000, 68300, 27500, 14500,406292]
+            data:  thermalStoredwaterTemp.map((value)=>value.storedwatertemperature)
         },
     ]
 };

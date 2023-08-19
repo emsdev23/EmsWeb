@@ -19,7 +19,7 @@ const [receivedData,setReceivedDate]=useState([])
     };
 
   const AlertsData=()=>{
-    axios.get(`http://${host}:5000/Alert/Logs`).then((res)=>{
+    axios.get(`http://localhost:5000/Alert/Logs`).then((res)=>{
       const dataResponse=res.data
       setAlerts(dataResponse)
   

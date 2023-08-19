@@ -1055,7 +1055,8 @@ options: {
 
 
     //co2 reduction calculation
-    const co2=(((Math.trunc(totalsolargeneration)+totalrooftopgeneration)/1000)*0.81).toFixed(2)
+    const co2=((((parseFloat(totalsolargeneration)+parseFloat(totalrooftopgeneration))/1000)*0.81).toFixed(2))
+    console.log((((parseFloat(totalsolargeneration)+parseFloat(totalrooftopgeneration))/1000)*0.81).toFixed(2))
     let co2ErrorValue=co2>100?0:co2
 
     
@@ -1824,7 +1825,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
   </tr>
  
   <tr>
-    <td><b style={{color:"#5e5d5c"}}>Total hours of usage:</b></td>
+    <td><b style={{color:"#5e5d5c"}}>Total hours of usage(hr):</b></td>
     <td><span style={{color:"black"}}>{totalHours}</span></td>
   </tr>
 </table>
