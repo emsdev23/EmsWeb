@@ -1081,7 +1081,7 @@ app.post("/analytics/onemingraph", (req, res) => {
 //
 
 app.get("/Alert/Logs",async(req,res)=>{
-    con.query("select * from alertLogs ",function(err,result,feilds){
+    con.query("select * from alertLogs order by alerttime desc ",function(err,result,feilds){
         const logVavlues=[]
         if(err){
             console.log(err)
@@ -1609,6 +1609,184 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
     
   //-------------------------end of API---------------------------------//
     
+
+  //--------------------------chillers status api-----------------------//
+  app.get("/chillers/status",async(req,res)=>{
+    meterDb.query("SELECT * FROM chillarstatus where date(timestamp)=curdate();",function(err,result,feilds){
+        const viewData=[]
+        if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+                let date=new Date(response[i].timestamp)
+                const hours = date.getHours().toString().padStart(2, '0');
+           const minutes = date.getMinutes().toString().padStart(2, '0');
+           // const seconds = date.getSeconds().toString().padStart(2, '0');
+           const timestamp = `${hours}:${minutes}`;
+            viewData.push({"polledTime":timestamp,"chiller1Status":response[i].chillar1,"chiller2Status":response[i].chillar2,"chiller3Status":response[i].chillar3,"chiller4Status":response[i].chillar4,"chiller5Status":response[i].chillar5,"chiller6Status":response[i].chillar6,"chiller7Status":response[i].chillar7,"chiller8Status":response[i].chillar8})
+
+
+            }
+            res.send(viewData)
+            console.log(viewData)
+        }
+    })
+    
+})
+  //--------------------------end of api-------------------------------//
+
+  //--------------------Chillers Status date filter function ---------------//
+  app.post("/Chillers/Datefilter", async (req, res) => {
+    const { date } = req.body;
+    meterDb.query(`SELECT * FROM chillarstatus WHERE DATE(timestamp) = '${date}'`, function(err, qrres) {
+      if (err) {
+        console.log(err);
+      } else {
+        const response = JSON.parse(JSON.stringify(qrres));
+        const data = response.map(entry => {
+          const date = new Date(entry.timestamp);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padevchargerStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //const timestamp = `${hours}`;
+          return { timestamp, chillar1:entry.chillar1,chillar2:entry.chillar2,chillar3:entry.chillar3,chillar4:entry.chillar4,chillar5:entry.chillar5,chillar6:entry.chillar6,chillar7:entry.chillar7,chillar8:entry.chillar8};
+        });
+        console.log(data);
+        res.send(data);
+      }
+    });
+  });
+
+  //-------------------------end of api---------------------------------//
+
+
+
+  //----------------------- thermal  instantanious control -----------------------//
+
+  app.post('/thermal/controll', function (req, res) {
+    var now = new Date();
+var formattedDate = now.toLocaleString('en-US', { 
+  year: 'numeric', 
+  month: '2-digit', 
+  day: '2-digit', 
+  hour: '2-digit', 
+  minute: '2-digit', 
+  second: '2-digit', 
+  hour12: false
+}).replace(',', '');
+
+console.log(formattedDate,"line 1680");
+
+//var polledTimeStamp=formattedDate
+
+    const { controlStatus, polledTime,functioncode} = req.body;
+    console.log(req.body)
+    const sql = 'INSERT INTO thermalInstantaneous (controlStatus, polledTime,functionCode) VALUES (?, ?, ?)';
+    con.query(sql, [controlStatus, polledTime,functioncode], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send(error);
+        }
+        else{
+            console.log(results)
+            res.status(200).send('parameter  added successfully!');
+        }
+        //return 
+    });
+});
+  //--------------------end of api----------------------------------//
+
+
+  //------------------------------thermal status api------------------//
+  app.get('/thermal/status',async(req,res)=>{
+    con.query("SELECT * FROM thermalStatus where date(polledTime)=curdate();",function(err,result,feilds){
+      const theramlDate=[]
+      if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+              let date=new Date(response[i].polledTime)
+              const hours = date.getHours().toString().padStart(2, '0');
+         const minutes = date.getMinutes().toString().padStart(2, '0');
+         // const seconds = date.getSeconds().toString().padStart(2, '0');
+         const timestamp = `${hours}:${minutes}`;
+         theramlDate.push({"polledTime":timestamp,"ThermalCHGStatus":parseInt(response[i].chgStatus),"thermalDCHGStatus":parseInt((response[i].dchgStatus)*-1)})
+
+
+          }
+          res.send(theramlDate)
+          console.log(theramlDate)
+      }
+  })
+
+
+  })
+  //-------------------------------end of api---------------------//
+
+
+  //----------------------------------thermalStatus dateFilter api-----------------//
+
+  app.post("/ThermalStatus/Datefilter", async (req, res) => {
+    const { date } = req.body;
+    con.query(`SELECT * FROM thermalStatus WHERE DATE(polledTime) = '${date}'`, function(err, qrres) {
+      if (err) {
+        console.log(err);
+      } else {
+        const response = JSON.parse(JSON.stringify(qrres));
+        const data = response.map(entry => {
+          const date = new Date(entry.polledTime);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          // const seconds = date.getSeconds().toString().padevchargerStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          //const timestamp = `${hours}`;
+          return { timestamp,thermalCHGStatus:parseInt(entry.chgStatus),thermalDCHGStatus:parseInt((entry.dchgStatus)*-1)};
+        });
+        console.log(data);
+        res.send(data);
+      }
+    });
+  });
+
+
+
+  //--------------------------end of api-----------------------------------//
+
+
+  //-------------------------------thermal stored water temparature api-----------------------//
+  app.get("/thermal/storedWaterTemp",async(req,res)=>{
+    const thermalWaterTemp=[]
+    meterDb.query("SELECT * FROM meterdata.thermalstoredwaterquaterly where date(timecolumn)=curdate()",function(error,result,feild){
+      if(error){
+        console.log(error)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          let date=new Date(response[i].timecolumn)
+          const hours = date.getHours().toString().padStart(2, '0');
+     const minutes = date.getMinutes().toString().padStart(2, '0');
+     // const seconds = date.getSeconds().toString().padStart(2, '0');
+     const timestamp = `${hours}:${minutes}`;
+     thermalWaterTemp.push({"polledTime":timestamp,"storedwatertemperature":parseFloat(response[i].storedwatertemperature)})
+
+
+      }
+      console.log(thermalWaterTemp)
+        res.send(thermalWaterTemp)
+
+        
+      }
+    })
+  })
+  //--------------------------------end of api----------------------------//
+
+
+
     
 
 

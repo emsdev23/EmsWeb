@@ -12,7 +12,7 @@ con.connect((err)=>{
         console.log("EMS DB not connected")
     }
     else{
-        console.log(' EMS DB conneted......')
+        console.log(' EMS DB connected......')
     }
 })
 
@@ -29,7 +29,7 @@ meterDb.connect((err)=>{
         console.log("METERDATA DB not connected")
     }
     else{
-        console.log(' METERDATA DB conneted......')
+        console.log(' METERDATA DB connected......')
     }
 })
 
@@ -46,7 +46,7 @@ hashtic.connect((err)=>{
         console.log("HASHTIC DB not connected")
     }
     else{
-        console.log(' HASHTIC DB conneted......')
+        console.log(' HASHTIC DB connected......')
     }
 })
 
@@ -65,7 +65,7 @@ chakradb.connect((err)=>{
         console.log("Chakra DB not connected")
     }
     else{
-        console.log('Chakra DB conneted......')
+        console.log('Chakra DB connected......')
     }
 })
 
@@ -82,7 +82,7 @@ unprocesseddata.connect((err)=>{
         console.log("unprocesseddata not connected")
     }
     else{
-        console.log('unprocesseddata conneted......')
+        console.log('unprocesseddata connected......')
     }
 
 })
