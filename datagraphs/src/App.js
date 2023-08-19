@@ -21,6 +21,8 @@ import Thermalcontrol from './pages/Thermalcontrol';
 import Peakdemandgraph from './pages/Peakdemandgraph';
 import BatteryAnalytics from './pages/BatteryAnalytics';
 import ChillerDashboard from './pages/ChillerDashboard';
+import ChillersStatus from './pages/ChillersStatus';
+import ThermalStatus from './pages/ThermalStatus';
 
 function LocationContext(props) {
   const location = useLocation();
@@ -48,13 +50,15 @@ function App() {
             <Route path="/Alertlogs" element={<Alerts />} />
             <Route path="/Documentation" element={<Documentation />} />
             <Route path="/Alerts/Peakdemand" element={<Peakdemand />} />
-            <Route path="/Alerts/Thermalalers" element={<Thermalalers />} />
-            <Route path="/Alerts/ChillerAlerts" element={<ChillerAlerts />} />
+            <Route path="/Alerts/ActiveAlerts/Thermal" element={<Thermalalers />} />
+            <Route path="/Alerts/ActiveAlerts/Chillers" element={<ChillerAlerts />} />
             <Route path="/peakgraph" element={<Peakdemandgraph />} />
             <Route path="/Wheeledgraph" element={<Wheeledinsolar />} />
             <Route path="/RoofTopSolar" element={<RooftopSolar />} />
             <Route path="/Battery_Analytics" element={<BatteryAnalytics/>}/>
-            <Route path="/chillersDashboard" element={<ChillerDashboard/>}/>
+            <Route path="/chillers/chillersDashboard" element={<ChillerDashboard/>}/>
+            <Route path="/Status/chillersStatus" element={<ChillersStatus/>}/>
+            <Route path="/Status/thermalStatus" element={<ThermalStatus/>}/>
             
           </Routes>
         </div>
