@@ -72,7 +72,7 @@ const chillersStatus = {
     },
 
     title: {
-        text: 'Chiller Status',
+        text: null,
         align: 'center',
         style: {
             color: '#cc0000	', // You can replace 'red' with any desired color value
@@ -147,7 +147,7 @@ const chillersStatusFiltered = {
     },
 
     title: {
-        text: 'Chiller Status',
+        text: null,
         align: 'center',
         style: {
             color: '#cc0000	', // You can replace 'red' with any desired color value
@@ -224,21 +224,10 @@ const dateValue = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chi
 
   return (
     <div>
-    
-        {/* <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
-  <div className="col-4">
-    <div className="input-group mb-3" style={{ width: "300px"}}>
-      <div className="input-group-prepend">
-        <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={chillerfilterDate} onChange={handleEndDateChange} />
-        </label>
+        <div> 
+      <h4 style={{textAlign:'center',marginTop:"15px"}}><b style={{fontSize:"30px"}}>Chiller Status </b></h4>
       </div>
-     
-    </div>
-  </div>
-
- 
-</div> */}
+   
 <div class="row">
   <div class="col-10" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>

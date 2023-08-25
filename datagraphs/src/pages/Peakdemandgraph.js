@@ -45,6 +45,16 @@ const CurrentGraph=()=>{
   })
 }
 
+const limitLine=[]
+
+for(let i=0;i<initialGraph.length;i++){
+  if(initialGraph[i].peakdemand>4000){
+    limitLine.push(4000)
+  }
+
+}
+console.log(limitLine)
+
   // const handleDateChange = (singledaydata) => {
   //   setSelectedDate(singledaydata);
   // };
@@ -205,7 +215,8 @@ console.log(initialGraph)
       series: [{
         name: "totalApparentPower2",
         data: data.map((val) => (val.peakdemand))
-      }],
+      },
+      ],
     
       options: {
         chart: {
@@ -300,7 +311,8 @@ console.log(initialGraph)
       series: [{
         name:"totalApparentPower2",
         data: data.map((val)=>(val.peakdemand))
-      }], 
+      },
+     ], 
       
       chart: {
         type: 'area',
@@ -351,7 +363,13 @@ console.log(initialGraph)
   series: [{
     name:"totalApparentPower2",
     data: initialGraph.map((val)=>(val.peakdemand))
-  }],
+  },
+ ],
+//  {
+//   name: "totalApparentPower2",
+//   data: limitLine.map((val) => (val)),
+//   type:"line"
+// }
 
   options: {
     chart: {
@@ -468,9 +486,8 @@ console.log(testing)
     <div>
       <div>
     <form onSubmit={handleSubmit}>
-      {/* <DatePicker selected={startDate} onChange={handleStartDateChange} placeholderText="Select start date" />
-      <DatePicker selected={endDate} onChange={handleEndDateChange} placeholderText="Select end date" />
-      <button type="submit">Submit</button> */}
+      <br/>
+      <h3 style={{textAlign:"center"}}><b>Peak Demand (KVA)</b></h3>
       <br/>
       <br/>
 

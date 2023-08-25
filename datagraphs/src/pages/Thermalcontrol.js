@@ -3,14 +3,104 @@ import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import axios from 'axios';
 import swal from 'sweetalert';
+import Swal from "sweetalert2"
+import * as GiIcons from  'react-icons/gi'
+
 
 function Thermalcontrol() {
 
   const [thermalData, setThermalData] = useState({
     functioncode: "",
     controlStatus: "",
-    polledTime: ""
+    polledTime: "",
+    // pin:""
   });
+
+  const [thermalOverviewData,setThermalOverviewData]=useState([])
+  const [pinNumber,setPinNumber]=useState("")
+  const thermalApi='http://localhost:5000/thermal/summaryCard'
+  const ActualPassKey=7230
+
+  // const handlePinPasswordChange = (pin) => {
+  //   setPinNumber(pin);
+  // };
+
+  const handlePinPasswordChange = (event) => {
+    setPinNumber(event.target.value);
+  };
+
+
+  
+  const ThermalData=()=>{
+    axios.get(thermalApi).then((res)=>{
+      const dataResponse=res.data
+      setThermalOverviewData(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
+  useEffect(()=>{
+    ThermalData()
+  },[])
+  console.log(thermalOverviewData)
+  let  storedWaterTemp=""
+  let inletTemparature=""
+  let outletTemparature=""
+  let thermalStoragelinepressure=""
+  let flowrateToBuilding=""
+  let flowrateToTS=""
+  let ActuvatorStatus=""
+  let ADPvalveStatus=""
+  let BDPvalveStatus =""
+  let HvalveStatus=""
+  let Status=""
+  for(let i=0;i<thermalOverviewData.length;i++){
+    storedWaterTemp=thermalOverviewData[i].storedwatertemperature
+    inletTemparature=thermalOverviewData[i].inletTemparature
+    outletTemparature=thermalOverviewData[i].outletTemparature
+    thermalStoragelinepressure=thermalOverviewData[i].thermalStoragelinepressure
+    flowrateToBuilding=thermalOverviewData[i].flowrateToBuilding
+    flowrateToTS=thermalOverviewData[i].flowrateToTS
+    ActuvatorStatus=thermalOverviewData[i].ActuvatorStatus
+    ADPvalveStatus=thermalOverviewData[i].ADPvalveStatus
+    BDPvalveStatus=thermalOverviewData[i].BDPvalveStatus
+    HvalveStatus=thermalOverviewData[i].HvalveStatus
+    if(thermalOverviewData[i].chargingPump1Power>0 || thermalOverviewData[i].chargingPump1Power>0){
+      Status="CHARGING"
+
+    }
+    if(thermalOverviewData[i].dischargingPump1Power>0 || thermalOverviewData[i].dischargingPump2Power>0){
+      Status="DISCHARGING"
+
+    }
+    if((thermalOverviewData[i].chargingPump1Power==0 && thermalOverviewData[i].chargingPump2Power==0) &&  (thermalOverviewData[i].dischargingPump1Power==0 && thermalOverviewData[i].dischargingPump2Power==0) ){
+      Status="IDLE"
+
+    }
+
+
+
+  }
+//   {
+//     "polledTime": "18:11",
+//     "storedwatertemperature": 7.62,
+//     "inletTemparature": 8.36,
+//     "outletTemparature": 14.2,
+//     "thermalStoragelinepressure": "6.250",
+//     "flowrateToBuilding": 0,
+//     "flowrateToTS": 61.74759,
+//     "ActuvatorStatus": "ON",
+//     "ADPvalveStatus": "ON",
+//     "BDPvalveStatus": "ON",
+//     "HvalveStatus": "ON",
+//     "chargingPump1Power": 4262.37,
+//     "chargingPump2Power": 0,
+//     "dischargingPump1Power": 0,
+//     "dischargingPump2Power": 0
+// }
+
 
   //const [thermaldata,setThermaldata]=useState([])
 
@@ -33,7 +123,9 @@ function Thermalcontrol() {
       polledTime: formattedDate,
     };
     console.log(formattedData)
-    swal({
+    console.log(pinNumber)
+    if(parseInt(pinNumber)===ActualPassKey){
+        swal({
       title: "Are you sure?",
       text: `the given parameters will be set for Thermal control !`,
       icon: "warning",
@@ -51,7 +143,9 @@ function Thermalcontrol() {
               functioncode: "",
               controlStatus: "",
               polledTime: "",
+              // pin:"",
             });
+            setPinNumber("")
             swal({
               title: (formattedData.functioncode === "ON" || formattedData.functioncode === "OFF" ) && formattedData.controlStatus === "discharge"?  `Thermal set to discharge ${formattedData.functioncode}  mode` : `Thermal set to charge ${formattedData.functioncode} mode`,
               icon: "success",
@@ -67,6 +161,15 @@ function Thermalcontrol() {
           });
       }
     });
+  }
+  else{
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'wrong! Pin',
+      // footer: '<a href="">Why do I have this issue?</a>'
+    })
+  }
   };
 
   const handleDateTimeChange = (moment, name) => {
@@ -81,10 +184,11 @@ function Thermalcontrol() {
       <div> 
         <h2 style={{fontSize:"30px",textAlign:"center"}}><b>Thermal Control</b></h2>
       </div>
+      <div  class="row" style={{ margin:'30px'}}>
           <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
-      <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
+      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Instantaneous Control</b></h4>
       <br/>
-    <div class="card" style={{background:"white",width:"auto", height:"380px",marginLeft:"10px"}} >
+    <div class="card" style={{background:"white",width:"auto", height:"430px",marginLeft:"10px"}} >
       <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
       <form onSubmit={handleThermalSubmit} >
       &nbsp;
@@ -92,9 +196,9 @@ function Thermalcontrol() {
         
       <div class="input-group mb-3"  style={{width:"300px"}}>
       <label class="input-group-text" for="inputGroupSelect01" style={{color:"gray",fontFamily:"sans-serif",fontSize:"19px"}} ><b>Status</b></label>
-  <select class="form-select" id="inputGroupSelect01" style={{color:"red"}} value={thermalData.controlStatus} onChange={(e) => setThermalData({ ...thermalData, controlStatus: e.target.value })}>
+  <select class="form-select" id="inputGroupSelect01" value={thermalData.controlStatus} onChange={(e) => setThermalData({ ...thermalData, controlStatus: e.target.value })}>
   <option value="">CHARGE/DISCHARGE</option>
-          <option value={"charge"} style={{color:"red"}}>CHARGE</option>
+          <option value={"charge"} style={{color:"green"}}>CHARGE</option>
           <option value={"discharge"} style={{color:"red"}}>DISCHARGE</option>
   </select>
   </div>
@@ -102,51 +206,27 @@ function Thermalcontrol() {
   <br/>
   <div class="input-group mb-3"  style={{width:"300px"}}>
       <label class="input-group-text" for="inputGroupSelect01" style={{color:"gray",fontFamily:"sans-serif",fontSize:"19px"}} ><b>Function</b></label>
-  <select class="form-select" id="inputGroupSelect01" style={{color:"red"}} value={thermalData.functioncode} onChange={(e) => setThermalData({ ...thermalData, functioncode: e.target.value })}>
+  <select class="form-select" id="inputGroupSelect01" value={thermalData.functioncode} onChange={(e) => setThermalData({ ...thermalData, functioncode: e.target.value })}>
   <option value="">ON/OFF</option>
-          <option value={"ON"} style={{color:"red"}} >ON</option>
+          <option value={"ON"} style={{color:"green"}} >ON</option>
           <option value={"OFF"} style={{color:"red"}} >OFF</option>
   </select>
   </div>
-  <br/>
-        
-
-        {/* <div style={{width:"300px"}}>
-        <DateTime
-           inputProps={{ placeholder: "polledTime" }}
-           value={thermalData.polledTime}
-           onChange={(moment) => handleDateTimeChange(moment, "polledTime")}
-           dateFormat="YYYY-MM-DD"
-           timeFormat="HH:mm:ss"
-           
-        />
-        </div> */}
-      <br/>
-
-        <br/>
-        
-        {/* <div class="mb-3">
-        <input
-          type="number"
-          name="capacity"
-          value={formData.capacity}
-          onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-          placeholder="Capacity"
-          style={{width:"300px"}}
-        />
+  {/* <br/>
+  <div class="input-group mb-3"  style={{width:"300px"}}>
+      <label class="input-group-text" for="inputGroupSelect01" style={{color:"gray",fontFamily:"sans-serif",fontSize:"19px"}} ><b>PIN</b></label>
+      <input name="pin" type="password"></input>
   </div> */}
-  <div class="mb-3">
-{/* 
-    <input
-          type="number"
-          name="capacity"
-          class="form-control"
-          value={formData.capacity}
-          onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-          placeholder="Capacity"
-          style={{width:"350px"}}
-        /> */}
+  <br/>
+  <div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon1" style={{color:"gray"}}><b>PIN</b></span>
   </div>
+  <input name="pin" type="password" class="form-control" placeholder="*****" aria-label="Username" aria-describedby="basic-addon1" onChange={handlePinPasswordChange}  value={pinNumber}/>
+</div>
+  
+  <br/>  
+
   <div style={{justifyContent:"center"}}> 
   {
     thermalData.controlStatus && thermalData.functioncode ?<button type="submit" class="btn btn-dark bt-lg" style={{height:"40px",width:"300px"}}><b>Submit</b></button>: <button type="button" class="btn btn-secondary btn-lg" disabled style={{height:"40px",width:"300px"}}><b>Submit</b></button>
@@ -159,7 +239,86 @@ function Thermalcontrol() {
       </div>
     </div>
   </div>
+
+  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
+      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Overview</b></h4>
+      <br/>
+      <div >
+    <div class="card" style={{background:"white",width:"500px"}}>
+      <div class="card-body">
+        <div> </div>
+        <h4><b  style={{color:"teal"}}>Status</b>:{Status}</h4>
+        <h4><b style={{color:"teal"}}>Stored Water Temperature(deg C)</b> : {storedWaterTemp}</h4>
+        <h4> <b style={{color:"teal"}}>Inlet Temperature (deg C)</b>: {inletTemparature}</h4>
+        <h4> <b style={{color:"teal"}}>Out Temperature (deg C)</b>: {outletTemparature}</h4>
+        <h4> <b style={{color:"teal"}}>Line Pressure (Bar)</b>: {thermalStoragelinepressure}</h4>
+        <div> 
+          <h4><b style={{color:"teal"}} >Flow Rate(m3/h)</b>:</h4>
+          <div class="container">
+  <div class="row" style={{marginLeft:"50px"}}>
+    <div class="col" >
+    <h5><b>To Building</b>: {flowrateToBuilding}</h5>
+    {/* <h6 style={{textAlign:"center"}}></h6> */}
     </div>
+    <div class="col">
+    <h5><b>To TS</b>: {flowrateToTS}</h5>
+    {/* <h6 style={{textAlign:"center"}}></h6> */}
+    </div>
+    </div>
+   <div > 
+    <h4><b style={{color:"teal"}}>Status </b>:</h4>
+   </div>
+    <div class="row">
+    <div class="col">
+   <p >Actuator</p>
+   {
+    ActuvatorStatus==="ON"? <GiIcons.GiValve color='green' size="70px"/>: <GiIcons.GiValve color='gray' size="70px"/>
+   }
+   
+    {/* <h6 style={{textAlign:"center"}}></h6> */}
+    </div>
+    <div class="col">
+    <p>ADP Valve</p>
+    {
+      ADPvalveStatus==="ON"?<GiIcons.GiValve color='green' size="70px"/>: <GiIcons.GiValve color='gray' size="70px"/>
+    }
+    </div>
+    <div class="col">
+    <p>BDP Valve</p>
+    {
+      BDPvalveStatus==="ON"?<GiIcons.GiValve color='green' size="70px"/>: <GiIcons.GiValve color='gray' size="70px"/>
+    }
+    </div>
+    <div class="col">
+    <p>H Valve</p>
+    {
+      HvalveStatus==="ON"?<GiIcons.GiValve color='green' size="70px"/>: <GiIcons.GiValve color='gray' size="70px"/>
+    }
+    </div>
+    </div>
+    
+   
+    </div>
+
+
+          
+          
+        </div>
+        
+        
+        
+        
+        
+       
+
+      
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  </div>
+    
   )
 }
 

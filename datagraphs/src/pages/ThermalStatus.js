@@ -72,7 +72,7 @@ const thermalGraph= {
       type: 'column'
   },
   title: {
-      text: 'Thermal Status',
+      text: null,
       align: 'center',
       style: {
           color: '#cc0000	', // You can replace 'red' with any desired color value
@@ -110,7 +110,7 @@ const thermalGraphFilter= {
       }
   },
   title: {
-      text: 'Thermal Status',
+      text: null,
       align: 'center',
       style: {
           color: '#cc0000	', // You can replace 'red' with any desired color value
@@ -149,23 +149,12 @@ const dateValue = thermalfilterDate ? new Date(thermalfilterDate.getTime() - the
 
   return (
     <div>
+         <div> 
+      <h4 style={{textAlign:'center',marginTop:"15px"}}><b style={{fontSize:"30px"}}>Thermal Status </b></h4>
+      </div>
 
       <div> 
-      {/* <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
-  <div className="col">
-    <div className="input-group mb-3" style={{ width: "300px"}}>
-      <div className="input-group-prepend">
-        <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={thermalfilterDate} onChange={handleEndDateChange} />
-        </label>
-      </div>
-     
-    </div>
-  </div>
-
- 
-</div> */}
-<div class="row">
+  <div class="row">
   <div class="col-10" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">

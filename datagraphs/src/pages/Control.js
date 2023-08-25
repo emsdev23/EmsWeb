@@ -13,7 +13,8 @@ import {FaBatteryEmpty} from "react-icons/fa"
 import { height } from '@mui/system';
 import image2 from "../images/power.png"
 import batterylow from '../images/battery-status.png'
-import batteryfull from '../images/smartphone-charger.png'
+import batteryfull from '../images/smartphone-charger.png';
+import BatteryShedule from './BatteryShedule';
 
 // import './Controls.css'
 
@@ -434,14 +435,14 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
 
    
       <div >
-        <h1 style={{textAlign:'center'}}><b>UPS Battery Control</b></h1>
+        <h2 style={{fontSize:"30px",textAlign:"center"}}><b>UPS Battery Control</b></h2>
       </div>
       <br/>
 
       <div  class="row" style={{ margin:'30px'}}>
          
       <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
-      <h4 style={{textAlign:"center"}}><b>Overview</b></h4>
+      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Overview</b></h4>
       <br/>
       <div >
     <div class="card" style={{background:"#b8bdcc",width:"auto"}}>
@@ -472,82 +473,18 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
   </div>
 
       <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
-      <h4 style={{textAlign:"center"}}><b>Scheduled Control</b></h4>
+      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Scheduled Control</b></h4>
       <br/>
     <div class="card" style={{background:"#b8bdcc",width:"auto", height:"380px",marginLeft:"10px"}} >
       <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
-      <form onSubmit={handleSubmit} >
-      &nbsp;
-        &nbsp;
-        
-      <div class="input-group mb-3"  style={{width:"300px"}}>
-      <label class="input-group-text" for="inputGroupSelect01">Status</label>
-  <select class="form-select" id="inputGroupSelect01" value={formData.functioncode} onChange={(e) => setFormData({ ...formData, functioncode: e.target.value })}>
-  {/* <option value=""> Options</option> */}
-          <option value={0}>IDLE</option>
-          <option value={1}>CHG</option>
-          <option value={2}>DCHG</option>
-  </select>
-  </div>
-  <br/>
-        
-
-        <div style={{width:"300px"}}>
-        <DateTime
-           inputProps={{ placeholder: "Start Time" }}
-           value={formData.starttime}
-           onChange={(moment) => handleDateTimeChange(moment, "starttime")}
-           dateFormat="YYYY-MM-DD"
-           timeFormat="HH:mm:ss"
-           
-        />
-        </div>
-      <br/>
-
-        <div style={{width:"300px"}}> 
-        <DateTime
-          inputProps={{ placeholder: "End Time" }}
-          value={formData.endtime}
-          onChange={(moment) => handleDateTimeChange(moment, "endtime")}
-          dateFormat="YYYY-MM-DD"
-          timeFormat="HH:mm:ss"
-          style={{width:"300px"}}
-        />
-        </div>
-        <br/>
-        
-        {/* <div class="mb-3">
-        <input
-          type="number"
-          name="capacity"
-          value={formData.capacity}
-          onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-          placeholder="Capacity"
-          style={{width:"300px"}}
-        />
-  </div> */}
-  <div class="mb-3">
-{/* 
-    <input
-          type="number"
-          name="capacity"
-          class="form-control"
-          value={formData.capacity}
-          onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-          placeholder="Capacity"
-          style={{width:"350px"}}
-        /> */}
-  </div>
-  <br/>
-  <button type="submit" class="btn btn-primary bt-lg" style={{height:"40px"}}>Submit</button>
-  </form>
+     <BatteryShedule/>
 
       </div>
     </div>
   </div>
   
-  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0" >
-  <h4 style={{textAlign:"center"}}><b>Instantaneous Control</b></h4>
+  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-2 mb-sm-0" >
+  <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Instantaneous Control</b></h4>
   <br/>
     <div class="card" style={{background:"#b8bdcc",width:"auto",height:"380px",marginLeft:"10px"}}>
       <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
@@ -576,10 +513,14 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
   </select>
   </div>
       <br/>
+      <br/>
+      <br/>
+      <div style={{justifyItems:"center",marginLeft:"120px",justifyTracks:'center'}}> 
       {
         isButtonDisabled=== false ? <button type="submit" class="btn btn-primary bt-lg" style={{height:"40px"}}>Submit</button>:<button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
       }
 
+</div>
      
       </div>
     </div>

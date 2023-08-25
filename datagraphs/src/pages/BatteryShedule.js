@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import swal from 'sweetalert';
 
-function Documentation() {
+function BatteryShedule() {
   const [selectedDays, setSelectedDays] = useState([]);
   const [chargestartTime, setChargestartTime] = useState('00:00');
   const [chargeendTime, setChargeendTime] = useState('00:00');
@@ -187,7 +187,7 @@ setSlot2dischargestarttime("");
           </div>
         ))}
       </div>
-      <p className="mt-3" style={{fontFamily:"monospace",fontStyle:"italic"}}>Selected days: {selectedDays.join(', ')}</p>
+      <p className="mt-3" style={{fontFamily:"monospace",fontStyle:"italic"}}>Scheduled Days: {selectedDays.join(',')}</p>
       
       <div>
       <div class="container">
@@ -313,10 +313,14 @@ setSlot2dischargestarttime("");
 </div>
 </div>
 </div>
-
+<div style={{justifyContent:"center",justifyItems:"center",marginLeft:"120px",display:"-ms-grid"}}> 
 <button className="btn btn-primary mt-4" onClick={handleSubmit}>
           Submit
         </button>
+
+</div>
+
+
 
         {/* <button className="btn btn-primary mt-4" onClick={handleClear}>
           Clear
@@ -329,4 +333,4 @@ setSlot2dischargestarttime("");
   );
 }
 
-export default Documentation;
+export default BatteryShedule;
