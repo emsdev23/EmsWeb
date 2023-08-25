@@ -64,32 +64,42 @@ export const SidebarData = [
         icon: <SevereColdIcon />,
       },
       {
-        title: 'Chillers',
-        // path: '/chillersDashboard',
-        icon: <DownloadingIcon />,
-        subNav:[
-        
-          {
-            title: 'ChillersStatus',
-            path: '/Status/chillersStatus',
-            icon: <SevereColdIcon />,
-          },
-
-        ]
+        title: 'ChillersStatus',
+        path: '/Status/chillersStatus',
+        icon: <SevereColdIcon />,
       },
       {
-        title: 'Thermal',
-        // path: '/chillersDashboard',
-        icon: <DownloadingIcon />,
-        subNav:[
-          {
-            title: 'ThermalStatus',
-            path: '/Status/thermalStatus',
-            icon: <ThermostatAutoRoundedIcon />,
-          },
-
-        ]
+        title: 'ThermalStatus',
+        path: '/Status/thermalStatus',
+        icon: <ThermostatAutoRoundedIcon />,
       },
+      // {
+      //   title: 'Chillers',
+      //   // path: '/chillersDashboard',
+      //   icon: <DownloadingIcon />,
+      //   subNav:[
+        
+      //     {
+      //       title: 'ChillersStatus',
+      //       path: '/Status/chillersStatus',
+      //       icon: <SevereColdIcon />,
+      //     },
+
+      //   ]
+      // },
+      // {
+      //   title: 'Thermal',
+      //   // path: '/chillersDashboard',
+      //   icon: <DownloadingIcon />,
+      //   subNav:[
+      //     {
+      //       title: 'ThermalStatus',
+      //       path: '/Status/thermalStatus',
+      //       icon: <ThermostatAutoRoundedIcon />,
+      //     },
+
+      //   ]
+      // },
     ],
   },  {
     title: 'Alerts',
