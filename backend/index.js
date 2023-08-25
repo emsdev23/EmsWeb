@@ -10,6 +10,10 @@ const tz = 'Asia/Kolkata'
 const password = "Arun@1807"
 const email = 'arun.kumar@tenet.res.in'
 const emailto =['ems@respark.iitm.ac.in']
+
+const util = require('util');
+const conQuery = util.promisify(con.query).bind(con);
+const chakradbQuery = util.promisify(chakradb.query).bind(chakradb);
 //faheera@respark.iitm.ac.in
 
 
@@ -1784,6 +1788,114 @@ console.log(formattedDate,"line 1680");
     })
   })
   //--------------------------------end of api----------------------------//
+
+  //-------------------------------------tharmalStorage summary card---------------------//
+
+  app.get("/thermal/summaryCard", async (req, res) => {
+    try {
+      const thermalWaterTemp = [];
+  
+      // Query the first database (con)
+      const result1 = await conQuery("SELECT * FROM EMSThermalstorage WHERE DATE(received_time) = CURDATE() ORDER BY received_time DESC LIMIT 1;");
+      const response1 = JSON.parse(JSON.stringify(result1));
+  
+      for (let i = 0; i < response1.length; i++) {
+        const date = new Date(response1[i].received_time);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const timestamp = `${hours}:${minutes}`;
+  
+        // Query the second database (chakradb)
+        const result2 = await chakradbQuery("SELECT * FROM hvacChillerElectricPolling WHERE DATE(polledTime) = CURDATE() ORDER BY polledTime DESC LIMIT 1");
+        const response2 = JSON.parse(JSON.stringify(result2));
+  
+        // Process the data from both databases
+        thermalWaterTemp.push({
+          "polledTime": timestamp,
+          "storedwatertemperature": parseFloat(response1[i].thermalstorage_storedwatertemperature),
+          "inletTemparature":parseFloat(response1[i].thermalstorage_inlet),
+          "outletTemparature":parseFloat(response1[i].thermalstorage_outlet),
+          "thermalStoragelinepressure":response1[i].thermalstorage_linepressure,
+          "flowrateToBuilding":parseFloat(response1[i].thermalstorage_to_buildingflowrate),
+          "flowrateToTS":parseFloat(response1[i].building_to_thermalstorage_flowrate),
+          "ActuvatorStatus":response1[i].actutator,
+          "ADPvalveStatus":response1[i].adpvalve,
+          "BDPvalveStatus":response1[i].bdpvalve,
+          "HvalveStatus":response1[i].H_valve,
+          "chargingPump1Power": parseFloat(response2[0].chargingPump1Power),
+          "chargingPump2Power": parseFloat(response2[0].chargingPump2Power),
+          "dischargingPump1Power": parseFloat(response2[0].dischargingPump1Power),
+          "dischargingPump2Power": parseFloat(response2[0].dischargingPump2Power)
+        });
+      }
+  
+      res.send(thermalWaterTemp);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("An error occurred");
+    }
+  });
+  //----------------------------end of api-------------------------------------//
+
+
+  //----------------------------battery shedule control api -----------------------//
+  app.post('/Shedulecontroll/UPSBattery', function (req, res) {
+    const resultValue = req.body;
+    const insertPromises = [];
+    console.log(resultValue)
+
+    for (let i = 0; i < resultValue.length; i++) {
+        const sql = `
+            INSERT INTO batteryScheduler (weekDay, chgstart1, chgend1,chgstart2,chgend2, dchgstart1, dchgend1,dchgstart2,dchgend2)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                weekDay = VALUES(weekDay),
+                chgstart1 = VALUES(chgstart1),
+                chgend1 = VALUES(chgend1),
+                chgstart2 = VALUES(chgstart2),
+                chgend2 = VALUES(chgend2),
+                dchgstart1 = VALUES(dchgstart1),
+                dchgend1 = VALUES(dchgend1),
+                dchgstart2 = VALUES(dchgstart2),
+                dchgend2 = VALUES(dchgend2)
+        `;
+
+        const insertPromise = new Promise((resolve, reject) => {
+            con.query(sql, [
+                resultValue[i].seletedDay,
+                resultValue[i].chargeStartTime,
+                resultValue[i].chargeEndTime,
+                resultValue[i].slot2ChargeStartTime,
+                resultValue[i].slot2chargeEndTime,
+                resultValue[i].DischargeStartTime,
+                resultValue[i].DischargeEndTime,
+                resultValue[i].slot2DischargeStartTime,
+                resultValue[i].slot2DischargeEndTime
+            ], function (error, results, fields) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        insertPromises.push(insertPromise);
+    }
+
+    Promise.all(insertPromises)
+        .then(() => {
+            console.log("All records inserted/updated successfully");
+            res.status(200).send('parameters added/updated successfully!');
+        })
+        .catch(error => {
+            console.error("Error inserting/updating records:", error);
+            res.status(500).send(error);
+        });
+});
+
+
+  //---------------------end of api-----------------//
 
 
 
