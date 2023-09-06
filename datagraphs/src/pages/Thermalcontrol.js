@@ -8,6 +8,7 @@ import * as GiIcons from  'react-icons/gi'
 
 
 function Thermalcontrol() {
+  const host='121.242.232.211'
 
   const [thermalData, setThermalData] = useState({
     functioncode: "",
@@ -18,7 +19,7 @@ function Thermalcontrol() {
 
   const [thermalOverviewData,setThermalOverviewData]=useState([])
   const [pinNumber,setPinNumber]=useState("")
-  const thermalApi='http://localhost:5000/thermal/summaryCard'
+  const thermalApi=`http://${host}:5000/thermal/summaryCard`
   const ActualPassKey=7230
 
   // const handlePinPasswordChange = (pin) => {
@@ -75,7 +76,7 @@ function Thermalcontrol() {
       Status="DISCHARGING"
 
     }
-    if((thermalOverviewData[i].chargingPump1Power==0 && thermalOverviewData[i].chargingPump2Power==0) &&  (thermalOverviewData[i].dischargingPump1Power==0 && thermalOverviewData[i].dischargingPump2Power==0) ){
+    if((thermalOverviewData[i].chargingPump1Power==0 && thermalOverviewData[i].chargingPump2Power==0) &&  ((thermalOverviewData[i].dischargingPump1Power==0 || thermalOverviewData[i].dischargingPump1Power==null) && thermalOverviewData[i].dischargingPump2Power==0) ){
       Status="IDLE"
 
     }
@@ -246,12 +247,41 @@ function Thermalcontrol() {
       <div >
     <div class="card" style={{background:"white",width:"500px"}}>
       <div class="card-body">
-        <div> </div>
-        <h4><b  style={{color:"teal"}}>Status</b>:{Status}</h4>
+      <table style={{ width: "100%", textAlign: "left"}}>
+          <tbody>
+          <tr>
+          <td><h4><b  style={{color:"teal"}}>Status</b></h4></td>
+          <td><h4>:</h4></td>
+          <td><h4>{Status}</h4></td>
+          </tr>
+          <tr> 
+            <td> <h4><b style={{color:"teal"}}>Stored Water Temperature(&deg;C)</b></h4></td>
+            <td><h4>:</h4></td>
+            <td><h4>{storedWaterTemp}</h4></td>
+          </tr>
+          <tr> 
+            <td> <h4><b style={{color:"teal"}}>Inlet Temperature (&deg;C)</b></h4></td>
+            <td><h4>:</h4></td>
+            <td><h4>{inletTemparature}</h4></td>
+          </tr>
+          <tr> 
+            <td> <h4> <b style={{color:"teal"}}>Outlet Temperature (&deg;C)</b></h4></td>
+            <td><h4>:</h4></td>
+            <td><h4>{outletTemparature}</h4></td>
+          </tr>
+          <tr> 
+            <td><h4> <b style={{color:"teal"}}>Line Pressure (Bar)</b></h4></td>
+            <td><h4>:</h4></td>
+            <td><h4>{thermalStoragelinepressure}</h4></td>
+          </tr>
+       
+        {/* <h4><b  style={{color:"teal"}}>Status</b>:{Status}</h4>
         <h4><b style={{color:"teal"}}>Stored Water Temperature(deg C)</b> : {storedWaterTemp}</h4>
         <h4> <b style={{color:"teal"}}>Inlet Temperature (deg C)</b>: {inletTemparature}</h4>
         <h4> <b style={{color:"teal"}}>Out Temperature (deg C)</b>: {outletTemparature}</h4>
-        <h4> <b style={{color:"teal"}}>Line Pressure (Bar)</b>: {thermalStoragelinepressure}</h4>
+        <h4> <b style={{color:"teal"}}>Line Pressure (Bar)</b>: {thermalStoragelinepressure}</h4> */}
+        </tbody>
+        </table>
         <div> 
           <h4><b style={{color:"teal"}} >Flow Rate(m3/h)</b>:</h4>
           <div class="container">

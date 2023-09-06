@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import swal from 'sweetalert';
+import Swal from "sweetalert2";
 
 function BatteryShedule() {
+
+  const ActualPassKey=7230
+  
+  const [pinNumber,setPinNumber]=useState("")
+
+  const host='121.242.232.211'
   const [selectedDays, setSelectedDays] = useState([]);
   const [chargestartTime, setChargestartTime] = useState('00:00');
   const [chargeendTime, setChargeendTime] = useState('00:00');
@@ -55,6 +62,10 @@ function BatteryShedule() {
     setSlot2dischargeendtime(event.target.value);
   };
   
+
+  const handlePinPasswordChange = (event) => {
+    setPinNumber(event.target.value);
+  };
 
   const handleSubmit = () => {
     console.log(selectedDays)
@@ -125,6 +136,7 @@ function BatteryShedule() {
         finalSelectedDays.push({"seletedDay":selectedDays[i],"chargeStartTime":chargestartTime,"chargeEndTime":chargeendTime,"DischargeStartTime":dischargestarttime,"DischargeEndTime":dischargeendtime,"slot2ChargeStartTime":slot2chargestartTime,"slot2chargeEndTime":slot2chargeendTime,"slot2DischargeStartTime":slot2dischargestarttime,"slot2DischargeEndTime":slot2dischargeendtime})
       }
     }
+    if(parseInt(pinNumber)===ActualPassKey){
       swal({
         title: "Are you sure?",
         text: `the given parameters will be set for UpsBattery Shedule !`,
@@ -136,7 +148,7 @@ function BatteryShedule() {
         dangerMode: false,
       }).then((willContinue) => {
         if (willContinue) {
-          axios.post(`http://localhost:5000/Shedulecontroll/UPSBattery`, finalSelectedDays)
+          axios.post(`http://${host}:5000/Shedulecontroll/UPSBattery`, finalSelectedDays)
             .then((response) => {
               const result = response.data;
               swal({
@@ -144,6 +156,7 @@ function BatteryShedule() {
                 icon: "success",
               });
             })
+            
             .catch((error) => {
               console.error(error);
               swal({
@@ -152,8 +165,23 @@ function BatteryShedule() {
                 icon: "error",
               });
             });
+            
         }
       });
+    }
+    else{
+      Swal.fire({
+        //icon: 'error',
+        //title: 'Oops...',
+        //text: 'wrong! Pin',
+        // imageUrl:'https://media.tenor.com/eqkjY6hklPcAAAAM/sad-mr-bean.gif',
+        imageUrl:'https://img.freepik.com/premium-vector/frustrated-man-touching-his-head-holding-phone-trying-remember-forgets-password-account_199628-198.jpg',
+        imageWidth: 400,
+        imageHeight: 350,
+        imageAlt: 'Custom image',
+       
+      })
+    }
   
 
     
@@ -174,7 +202,7 @@ setSlot2dischargestarttime("");
 
 
   return (
-    <div className="container">
+    <div className="container" >
       <div className="d-flex" style={{justifyItems:'center',justifyContent:"center"}}>
         {daysOfWeek.map(day => (
           <div
@@ -187,14 +215,20 @@ setSlot2dischargestarttime("");
           </div>
         ))}
       </div>
-      <p className="mt-3" style={{fontFamily:"monospace",fontStyle:"italic"}}>Scheduled Days: {selectedDays.join(',')}</p>
+      <p className="mt-3" style={{fontFamily:"monospace",fontStyle:"italic",color:"blue"}}><b>Scheduled Days</b>: <span style={{color:"black"}}>{selectedDays.join(',')}</span></p>
+      <div class="input-group mb-3" style={{width:"300px",marginLeft:"20px"}}>
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon1" style={{color:"gray"}}><b>PIN</b></span>
+  </div>
+  <input name="pin" type="password" class="form-control" placeholder="****" aria-label="Username" aria-describedby="basic-addon1" onChange={handlePinPasswordChange}  value={pinNumber}/>
+</div>
       
       <div>
       <div class="container">
       <div class="row" style={{justifyItems:'center',justifyContent:"center"}}>
   <div class="col-6">
 
-    <h3 style={{color:"tomato",textAlign:"center"}}>
+    <h3 style={{color:"black",textAlign:"center"}}>
       <b>Charge</b>
     </h3>
     <div class="accordion" id="accordionExample">
@@ -254,7 +288,7 @@ setSlot2dischargestarttime("");
 
   </div>
   <div class="col-6"> 
-  <h3 style={{color:"tomato",textAlign:"center"}}> 
+  <h3 style={{color:"black",textAlign:"center"}}> 
     <b>Discharge</b>
   </h3>
 
@@ -313,7 +347,8 @@ setSlot2dischargestarttime("");
 </div>
 </div>
 </div>
-<div style={{justifyContent:"center",justifyItems:"center",marginLeft:"120px",display:"-ms-grid"}}> 
+
+<div style={{justifyContent:"center",justifyItems:"center",marginLeft:"50%",display:"-ms-grid"}}> 
 <button className="btn btn-primary mt-4" onClick={handleSubmit}>
           Submit
         </button>

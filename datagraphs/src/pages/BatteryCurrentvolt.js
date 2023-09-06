@@ -9,11 +9,12 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function BatteryCurrentvolt() {
+  const host='121.242.232.211'
 
   const [data, setData] = useState([]);
   const [voltcurrentfilterDate, setVoltcurrentfilterDate] = useState(null);
   const [loading, setLoading] = useState(false);
-  const voltage="http://121.242.232.211:5000/analytics/battery/voltage&current"
+  const voltage=`http://${host}:5000/analytics/battery/voltage&current`
   const [voltcurrent,setVoltcurrent]=useState([])
   console.log(voltcurrent)
 
@@ -45,7 +46,7 @@ exportDataInit(Highcharts);
         try {
           const formattedStartDate = voltcurrentfilterDate ? new Date(voltcurrentfilterDate.getTime() - voltcurrentfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://121.242.232.211:5000/analytics/onemingraph`, {
+          const response = await axios.post(`http://${host}:5000/analytics/onemingraph`, {
             date: formattedStartDate,
           });
         
@@ -74,7 +75,7 @@ exportDataInit(Highcharts);
           data: voltcurrent.map((val) => val.batteryVoltage),
           yAxis: 0, // Primary y-axis
           type: "line",
-          color:"#FF0000"
+          color:"#c24e10"
           // ...
         },
         {
@@ -82,6 +83,7 @@ exportDataInit(Highcharts);
           data: voltcurrent.map((val) => val.batteryCurrent),
           yAxis: 1, // Secondary y-axis
           type: "area",
+          color:"#b1a4ed"
           // ...
         },
       ],

@@ -8,9 +8,11 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function BatteryEnergyPac() {
+
+  const host='121.242.232.211'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
-    const energy="http://121.242.232.211:5000/analytics/battery"
+    const energy=`http://${host}:5000/analytics/battery`
     const [graphData, setGraphData] = useState([]);
     const [data, setData] = useState([]);
     const [filterDate, setFilterDate] = useState(null);
@@ -42,7 +44,7 @@ function BatteryEnergyPac() {
         try {
           const formattedStartDate = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://121.242.232.211:5000/analytics/fivemingraphs`, {
+          const response = await axios.post(`http://${host}:5000/analytics/fivemingraphs`, {
             date: formattedStartDate,
           });
         
@@ -75,7 +77,10 @@ function BatteryEnergyPac() {
         data: graphData.map((val) => val.batteryEnergy),
         yAxis: 1,
         type: "area",
-        color:'#9ACCFB'
+        color:'#9ACCFB',
+        marker: {
+          enabled: false, // Disable markers for the series
+        },
       },
       {
         name: "SoC(%)",
@@ -83,6 +88,9 @@ function BatteryEnergyPac() {
         yAxis: 0,
         type: "line",
         color: '#FFA500', // Change the color of the "Packsoc" line graph
+        marker: {
+          enabled: false, // Disable markers for the series
+        },
       },
     
     
@@ -203,7 +211,10 @@ function BatteryEnergyPac() {
         data: data.map((val) => val.batteryEnergy),
         yAxis: 1,
         type: "area",
-        color:'#9ACCFB'
+        color:'#9ACCFB',
+        marker: {
+          enabled: false, // Disable markers for the series
+        },
       },
       {
         name: "SoC(%)",
@@ -211,6 +222,9 @@ function BatteryEnergyPac() {
         yAxis: 0,
         type: "line",
         color: '#FFA500', // Change the color of the "Packsoc" line graph
+        marker: {
+          enabled: false, // Disable markers for the series
+        },
       },
     
     
@@ -337,12 +351,26 @@ const dateValue = filterDate ? new Date(filterDate.getTime() - filterDate.getTim
 
 let  currentBatteryStatus=[]
 for(let i=0;i<graphData.length;i++){
-  currentBatteryStatus.push(graphData[i].batteryStatus)
+  if(graphData[i].batteryStatus==="DCHG"){
+    currentBatteryStatus.push("DISCHARGING")
+
+  }
+  if(graphData[i].batteryStatus==="CHG"){
+    currentBatteryStatus.push("CHARGING")
+
+  }
+  if(graphData[i].batteryStatus==="IDEL"){
+    currentBatteryStatus.push("IDEL")
+
+  }
+  
 }
   return (
     <div>
 
         <div> 
+
+        <div> <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Daily Energy cycle v/s SoC</h5></div>
 
 <div class="row">
   <div class="col-9" > 
@@ -351,20 +379,17 @@ for(let i=0;i<graphData.length;i++){
           <h5 style={{color:"brown"}}><b> Date :-</b></h5><DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} />
           
           <h3 style={{marginLeft:"135%"}}>{dateValue}</h3>
-      
           
         </label>
         
       </div>
   </div>
   <div class="col-3">{
-            filterDate===null?<button type="button" class="btn btn-warning" style={{marginLeft:"70px"}}> 
-            <h5 ><b style={{color:"black"}}>Current status:{currentBatteryStatus[currentBatteryStatus.length-1]}</b></h5>
-            </button>:""
+            filterDate===null?<h5 ><b style={{color:"black"}}>Current status:{currentBatteryStatus[currentBatteryStatus.length-1]}</b></h5>:""
           }</div>
 </div>
 <div> 
- <div> <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Daily Energy cycle v/s SoC</h5></div>
+ {/* <div> <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Daily Energy cycle v/s SoC</h5></div> */}
  {
     filterDate===null?<HighchartsReact highcharts={Highcharts} options={options} />:<HighchartsReact highcharts={Highcharts} options={option} />
 }

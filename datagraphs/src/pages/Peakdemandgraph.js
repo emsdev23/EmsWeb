@@ -1,12 +1,18 @@
 import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
+import Highcharts from 'highcharts';
+import exportingInit from 'highcharts/modules/exporting';
+import exportDataInit from 'highcharts/modules/export-data';
+import HighchartsReact from 'highcharts-react-official';
 import 'react-datepicker/dist/react-datepicker.css';
 import ReactApexChart from 'react-apexcharts';
 import BuildindConsumptionPage2 from './BuildindConsumptionPage2';
+import Grid from '@mui/material/Grid';
 
 
-const host = "http://localhost:5000/peak/hvacSchneider7230Polling"
+const host = "http://121.242.232.211:5000/peak/hvacSchneider7230Polling"
+const pastdata="http://localhost:5000/peak/initialgraph"
 
 function Peakdemandgraphs() {
 
@@ -16,8 +22,14 @@ function Peakdemandgraphs() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [singledayFilter,setSingledayFilter]=useState(null)
+  const [singledayFilterData,setSingledayFilterData]=useState([])
+
 
   const [initialGraph,setInitialGraph]=useState([])
+
+
+  const [passevendaystdata,setPastsevendaysdata]=useState([])
  
 
   const handleStartDateChange = (date) => {
@@ -29,6 +41,10 @@ function Peakdemandgraphs() {
   setEndDate(date);
 };
 
+
+const handlesingleDayFilterChange = (date) => {
+  setSingledayFilter(date);
+};
 const handleSubmit = (event) => {
   event.preventDefault();
   fetchData();
@@ -36,7 +52,7 @@ const handleSubmit = (event) => {
 
 
 const CurrentGraph=()=>{
-  axios.get(host).then((res)=>{
+  axios.get('http://localhost:5000/peak/hvacSchneider7230Polling').then((res)=>{
     const dataresponse=res.data
     setInitialGraph(dataresponse)
    
@@ -45,15 +61,17 @@ const CurrentGraph=()=>{
   })
 }
 
-const limitLine=[]
-
-for(let i=0;i<initialGraph.length;i++){
-  if(initialGraph[i].peakdemand>4000){
-    limitLine.push(4000)
-  }
-
+const pastSevenDaysGraph=()=>{
+  axios.get(pastdata).then((res)=>{
+    const dataresponse=res.data
+    setPastsevendaysdata(dataresponse)
+   
+  }).catch((err)=>{
+    console.log(err)
+  })
 }
-console.log(limitLine)
+
+
 
   // const handleDateChange = (singledaydata) => {
   //   setSelectedDate(singledaydata);
@@ -94,20 +112,42 @@ console.log(limitLine)
     }
   };
 
+
+  const SingleDayfetchData = async () => {
+    setLoading(true);
+    try {
+      const formattedStartDate = singledayFilter ? new Date(singledayFilter.getTime() - singledayFilter.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
+  
+      const response = await axios.post('http://localhost:5000/singleDayFilter/hvacSchneider7230Polling', {
+        date: formattedStartDate,
+      });
+    
+      setSingledayFilterData(response.data);
+      setLoading(false);
+      console.log(formattedStartDate)
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
+
 useEffect(() => {
   fetchData();
-  
+  }, [startDate, endDate]);
 
-
-}, [startDate, endDate]);
+useEffect(() => {
+  SingleDayfetchData()
+  }, [singledayFilter]);
 
 
 useEffect(()=>{
   CurrentGraph()
+  pastSevenDaysGraph()
 },[])
 
 console.log(startDate,endDate)
 console.log(initialGraph)
+console.log(singledayFilterData)
 
   // const handlesingledaySubmit = async (event) => {
   //   event.preventDefault();
@@ -349,11 +389,6 @@ console.log(initialGraph)
         dashArray: [0],
       },
     };
-  
-    // Update stroke dash array based on data limit
-    if (data.some((point) => point.y >= 3900)) {
-      apexchartsOptions.stroke.dashArray = [5];
-    }
 
 
 
@@ -364,13 +399,12 @@ console.log(initialGraph)
     name:"totalApparentPower2",
     data: initialGraph.map((val)=>(val.peakdemand))
   },
+  {
+    name:"LmitLine",
+    data: initialGraph.map((val)=>(val.limitLine)),
+    type:""
+  },
  ],
-//  {
-//   name: "totalApparentPower2",
-//   data: limitLine.map((val) => (val)),
-//   type:"line"
-// }
-
   options: {
     chart: {
       type: 'area',
@@ -476,34 +510,600 @@ console.log(initialGraph)
 };
 
 
-const curdGraph= startDate || endDate ?  apexcharts: apexcharts2;
-const testing = startDate || endDate ?  "selected graph executed": "current date graph executed";
-console.log(testing)
+
+//peakDemand initial graph single day//
+const currentGraph= {
+  // Highcharts configuration options
+  chart: {
+    zoomType: 'x'
+},
+  series: [   {
+      name: "Apparent Power  (kvA)",
+      data:  initialGraph.map((val)=>(val.peakdemand)),
+      //yAxis: 1,
+      type: "area",
+      color:'#6F00FF',
+      marker: {
+        enabled: false, // Disable markers for the series
+      },
+    },
+    {
+      name: "LimitLine",
+      data:initialGraph.map((val)=>(val.limitLine)),
+      //yAxis: 0,
+      type: "line",
+      color: 'red', // Change the color of the "Packsoc" line graph
+      dashStyle: 'dash',
+      marker: {
+        enabled: false, // Disable markers for the series
+      },
+    },
+  
+  
+  ],
+  //   title: {
+  //     text: "Daily Energy cycle v/s SoC", // Set the chart title text
+  //     align: "center", // Align the title to the center
+  //     margin: 10, // Set the margin of the title
+  //     style: {
+  //       fontSize: "30px", // Set the font size of the title
+  //       fontWeight: "bold", // Set the font weight of the title
+  //       fontFamily: undefined, // Use the default font family
+  //       color: "black", // Set the color of the title
+  //     },
+  //   },
+  title: {
+      text: null, // Set title text to null
+    },
+    yAxis: [
+      {
+        title: {
+          text: "Apparent Power  (kvA)",
+          style:{
+            fontSize:"15px"
+          }
+        },
+      },
+      // {
+      //   title: {
+      //     text: "Energy (kWh)",
+      //   },
+      //   opposite: true, // Display the secondary y-axis on the opposite side of the chart
+      // },
+    ],
+    tooltip: {
+      enabled: true,
+      theme: 'dark',
+      style: {
+        background: '#222',
+        color: 'black'
+      },
+    },
+  xAxis: {
+      type: "category",
+      categories: initialGraph.map((time) => time.polledTime), // Use the pre-formatted timestamp from the API
+    },
+    plotOptions: {
+      line: {
+        lineWidth: 2, // Increase the line thickness
+      },
+    },
+    exporting: {
+      enabled: true, // Enable exporting
+      buttons: {
+        contextButton: {
+          menuItems: [
+            {
+              text: 'View Data Table', // Set the text for the custom menu item
+              onclick: function () {
+                const chart = this;
+                const data = chart.getDataRows(); // Get the data rows from the chart
+                const table = document.createElement('table'); // Create a table element
+                const thead = table.createTHead(); // Create the table header
+                const tbody = table.createTBody(); // Create the table body
+  
+                // Create and append the table header row
+                const headerRow = thead.insertRow();
+                data[0].forEach((header) => {
+                  const th = document.createElement('th');
+                  th.textContent = header;
+                  headerRow.appendChild(th);
+                });
+  
+                // Create and append the table body rows
+                for (let i = 1; i < data.length; i++) {
+                  const bodyRow = tbody.insertRow();
+                  data[i].forEach((cell) => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    bodyRow.appendChild(td);
+                  });
+                }
+  
+                // Open a new window and append the table
+                const win = window.open();
+                win.document.body.appendChild(table);
+              },
+            },
+            'toggleDataLabels', // Add option for toggling data labels
+            'viewFullscreen', // Add option for full-screen mode
+            'separator', // Add a separator line
+            'downloadPNG', // Enable PNG download option
+            'downloadSVG', // Enable SVG download option
+            'downloadPDF', // Enable PDF download option
+          ],
+        },
+      },
+    },
+  
+  
+   
+  // ...
+};
+
+
+//peakDemand filtered graph single day//
+const FilteredGraph= {
+  // Highcharts configuration options
+  chart: {
+    zoomType: 'x'
+},
+  series: [   {
+      name: "Apparent Power  (kvA)",
+      data:  singledayFilterData.map((val)=>(val.peakdemand)),
+      //yAxis: 1,
+      type: "area",
+      color:'#6F00FF',
+      marker: {
+        enabled: false, // Disable markers for the series
+      },
+    },
+    {
+      name: "LimitLine",
+      data:singledayFilterData.map((val)=>(val.limitLine)),
+      //yAxis: 0,
+      type: "line",
+      color: 'red', // Change the color of the "Packsoc" line graph
+      dashStyle: 'dash',
+      marker: {
+        enabled: false, // Disable markers for the series
+      },
+    },
+  
+  
+  ],
+  //   title: {
+  //     text: "Daily Energy cycle v/s SoC", // Set the chart title text
+  //     align: "center", // Align the title to the center
+  //     margin: 10, // Set the margin of the title
+  //     style: {
+  //       fontSize: "30px", // Set the font size of the title
+  //       fontWeight: "bold", // Set the font weight of the title
+  //       fontFamily: undefined, // Use the default font family
+  //       color: "black", // Set the color of the title
+  //     },
+  //   },
+  title: {
+      text: null, // Set title text to null
+    },
+    yAxis: [
+      {
+        title: {
+          text: "Apparent Power  (kvA)",
+          style:{
+            fontSize:"15px"
+          }
+        },
+      },
+      // {
+      //   title: {
+      //     text: "Energy (kWh)",
+      //   },
+      //   opposite: true, // Display the secondary y-axis on the opposite side of the chart
+      // },
+    ],
+    tooltip: {
+      enabled: true,
+      theme: 'dark',
+      style: {
+        background: '#222',
+        color: 'black'
+      },
+    },
+  xAxis: {
+      type: "category",
+      categories: singledayFilterData.map((time) => time.polledTime), // Use the pre-formatted timestamp from the API
+    },
+    plotOptions: {
+      line: {
+        lineWidth: 2, // Increase the line thickness
+      },
+    },
+    exporting: {
+      enabled: true, // Enable exporting
+      buttons: {
+        contextButton: {
+          menuItems: [
+            {
+              text: 'View Data Table', // Set the text for the custom menu item
+              onclick: function () {
+                const chart = this;
+                const data = chart.getDataRows(); // Get the data rows from the chart
+                const table = document.createElement('table'); // Create a table element
+                const thead = table.createTHead(); // Create the table header
+                const tbody = table.createTBody(); // Create the table body
+  
+                // Create and append the table header row
+                const headerRow = thead.insertRow();
+                data[0].forEach((header) => {
+                  const th = document.createElement('th');
+                  th.textContent = header;
+                  headerRow.appendChild(th);
+                });
+  
+                // Create and append the table body rows
+                for (let i = 1; i < data.length; i++) {
+                  const bodyRow = tbody.insertRow();
+                  data[i].forEach((cell) => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    bodyRow.appendChild(td);
+                  });
+                }
+  
+                // Open a new window and append the table
+                const win = window.open();
+                win.document.body.appendChild(table);
+              },
+            },
+            'toggleDataLabels', // Add option for toggling data labels
+            'viewFullscreen', // Add option for full-screen mode
+            'separator', // Add a separator line
+            'downloadPNG', // Enable PNG download option
+            'downloadSVG', // Enable SVG download option
+            'downloadPDF', // Enable PDF download option
+          ],
+        },
+      },
+    },
+  
+  
+   
+  // ...
+};
+
+
+
+//daily peakDemand initial graph//
+
+const PeakValueGraph= {
+  // Highcharts configuration options
+  chart: {
+    zoomType: 'x'
+},
+  series: [   {
+      name: "Apparent Power  (kvA)",
+      data:  passevendaystdata.map((val)=>(val.peakdemand)),
+      //yAxis: 1,
+      type: "column",
+      color:'#00308F',
+      marker: {
+        enabled: false, // Disable markers for the series
+      },
+    },
+  
+  
+  ],
+  //   title: {
+  //     text: "Daily Energy cycle v/s SoC", // Set the chart title text
+  //     align: "center", // Align the title to the center
+  //     margin: 10, // Set the margin of the title
+  //     style: {
+  //       fontSize: "30px", // Set the font size of the title
+  //       fontWeight: "bold", // Set the font weight of the title
+  //       fontFamily: undefined, // Use the default font family
+  //       color: "black", // Set the color of the title
+  //     },
+  //   },
+  title: {
+      text: null, // Set title text to null
+    },
+    yAxis: [
+      {
+        title: {
+          text: "Apparent Power  (kvA)",
+          style:{
+            fontSize:"15px"
+          }
+        },
+      },
+      // {
+      //   title: {
+      //     text: "Energy (kWh)",
+      //   },
+      //   opposite: true, // Display the secondary y-axis on the opposite side of the chart
+      // },
+    ],
+    tooltip: {
+      enabled: true,
+      theme: 'dark',
+      style: {
+        background: '#222',
+        color: 'black'
+      },
+    },
+  xAxis: {
+      type: "category",
+      categories: passevendaystdata.map((val)=>(val.polledTime)), // Use the pre-formatted timestamp from the API
+    },
+    plotOptions: {
+      line: {
+        lineWidth: 2, // Increase the line thickness
+      },
+    },
+    exporting: {
+      enabled: true, // Enable exporting
+      buttons: {
+        contextButton: {
+          menuItems: [
+            {
+              text: 'View Data Table', // Set the text for the custom menu item
+              onclick: function () {
+                const chart = this;
+                const data = chart.getDataRows(); // Get the data rows from the chart
+                const table = document.createElement('table'); // Create a table element
+                const thead = table.createTHead(); // Create the table header
+                const tbody = table.createTBody(); // Create the table body
+  
+                // Create and append the table header row
+                const headerRow = thead.insertRow();
+                data[0].forEach((header) => {
+                  const th = document.createElement('th');
+                  th.textContent = header;
+                  headerRow.appendChild(th);
+                });
+  
+                // Create and append the table body rows
+                for (let i = 1; i < data.length; i++) {
+                  const bodyRow = tbody.insertRow();
+                  data[i].forEach((cell) => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    bodyRow.appendChild(td);
+                  });
+                }
+  
+                // Open a new window and append the table
+                const win = window.open();
+                win.document.body.appendChild(table);
+              },
+            },
+            'toggleDataLabels', // Add option for toggling data labels
+            'viewFullscreen', // Add option for full-screen mode
+            'separator', // Add a separator line
+            'downloadPNG', // Enable PNG download option
+            'downloadSVG', // Enable SVG download option
+            'downloadPDF', // Enable PDF download option
+          ],
+        },
+      },
+    },
+  
+  
+   
+  // ...
+};
+
+
+
+//daily peakDemand filtered graph//
+
+const PeakValueFilteredGraph= {
+  // Highcharts configuration options
+  chart: {
+    zoomType: 'x'
+},
+  series: [   {
+      name: "Apparent Power  (kvA)",
+      data:  data.map((val)=>(val.peakdemand)),
+      //yAxis: 1,
+      type: "column",
+      color:'#00308F',
+      marker: {
+        enabled: false, // Disable markers for the series
+      },
+    },
+  
+  
+  ],
+  //   title: {
+  //     text: "Daily Energy cycle v/s SoC", // Set the chart title text
+  //     align: "center", // Align the title to the center
+  //     margin: 10, // Set the margin of the title
+  //     style: {
+  //       fontSize: "30px", // Set the font size of the title
+  //       fontWeight: "bold", // Set the font weight of the title
+  //       fontFamily: undefined, // Use the default font family
+  //       color: "black", // Set the color of the title
+  //     },
+  //   },
+  title: {
+      text: null, // Set title text to null
+    },
+    yAxis: [
+      {
+        title: {
+          text: "Apparent Power  (kvA)",
+          style:{
+            fontSize:"15px"
+          }
+        },
+      },
+      // {
+      //   title: {
+      //     text: "Energy (kWh)",
+      //   },
+      //   opposite: true, // Display the secondary y-axis on the opposite side of the chart
+      // },
+    ],
+    tooltip: {
+      enabled: true,
+      theme: 'dark',
+      style: {
+        background: '#222',
+        color: 'black'
+      },
+    },
+  xAxis: {
+      type: "category",
+      categories: data.map((val)=>(val.timestamp)), // Use the pre-formatted timestamp from the API
+    },
+    plotOptions: {
+      line: {
+        lineWidth: 2, // Increase the line thickness
+      },
+    },
+    exporting: {
+      enabled: true, // Enable exporting
+      buttons: {
+        contextButton: {
+          menuItems: [
+            {
+              text: 'View Data Table', // Set the text for the custom menu item
+              onclick: function () {
+                const chart = this;
+                const data = chart.getDataRows(); // Get the data rows from the chart
+                const table = document.createElement('table'); // Create a table element
+                const thead = table.createTHead(); // Create the table header
+                const tbody = table.createTBody(); // Create the table body
+  
+                // Create and append the table header row
+                const headerRow = thead.insertRow();
+                data[0].forEach((header) => {
+                  const th = document.createElement('th');
+                  th.textContent = header;
+                  headerRow.appendChild(th);
+                });
+  
+                // Create and append the table body rows
+                for (let i = 1; i < data.length; i++) {
+                  const bodyRow = tbody.insertRow();
+                  data[i].forEach((cell) => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    bodyRow.appendChild(td);
+                  });
+                }
+  
+                // Open a new window and append the table
+                const win = window.open();
+                win.document.body.appendChild(table);
+              },
+            },
+            'toggleDataLabels', // Add option for toggling data labels
+            'viewFullscreen', // Add option for full-screen mode
+            'separator', // Add a separator line
+            'downloadPNG', // Enable PNG download option
+            'downloadSVG', // Enable SVG download option
+            'downloadPDF', // Enable PDF download option
+          ],
+        },
+      },
+    },
+  
+  
+   
+  // ...
+};
+// const curdGraph= startDate || endDate ?  apexcharts: apexcharts2;
+// const testing = startDate || endDate ?  "selected graph executed": "current date graph executed";
+// console.log(testing)
 
 
 
   return (
     <div>
+      <div> 
+        <h3 style={{textAlign:"center"}}><b>Building Consumption</b></h3>
+      </div>
+      <br/>
+      <br/>
+       <div> 
+    <BuildindConsumptionPage2/>
+  </div>
+  <br/>
+  <br/>
       <div>
+      <h4 style={{textAlign:"center",color:"brown"}}><b>Peak Demand (kVA)</b></h4>
+
+      <Grid sx={{ flexGrow: 1 }} container spacing={2} >
+      
+<Grid item xs={12} sm={6} >
+<h5 style={{textAlign:"center"}}><b>Dily Demand(kVA)</b></h5>
     <form onSubmit={handleSubmit}>
+      {/* <br/>
+      
       <br/>
-      <h3 style={{textAlign:"center"}}><b>Peak Demand (KVA)</b></h3>
-      <br/>
-      <br/>
+      <br/> */}
 
       <div className="row" style={{marginTop:'20px',marginLeft:"20px"}}>
   <div className="col-3">
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h6 style={{color:"brown"}}><b>Start Date :</b></h6> <DatePicker id="date" selected={startDate} onChange={handleStartDateChange} placeholderText='select date' />
+        <h6 style={{color:"brown"}}><b>Date :</b></h6> <DatePicker id="date" selected={singledayFilter} onChange={handlesingleDayFilterChange} placeholderText='select date' />
         </label>
       </div>
      
     </div>
   </div>
 
-  <div className="col-3">
+  {/* <div className="col-3">
+    <div className="input-group mb-3" style={{ width: "300px" }}>
+      <div className="input-group-prepend">
+        <label className="input-group-text" htmlFor="inputGroupSelect01">
+        <h6 style={{color:"brown"}}><b>End Date :</b></h6> <DatePicker selected={endDate} onChange={handleEndDateChange} placeholderText='select date' />
+        </label>
+      </div>
+     
+    </div>
+  </div> */}
+</div>
+
+    </form>
+
+   
+
+    {loading ? (
+      <div>Loading...</div>
+    ) : (
+      <div>
+        {/* <ReactApexChart options={curdGraph.options} series={curdGraph.series} type={graphChange} height="400px" /> */}
+        {
+          singledayFilter===null? <HighchartsReact highcharts={Highcharts} options={currentGraph} />: <HighchartsReact highcharts={Highcharts} options={FilteredGraph} />
+        }
+       
+      </div>
+    )}
+    </Grid>
+    {/* <hr style={{border:"4px solid black"}}/> */}
+    <Grid item xs={12} sm={6} >
+      <h5 style={{textAlign:"center"}}><b>Maximum Demand(kVA)</b></h5>
+    <form onSubmit={handleSubmit}>
+
+      <div className="row" style={{marginTop:'20px',marginLeft:"20px"}}>
+  <div className="col-6">
+    <div className="input-group mb-3" style={{ width: "300px"}}>
+      <div className="input-group-prepend">
+        <label className="input-group-text" htmlFor="inputGroupSelect01">
+        <h6 style={{color:"brown"}}><b> Start Date :</b></h6> <DatePicker id="date" selected={startDate} onChange={handleStartDateChange} placeholderText='select date' />
+        </label>
+      </div>
+     
+    </div>
+  </div>
+
+  <div className="col-6">
     <div className="input-group mb-3" style={{ width: "300px" }}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
@@ -516,17 +1116,30 @@ console.log(testing)
 </div>
     </form>
 
+   
+
     {loading ? (
       <div>Loading...</div>
     ) : (
       <div>
-        <ReactApexChart options={curdGraph.options} series={curdGraph.series} type={graphChange} height="400px" />
+        {/* <ReactApexChart options={curdGraph.options} series={curdGraph.series} type={graphChange} height="400px" /> */}
+        {/* {
+          startDate===null? <HighchartsReact highcharts={Highcharts} options={PeakValueGraph} />: <HighchartsReact highcharts={Highcharts} options={FilteredGraph} />
+        } */}
+        {
+          startDate ===null &&endDate===null? <HighchartsReact highcharts={Highcharts} options={PeakValueGraph} />: <HighchartsReact highcharts={Highcharts} options={PeakValueFilteredGraph} />
+
+        }
+       
+        {/* PeakValueFilteredGraph */}
+       
       </div>
     )}
+    </Grid>
+    </Grid>
   </div>
-  <div> 
-    <BuildindConsumptionPage2/>
-  </div>
+  
+ 
 
     </div>
    

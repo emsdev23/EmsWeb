@@ -15,6 +15,8 @@ import image2 from "../images/power.png"
 import batterylow from '../images/battery-status.png'
 import batteryfull from '../images/smartphone-charger.png';
 import BatteryShedule from './BatteryShedule';
+import Swal from "sweetalert2";
+import './Battery.css';
 
 // import './Controls.css'
 
@@ -23,6 +25,11 @@ import BatteryShedule from './BatteryShedule';
 const host = '121.242.232.211'
 
 function Control() {
+
+  const ActualPassKey=7230
+  
+  const [pinNumber,setPinNumber]=useState("")
+
   const [formData, setFormData] = useState({
     functioncode: "",
     starttime: "",
@@ -36,6 +43,7 @@ function Control() {
   })
   const [batterydata,setBatterydata]=useState([])
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
 
 
   const batteryurl='http://localhost:5000/Batterydata'
@@ -61,6 +69,11 @@ function Control() {
       console.log(err)
     })
   } 
+
+
+  const handlePinPasswordChange = (event) => {
+    setPinNumber(event.target.value);
+  };
 
   // batteryData()
 
@@ -90,9 +103,13 @@ function Control() {
  const chgtime=[]
  const DCHG=[]
  const dscgtime=[]
+ const current=[]
+ const voltage=[]
 
  for(let i=0;i<batterydata.length;i++){
   packSoc.push(batterydata[i].pack_usable_soc)
+  current.push(parseFloat(batterydata[i].BatteryCurrent))
+  voltage.push(parseFloat(batterydata[i].BatteryVoltage))
  
   if(batterydata[i].batteryStatus==="CHG"){
     CHG.push((batterydata[i].chargingAVG))
@@ -206,7 +223,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
     batterystatus:insformData.batterystatus
 
    }
-
+   if(parseInt(pinNumber)===ActualPassKey){
    if(insformatedData.batterystatus==="charge" && insformatedData.functioncode===1){
     insformatedData.functioncode=1
     swal({
@@ -422,6 +439,21 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
     console.log(insformatedData.functioncode)
 
    }
+  }
+  else{
+    Swal.fire({
+      //icon: 'error',
+      //title: 'Oops...',
+      //text: 'wrong! Pin',
+      // imageUrl:'https://media.tenor.com/eqkjY6hklPcAAAAM/sad-mr-bean.gif',
+      imageUrl:'https://img.freepik.com/premium-vector/frustrated-man-touching-his-head-holding-phone-trying-remember-forgets-password-account_199628-198.jpg',
+      imageWidth: 400,
+      imageHeight: 350,
+      imageAlt: 'Custom image',
+     
+    })
+  }
+   //------------//
    
     console.log(insformatedData)
     
@@ -432,6 +464,19 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
   return (
     <>
     <div> 
+      {/* <div className="battery-icon">
+        
+        <div className="battery-level" style={{ height: `${Math.round(packSoc[packSoc.length - 1])}%` }}></div>
+        <i className="fas fa-battery-three-quarters"></i>
+      </div>
+      <div>Battery: {Math.round(packSoc[packSoc.length - 1])}%</div>
+
+      <div className="battery-icon">
+      <div className="battery-body">
+        <div className="battery-level" style={{ height: `${Math.round(packSoc[packSoc.length - 1])}%` }}></div>
+      </div>
+    </div> */}
+
 
    
       <div >
@@ -439,54 +484,79 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       </div>
       <br/>
 
-      <div  class="row" style={{ margin:'30px'}}>
+      <div  class="row" style={{ marginLeft:'50px',marginRight:'50px'}}>
          
-      <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
-      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Overview</b></h4>
-      <br/>
-      <div >
-    <div class="card" style={{background:"#b8bdcc",width:"auto"}}>
-      <div class="card-body">
-        <h3> <b>Pack SoC(%):</b> {Math.round(packSoc[packSoc.length-1])}</h3>
-        <h3><b>Current Status:</b>{currentStatus[currentStatus.length-1]}</h3>
-        <div style={{width:'400px'}}> 
-        {packSoc[packSoc.length - 1] >= 65  ? (
+      <div style={{ display: 'inline-block' }} class="col-sm-6 mb-3 mb-sm-0">
+  <h4 style={{ textAlign: "center" }}><b style={{ color: "brown" }}>Overview</b></h4>
+  <br />
+  <div>
+    <div class="card" style={{ background: "white", width: "auto",height:"363px" }}>
+      <div class="card-body" style={{ textAlign: "center" }}>
+        <table style={{ width: "100%", textAlign: "left"}}>
+          <tbody>
+            <tr >
+              <td><h4 style={{ color: "teal" }}><b>SoC(%)</b></h4></td>
+              <td><h4>:</h4></td>
+              <td><h4>{Math.round(packSoc[packSoc.length - 1])}</h4></td>
+            </tr>
+            <tr style={{marginTop:"30px"}}>
+              <td><h4 style={{ color: "teal" }}><b>Current Status</b></h4></td>
+              <td><h4>:</h4></td>
+              <td><h4>{currentStatus[currentStatus.length - 1]}</h4></td>
+            </tr>
+            <tr> 
+            {packSoc[packSoc.length - 1] >= 65  ? (
   <img src={batteryfull} alt="batteryfull" style={{ width: "100px", height: "100px" }} />
 ) : packSoc[packSoc.length - 1] <= 20 ? (
   <img src={batterylow} alt="batterylow" style={{ width: "100px", height: "100px" }} />
 ) : (
   <img src={image2} alt="batteryhalf" style={{ width: "100px", height: "100px" }} />
 )}
-
-      
-        </div>
-        
-        <h3><b>Last Charge: </b> {val?<span style={{color:"red"}}>{(val)} kWh | </span>:<span style={{fontSize:"20px"}}>yet to charge</span>} </h3>
-        {formattedTimestamp!=="Invalid Date"?<h4>{formattedTimestamp}</h4>:<p>_______</p>}
-        {/* <p>{formattedTimestamp}</p> */}
-        <h3><b>Last Discharge:</b> {DCHG[DCHG.length-1]?<span style={{color:"red"}}>{Math.round(DCHG[DCHG.length-1])} kWh | </span>: <span style={{fontSize:"20px"}}>yet to discharge</span>} </h3>
-        {disformattedTimestamp!=="Invalid Date"?<h4>{disformattedTimestamp}</h4>:<p>_______</p>}
+            </tr>
+            <tr> 
+              <td><h4  style={{ color: "teal" }}><b>Current (A)</b></h4></td>
+              <td><h4>:</h4></td>
+              <td><h4>{current[current.length-1]}</h4></td>
+            </tr>
+            <tr> 
+              <td><h4  style={{ color: "teal" }}><b>Voltage (V)</b></h4></td>
+              <td><h4>:</h4></td>
+              <td><h4>{voltage[voltage.length-1]}</h4></td>
+            </tr>
+            <tr>
+              <td><h4 style={{ color: "teal" }}><b>Last Charge</b></h4></td>
+              <td><h4>:</h4></td>
+              <td>
+                {val ? <h4 style={{ color: "black",fontSize:"20px" }}>{(Math.floor(val))} kWh  </h4> : <h4 style={{ fontSize: "20px",color:"gray" }}>yet to charge</h4>}
+              </td>
+              {/* <br/> */}
+              <td> 
+              {formattedTimestamp!=="Invalid Date"?<span style={{ color: "gray",fontSize:"20px" }}>{formattedTimestamp}</span>:<p>_______</p>}
+              </td>
+              
+            </tr>
+            <tr>
+              <td><h4 style={{ color: "teal" }}><b>Last Discharge</b></h4></td>
+              <td><h4>:</h4></td>
+              <td>
+                {DCHG[DCHG.length - 1] ? <h4 style={{ color: "black",fontSize:"20px"  }}>{Math.round(DCHG[DCHG.length - 1])} kWh  </h4> : <h4 style={{ fontSize: "20px",color:"gray" }}>yet to discharge</h4>}
+              </td>
+              <td> 
+              {disformattedTimestamp!=="Invalid Date"?<span style={{ color: "gray",fontSize:"20px" }}>{disformattedTimestamp}</span>:<p>_______</p>}
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <h1></h1>
       </div>
     </div>
-    </div>
   </div>
+</div>
 
-      <div style={{ display: 'inline-block'}} class="col-sm-4 mb-3 mb-sm-0">
-      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Scheduled Control</b></h4>
-      <br/>
-    <div class="card" style={{background:"#b8bdcc",width:"auto", height:"380px",marginLeft:"10px"}} >
-      <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
-     <BatteryShedule/>
-
-      </div>
-    </div>
-  </div>
-  
-  <div style={{ display: 'inline-block'}} class="col-sm-4 mb-2 mb-sm-0" >
+  <div style={{ display: 'inline-block'}} class="col-sm-6 mb-2 mb-sm-0" >
   <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Instantaneous Control</b></h4>
   <br/>
-    <div class="card" style={{background:"#b8bdcc",width:"auto",height:"380px",marginLeft:"10px"}}>
+    <div class="card" style={{background:"white",width:"auto",height:"363px",marginLeft:"10px"}}>
       <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
       <form onSubmit={instantaneousSubmit}> 
   <div class="row">
@@ -496,25 +566,33 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
         {/* <h5 class="card-title">Battery Charge</h5> */}
 
         <div class="input-group mb-3"  style={{width:"300px"}}>
-      <label class="input-group-text" for="inputGroupSelect01" >Status </label>
-  <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) => setInsformData({ ...insformData, batterystatus: e.target.value })}>
-  <option value="">Charge/Discharge</option>
-        <option value="charge">Charge</option>
-        <option value="discharge">Discharge</option>
-  </select>
+      <label class="input-group-text" for="inputGroupSelect01" style={{color:"gray",fontSize:"18px"}} ><b>Status</b> </label>
+      <select class="form-select" id="inputGroupSelect01" value={insformData.batterystatus} onChange={(e) =>setInsformData({ ...insformData, batterystatus: e.target.value })}>
+  <option value="" disabled>CHARGE/DISCHARGE</option>
+  <option value="charge" style={{ color: "green", fontSize: "17px" }}>CHARGE</option>
+  <option value="discharge" style={{ color: "red" ,fontSize: "17px"}}>DISCHARGE</option>
+</select>
+
   </div>
         <br/>
         <div class="input-group mb-3"  style={{width:"300px"}}>
-      <label class="input-group-text" for="inputGroupSelect01">Function</label>
+      <label class="input-group-text" for="inputGroupSelect01" style={{color:"gray",fontSize:"18px"}}><b>Function</b></label>
   <select class="form-select" id="inputGroupSelect01" value={insformData.functioncode} onChange={(e) => setInsformData({ ...insformData, functioncode: e.target.value })}>
-  <option value=""> On/Off</option>
-        <option value={1}>ON</option>
-        <option value={2}>OFF</option>
+  <option value="" disabled> ON/OFF</option>
+        <option value={1}  style={{ color: "green", fontSize: "17px" }}>ON</option>
+        <option value={2}  style={{ color: "red", fontSize: "17px" }}>OFF</option>
   </select>
   </div>
       <br/>
-      <br/>
-      <br/>
+      {/* <br/>
+      <br/> */}
+
+      <div class="input-group mb-3" style={{width:"300px"}}>
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon1" style={{color:"gray"}}><b>PIN</b></span>
+  </div>
+  <input name="pin" type="password" class="form-control" placeholder="*****" aria-label="Username" aria-describedby="basic-addon1" onChange={handlePinPasswordChange}  value={pinNumber}/>
+</div>
       <div style={{justifyItems:"center",marginLeft:"120px",justifyTracks:'center'}}> 
       {
         isButtonDisabled=== false ? <button type="submit" class="btn btn-primary bt-lg" style={{height:"40px"}}>Submit</button>:<button type="button" class="btn btn-secondary btn-lg" disabled>Submit</button>
@@ -531,6 +609,19 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       </div>
     </div>
   </div>
+
+      <div style={{ display: 'inline-block',marginTop:"40px"}} class="col-sm-12 mb-3 mb-sm-0">
+      <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Scheduled Control</b></h4>
+      <br/>
+    <div class="card" style={{background:"white",width:"auto", height:"auto",marginLeft:"10px",marginBottom:"30px"}} >
+      <div class="card-body" style={{justifyContent:"center",alignItems:'center',display:"flex"}}>
+     <BatteryShedule/>
+
+      </div>
+    </div>
+  </div>
+  {/* //---- */}
+
 
   
 </div>

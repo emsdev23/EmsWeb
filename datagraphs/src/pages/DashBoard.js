@@ -23,9 +23,13 @@ import Thermal from './Thermal';
 import ForestIcon from '@mui/icons-material/Forest';
 import { TiWeatherSnow } from "react-icons/ti";
 import { BsFillCircleFill } from "react-icons/bs";
-import Evcharger from '../images/charging-station-on.png'
+import EvchargerOn from '../images/charging-station-on.png'
+import EvChargerOff from "../images/charging-station-off.png"
 import Navbar from '../components/Navbar';
 import BatteryHourly from './BatteryHourly';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import InsertChartIcon from '@mui/icons-material/InsertChart';
+// import {Link} from 'react-router-dom';
 
 
 //import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
@@ -103,6 +107,8 @@ function DashBoard() {
 
 
    const [EvCharger,setEvCharger]=useState([])
+
+   const [thermalOverviewData,setThermalOverviewData]=useState([])
   
  
   const linestate  = {
@@ -154,9 +160,10 @@ function DashBoard() {
   const energysaved = `http://${host}:5000/peaksavings`
   const chillerstatus = `http://${host}:5000/chillerstatusd`
   const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
-  const powerFactor= `http://localhost:5000/schneider7230readings`
-  const diesel=`http://localhost:5000/dashboard/Deisel`
+  const powerFactor= `http://${host}:5000/schneider7230readings`
+  const diesel=`http://${host}:5000/dashboard/Deisel`
   const chargerdate=`http://localhost:5000/dashboard/EvCharger`
+  const thermalApi=`http://${host}:5000/thermal/summaryCard`
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -359,6 +366,17 @@ function DashBoard() {
     })
   }
 
+ //thermal data
+  const ThermalData=()=>{
+    axios.get(thermalApi).then((res)=>{
+      const dataResponse=res.data
+      setThermalOverviewData(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
 
   // piedata()
   //   batterydata()
@@ -386,6 +404,7 @@ function DashBoard() {
     DieselEnergyvalue()
     EvChargerData()
     PowerValue()
+    ThermalData()
 
     const interval = setInterval(() => {
      
@@ -400,6 +419,7 @@ function DashBoard() {
       PowerFactor()
       DieselEnergyvalue()
       EvChargerData()
+      ThermalData()
       console.log("running every 5min ............")
   }, 5 * 60 * 1000);
 
@@ -445,13 +465,26 @@ function DashBoard() {
  let totalSessions=''
  let NoOfchargersused=''
  let totalHours=''
+ let LEV1_1Status=""
+ let LEV4_1Status=""
+ let CP11_1Status=""
+ let CP12_1Status=""
+ let CP13_1Status=""
+ let CP14_1Status=""
+
  for(let i=0;i<EvCharger.length;i++){
   totalEnergy=((EvCharger[i].totalEnergy))
   totalSessions=EvCharger[i].totalSessions
   NoOfchargersused=EvCharger[i].NoOfChargersUsed
   totalHours=EvCharger[i].totalTimeusage
-  
- }
+  LEV1_1Status=EvCharger[i].LEV1_1Status
+  LEV4_1Status=EvCharger[i].LEV4_1Status
+  CP11_1Status=EvCharger[i].CP11_1Status
+  CP12_1Status=EvCharger[i].CP12_1Status
+  CP13_1Status=EvCharger[i].CP13_1Status
+  CP14_1Status=EvCharger[i].CP14_1Status
+}
+console.log(LEV1_1Status,LEV4_1Status,CP11_1Status,CP12_1Status,CP13_1Status,CP14_1Status)
 
 
 
@@ -1338,6 +1371,23 @@ const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
   
 const calculatedHeight = `calc(100vh - 100px)`;
 
+let ThermalStatus=""
+for(let i=0;i<thermalOverviewData.length;i++){
+if(thermalOverviewData[i].chargingPump1Power>0 || thermalOverviewData[i].chargingPump1Power>0){
+  ThermalStatus="CHARGING"
+
+}
+if(thermalOverviewData[i].dischargingPump1Power>0 || thermalOverviewData[i].dischargingPump2Power>0){
+  ThermalStatus="DISCHARGING"
+
+}
+if((thermalOverviewData[i].chargingPump1Power==0 && thermalOverviewData[i].chargingPump2Power==0) &&  ((thermalOverviewData[i].dischargingPump1Power==0||thermalOverviewData[i].dischargingPump1Power==null) && thermalOverviewData[i].dischargingPump2Power==0) ){
+  ThermalStatus="IDLE"
+
+}
+}
+console.log(thermalOverviewData)
+
 
 
       
@@ -1349,8 +1399,11 @@ const calculatedHeight = `calc(100vh - 100px)`;
     <div   className="main" style={{marginRight:"30px",marginLeft:"30px",marginBottom:"50px"}} >
 
   <div class="row"   >
+    {/* ----------- */}
+   
   <div class="col-sm-12 mb-3 mb-sm-0">
   <div class="container-fluid">
+
   <div class="card1" style={{width: "100%", height: calculatedHeight,justifyContent: 'center', marginTop:0, background: 'white', color: "white"}} >
 <div   class="card-body d-flex flex-column justify-content-center">
  
@@ -1361,8 +1414,9 @@ const calculatedHeight = `calc(100vh - 100px)`;
 <div  style={{ position: 'relative' }}>
 
         <ReactApexChart options={state.options} series={state.series} type="donut" width={'100%'} height={'400px'}  />
+        <Link to='/peakgraph' style={{ textDecoration: 'none' }}> 
         <h5 class="card-title" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'black', zIndex: 1 }}><b>Building Consumption</b></h5>
-      
+        </Link>
       </div>
 {/* <div class="row" >
 
@@ -1526,24 +1580,43 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
  
   </div>
+  
+
+  {/* ------------------- */}
 
   <div class="col-sm-4" style={{border: '1px solid red top bottom left'}} >
     <div class="card" style={{width:"auto",height:"100%",marginTop:"0%",background:'white',color:"white"}}>
       <div class="card-body">
-        <h5 class="card-title" style={{color:"#145369"}}><b>Wheeled in Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
-        <br/>
-        <br/>
-        <p style={{ textDecoration: 'underline !important', color: 'black' }}><b>Performance(%):</b></p>
+      <div class="container">
+  <div class="row">
+    <div class="col-6">
+    <h5 class="card-title" style={{color:"#145369"}}><b>Wheeled in Solar </b></h5>
+    </div>
+    <div class="col-6" >
+    <Link to='/Wheeledgraph' style={{marginLeft:"70px"}}>
+         {/* <button type="button" class="btn btn-outline-success">Explore</button> */}
+         <QueryStatsIcon style={{ fontSize: '35px', color: 'black', marginLeft: '10px',width:"100px" }}/>
+      </Link>
+    </div>
+    </div>
+    </div>
+    <div class="row"> 
+    <div class="col-6">
+      <h5>
+    <p style={{ textDecoration: 'underline !important', color: 'black',marginLeft:"10px" }}><b>Performance(%):</b></p>
+    </h5> 
+    </div>
 
-
-        <h1 style={{fontSize:"150px",textAlign:"center",color:"tomato",height:"200px"}}> 
+    </div>
+  
+          <h1 style={{fontSize:"150px",textAlign:"center",color:"tomato",height:"200px"}}> 
          {Math.trunc(WheeledinsolarperformanceValue)}%
          <br></br>
          <hr style={{color:"green",border:"1px solid gray"}}/>
          </h1>
          
         
-        </h5> 
+        
 
         
        <br/>
@@ -1597,25 +1670,32 @@ const calculatedHeight = `calc(100vh - 100px)`;
   <div class="col-sm-4" >
   <div class="card" style={{width:"auto",height:"100%",background:'white',color:"white"}}>
       <div class="card-body">
-        {/* <h5 class="card-title" style={{color:"black"}}><b> Rooftop Solar </b> <span style={{color:"black",marginLeft:'100px' }}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span></h5> */}
-        {/* <Chart
-        options={gaugeChartOptions}
-        series={gaugeChartData.series}
-        type="radialBar"
-        height={350}
-      /> */}
-      <h5 class="card-title" style={{color:"#145369"}}><b>Rooftop Solar </b><span style={{color:"black",marginLeft:'70px'}}>Status:{statusvalue>=0?<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="red" fontSize="1.5em"/>}</span>
-      <br/>
-        <br/>
-      <p style={{ textDecoration: 'underline !important', color: 'black' }}><b>Performance(%):</b></p>
+      <div class="container">
+  <div class="row">
+    <div class="col-6">
+    <h5 class="card-title" style={{color:"#145369"}}><b>Rooftop Solar </b></h5>
+    </div>
+    <div class="col-6" >
+    <Link to='/RoofTopSolar' style={{marginLeft:"70px"}}>
+         {/* <button type="button" class="btn btn-outline-success">Explore</button> */}
+         <QueryStatsIcon style={{ fontSize: '35px', color: 'black', marginLeft: '10px',width:"100px" }}/>
+      </Link>
+    </div>
+    </div>
+    </div>
+    <div class="row"> 
+    <div class="col-6">
+      <h5>
+    <p style={{ textDecoration: 'underline !important', color: 'black',marginLeft:"10px" }}><b>Performance(%):</b></p>
+    </h5> 
+    </div>
+    </div>
+  
         <h1 style={{fontSize:"150px",textAlign:"center",color:"brown",height:"200px"}}> 
          {Math.trunc(prpercentage)}%
          <br></br>
          <hr style={{color:"green",border:"1px solid gray"}}/>
          </h1>
-         
-        
-        </h5> 
         <br/>
       
         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px', margin: '0 auto'}}>
@@ -1718,13 +1798,24 @@ const calculatedHeight = `calc(100vh - 100px)`;
         <td>{chillerval2['chiller8'] === 0 || chillerval2['chiller8'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
       </tr>
     </table>
+    <br/>
     
     <div class="card-text"style={{color:"black",font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-      {/* <b style={{color:'black'}}> No.Of cycles: </b>
-      <br/>
-      <b style={{color:'black'}}>Charging Energy:</b>
-      <br/>
-      <b style={{color:'black'}}>Discharging Energy:</b> */}
+    <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Thermal Status</b></h4>
+    {/* <br/> */}
+    {/* <h3 style={{color:"black",textAlign:"center"}}>{ThermalStatus}</h3> */}
+    <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}> 
+    <td  ><b>{ThermalStatus}</b></td>
+
+    </table>
+    <br/>
+    <div style={{ color: '#5e5d5c', textAlign: 'right', fontSize: "22px"}}> 
+         <Link to='/Status/chillersStatus'>
+         <button type="button" class="btn btn-outline-success">Explore</button>
+      </Link> 
+      </div> 
+ 
+    
 
     </div>
   </div>
@@ -1735,10 +1826,6 @@ const calculatedHeight = `calc(100vh - 100px)`;
     <div class="card" style={{height:"100%",background:'white',color:"white"}}>
       <div class="card-body">
       <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Thermal Storage</b></h4>
-      {/*<span style={{color:"black",marginLeft:'100px'}}>Status:</span><BsIcons.BsBatteryFull color="#20B2AA" fontSize="1.5em"/>*/}
-        <hr/>
-        {/* <Line data={data} options={optionsdata} /> */}
-        {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
         <Thermal />
         <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
         {/* <b style={{color:"black"}}>Cooling Energy:</b> */}
@@ -1802,13 +1889,63 @@ const calculatedHeight = `calc(100vh - 100px)`;
          
          <hr/>
 
-         <div style={{display: 'flex', justifyContent: 'center'}}>
+         {/* <div style={{display: 'flex', justifyContent: 'center'}}>
   <img src={Evcharger} alt="evcharger" width="250px" height="250px" />
+</div> */}
+ {/* let LEV1_1Status=""
+ let LEV4_1Status=""
+ let CP11_1Status=""
+ let CP12_1Status=""
+ let CP13_1Status=""
+ let CP14_1Status="" */}
+<div class="row">
+  <div class="col-4">
+    <h5 style={{color:"black"}}><b>1</b></h5>
+    {
+      LEV1_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="50px" height="50px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
+    } 
+  </div>
+  <div class="col-4">
+    <h5 style={{color:"black"}}><b>2</b></h5>
+    {
+      LEV4_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
+    } 
+  </div>
+  <div class="col-4">
+    <h5 style={{color:"black"}}><b>3</b></h5>
+    {
+      CP11_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
+    } 
+  </div>
 </div>
 <br/>
 <br/>
+<div class="row">
+  <div class="col-4">
+    <h5 style={{color:"black"}}><b>4</b></h5>
+    {
+      CP12_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
+    } 
+  </div>
+  <div class="col-4">
+    <h5 style={{color:"black"}}><b>5</b></h5>
+    {
+      CP13_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
+    } 
+  </div>
+  <div class="col-4">
+    <h5 style={{color:"black"}}><b>6</b></h5>
+    {
+      CP14_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
+    } 
+  </div>
+</div>
+
 <br/>
-         <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px', margin: '0 auto'}}>
+<br/>
+<br/>
+<br/>
+  <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'19px', margin: '0 auto'}}>
   <tr>
     <td><b style={{color:"#5e5d5c"}}>Total Energy Used (kWh):</b></td>
     <td><span style={{color:"black"}}>{totalEnergy}</span></td>

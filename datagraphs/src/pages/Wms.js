@@ -1,3 +1,131 @@
+app.get("/Thermal/Chillers/Status", async (req, res) => {
+    try {
+      const FinalData = [];
+  
+      // Query the first database (con) for thermal Status table
+      const result1 = await conQuery("SELECT * FROM thermalStatus where date(polledTime)=curdate();");
+      const response1 = JSON.parse(JSON.stringify(result1));
+  
+      for (let i = 0; i < response1.length; i++) {
+        const date = new Date(response1[i].polledTime);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const timestamp = `${hours}:${minutes}`;
+  
+        // Query the second database (meterDB) for Chiller status table
+        const result2 = await meterDataQuery("SELECT * FROM chillarstatus where date(timestamp)=curdate()");
+        const response2 = JSON.parse(JSON.stringify(result2));
+  
+        // Process the data from both databases
+        FinalData.push({
+          "polledTime": timestamp,
+          "chiller1Status":response1[i].chillar1,
+          "chiller2Status":response1[i].chillar2,
+          "chiller3Status":response1[i].chillar3,
+          "chiller4Status":response1[i].chillar4,
+          "chiller5Status":response1[i].chillar5,
+          "chiller6Status":response1[i].chillar6,
+          "chiller7Status":response1[i].chillar7,
+          "chiller8Status":response1[i].chillar8,
+          "ThermalCHGStatus":parseInt(response2[i].chgStatus),
+          "thermalDCHGStatus":parseInt((response2[i].dchgStatus)*-1),
+        //   "storedwatertemperature": parseFloat(response1[i].thermalstorage_storedwatertemperature),
+        //   "chargingPump1Power": parseFloat(response2[0].chargingPump1Power),
+        //   "chargingPump2Power": parseFloat(response2[0].chargingPump2Power),
+        //   "dischargingPump1Power": parseFloat(response2[0].dischargingPump1Power),
+        //   "dischargingPump2Power": parseFloat(response2[0].dischargingPump2Power)
+        });
+      }
+
+      console.log(FinalData)
+      res.send(FinalData);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("An error occurred");
+    }
+  });
+
+
+
+  app.get("/chillers/status",async(req,res)=>{
+    meterDb.query("SELECT * FROM chillarstatus where date(timestamp)=curdate();",function(err,result,feilds){
+        const viewData=[]
+        if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+                let date=new Date(response[i].timestamp)
+                const hours = date.getHours().toString().padStart(2, '0');
+           const minutes = date.getMinutes().toString().padStart(2, '0');
+           // const seconds = date.getSeconds().toString().padStart(2, '0');
+           const timestamp = `${hours}:${minutes}`;
+            viewData.push({"polledTime":timestamp,"chiller1Status":response[i].chillar1,"chiller2Status":response[i].chillar2,"chiller3Status":response[i].chillar3,"chiller4Status":response[i].chillar4,"chiller5Status":response[i].chillar5,"chiller6Status":response[i].chillar6,"chiller7Status":response[i].chillar7,"chiller8Status":response[i].chillar8})
+
+
+            }
+            res.send(viewData)
+            console.log(viewData)
+        }
+    })
+    
+})
+
+
+app.get('/thermal/status',async(req,res)=>{
+    con.query("SELECT * FROM thermalStatus where date(polledTime)=curdate();",function(err,result,feilds){
+      const theramlDate=[]
+      if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+              let date=new Date(response[i].polledTime)
+              const hours = date.getHours().toString().padStart(2, '0');
+         const minutes = date.getMinutes().toString().padStart(2, '0');
+         // const seconds = date.getSeconds().toString().padStart(2, '0');
+         const timestamp = `${hours}:${minutes}`;
+         theramlDate.push({"polledTime":timestamp,"ThermalCHGStatus":parseInt(response[i].chgStatus),"thermalDCHGStatus":parseInt((response[i].dchgStatus)*-1)})
+
+
+          }
+          res.send(theramlDate)
+          console.log(theramlDate)
+      }
+  })
+
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import axios from "axios"
 // import { useState } from 'react';
 
@@ -296,6 +424,27 @@
 // 
 
 // export default Analytics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       
       

@@ -3,10 +3,45 @@ import axios from 'axios';
 import Chart from 'react-apexcharts';
 import Card from 'react-bootstrap/Card';
 import { colors } from '@mui/material';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 
 const Thermal = () => {
     const [result, setResult] = useState([])
+
+
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [singledaydata,setSingledaydata]=useState([])
+
+
+    //---------function to handle change in inputTag----------------//
+    const handleDateChange = (selectedDate) => {
+      setSelectedDate(selectedDate);
+    };
+
+
+      //------------function to post request according selected date------------------//
+      const handlesingledayFilter = async () => {
+       
+        try {
+          const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
+          const response = await axios.post(`http://localhost:5000/thermal/datefilter`, { date: formattedDate });
+          setSingledaydata(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      //--------------------------end of function------------//
+
+       //-------calling the post request function inside the useEffect----------//
+       useEffect(()=>{
+        handlesingledayFilter()
+
+      },[selectedDate])
+
+      console.log(singledaydata)
+
   
     const namelist = () =>{
      axios.get("http://localhost:5000/thermal").then((res)=>setResult(res.data))
@@ -30,8 +65,22 @@ const Thermal = () => {
         }
     }
 
+
+    //filter date calculation
+    let filteredresultkeys = []
+    let filteredaverageenergy = []
+    for (const re in singledaydata){
+      if (filteredresultkeys.includes(re) !== true){
+        filteredresultkeys.push(re)
+        filteredaverageenergy.push(singledaydata[re]["chillerEnergy"])
+      }
+  }
+
     console.log(resultkeys)
     console.log(averageenergy)
+
+    console.log(filteredresultkeys)
+    console.log(filteredaverageenergy)
 
     const graph={
       series :
@@ -100,30 +149,112 @@ const Thermal = () => {
             },
             }
           }
+
+
+
+          const Filteredgraph={
+            series :
+                [{
+                    name : "Cooling Energy",
+                    data : filteredaverageenergy.map((val)=>val.toFixed(2))  
+                }],
+        
+                options: {
+                  chart: {
+                    type: 'bar',
+                    height: 350
+                  },
+                  plotOptions: {
+                    bar: {
+                      colors: {
+                        ranges: [{
+                          from: -9999,
+                          to: 0,
+                          color: '#F15B46'
+                        }, {
+                          from: 0,
+                          to: 9999,
+                          color: '#28abf7'  
+                        }]
+                      },
+                      columnWidth: '80%',
+                    }
+                  },
+                  dataLabels: {
+                    enabled: false,
+                  },
+                  colors:["#384147"],
+                  yaxis: {
+                    title: {
+                      text: 'ckWh',
+                    }
+                  },
+                  xaxis : {
+                    title : {text:"Time in Hour"},
+                    categories :filteredresultkeys.map((val)=>val),
+                    colors:"white"
+                  },
+                    labels: {
+                      rotate: 0
+                    },
+                         tooltip: {
+              enabled: true,
+              theme: 'dark',
+              style: {
+                background: '#222',
+                color: '#031157'
+              }
+                  },
+                  fill: {
+                    opacity: 0.5,
+                    type: 'gradient',
+                    gradient: {
+                      shadeIntensity: 1,
+                      opacityFrom: 0.7,
+                      opacityTo: 0.9,
+                      stops: [0, 100]
+                    },
+                  
+                    colors: ['#7aadeb']
+                  },
+                  }
+                }
   
       return(
-        // <Card style={{ width: '18rem' }}>
-        //     <Card.Body>
-        //         <div  className="title">
-        //         <Card.Title><b>Thermal Storage</b></Card.Title>
-        //         </div>
-        //     <div >
-        //     <Chart type='area'
-        //     height = {350}
-        //     width={500}
-        //     series = {graph.series}
-        //     options = {graph.options}
-        //     />
-        // </div>
-        //     </Card.Body>
-        // </Card>
-        <div> 
-        <Chart type='area'
-            height = {'170%'}
-            width={'100%'}
-            series = {graph.series}
-            options = {graph.options}
-            />
+        <div>
+          <div> 
+          <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
+  <div className="col-10">
+    <div className="input-group mb-3" style={{ width: "300px"}}>
+      <div className="input-group-prepend">
+        <label className="input-group-text" htmlFor="inputGroupSelect01">
+          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
+        </label>
+      </div>
+     
+    </div>
+  </div>
+  </div>
+            </div> 
+            <div>
+
+              {
+                selectedDate==null? <Chart type='area'
+                height = {'170%'}
+                width={'100%'}
+                series = {graph.series}
+                options = {graph.options}
+                />: <Chart type='area'
+                height = {'170%'}
+                width={'100%'}
+                series = {Filteredgraph.series}
+                options = {Filteredgraph.options}
+                />
+              }
+            
+
+            </div>
+      
         </div>
     )
   

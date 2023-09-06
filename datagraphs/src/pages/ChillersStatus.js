@@ -6,12 +6,13 @@ import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
+import ThermalStatus from "./ThermalStatus"
 function ChillersStatus() {
+    const host="121.242.232.211"
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
 
-    const ChillerApi="http://localhost:5000/chillers/status"
+    const ChillerApi=`http://localhost:5000/Thermal/Chillers/Status`
     const [chillerData, setchillerData] = useState([]);
 
     const [data, setData] = useState([]);
@@ -42,7 +43,7 @@ function ChillersStatus() {
         try {
           const formattedStartDate = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chillerfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://localhost:5000/Chillers/Datefilter`, {
+          const response = await axios.post(`http://localhost:5000/Thermal/Chillers/Status/datefilters`, {
             date: formattedStartDate,
           });
         
@@ -103,7 +104,18 @@ const chillersStatus = {
         }
     },
 
-    series: [{
+    series: [
+        // {
+        //     name: 'ThermalCharge',
+        //     data: chillerData.map((chiller1)=>chiller1.ThermalCHGStatus),
+        //     //stack: 'Europe'
+        // },
+        {
+            name: 'TS Discharge',
+            data: chillerData.map((chiller1)=>chiller1.thermalDCHGStatus),
+            color:"green"
+            //stack: 'Europe'
+        },{
         name: 'Chiller1',
         data: chillerData.map((chiller1)=>chiller1.chiller1Status),
         //stack: 'Europe'
@@ -157,7 +169,7 @@ const chillersStatusFiltered = {
   
 
     xAxis: {
-        categories:data.map((time)=>time.timestamp)
+        categories:data.map((time)=>time.polledTime)
     },
 
     yAxis: {
@@ -178,38 +190,44 @@ const chillersStatusFiltered = {
         }
     },
 
-    series: [{
+    series: [
+        {
+            name: 'TS Discharge',
+            data: data.map((chiller1)=>chiller1.thermalDCHGStatus),
+            color:"green"
+            //stack: 'Europe'
+        },{
         name: 'Chiller1',
-        data: data.map((chiller1)=>chiller1.chillar1),
+        data: data.map((chiller1)=>chiller1.chiller1Status),
         //stack: 'Europe'
     }, {
         name: 'Chiller2',
-        data: data.map((chiller2)=>chiller2.chillar2),
+        data: data.map((chiller2)=>chiller2.chiller2Status),
        // stack: 'Europe'
     }, {
         name: 'Chiller3',
-        data:  data.map((chiller3)=>chiller3.chillar3),
+        data:  data.map((chiller3)=>chiller3.chiller3Status),
         //stack: 'North America'
     }, {
         name: 'Chiller4',
-        data:  data.map((chiller4)=>chiller4.chillar4),
+        data:  data.map((chiller4)=>chiller4.chiller4Status),
         //stack: 'North America'
     },
     {
         name: 'Chiller5',
-        data: data.map((chiller5)=>chiller5.chillar5),
+        data: data.map((chiller5)=>chiller5.chiller5Status),
         //stack: 'Europe'
     }, {
         name: 'Chiller6',
-        data: data.map((chiller6)=>chiller6.chillar6),
+        data: data.map((chiller6)=>chiller6.chiller6Status),
        // stack: 'Europe'
     }, {
         name: 'Chiller7',
-        data: data.map((chiller7)=>chiller7.chillar7),
+        data: data.map((chiller7)=>chiller7.chiller7Status),
         //stack: 'North America'
     }, {
         name: 'Chiller8',
-        data: data.map((chiller8)=>chiller8.chillar8),
+        data: data.map((chiller8)=>chiller8.chiller8Status),
         //stack: 'North America'
     }]
 };
@@ -224,6 +242,7 @@ const dateValue = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chi
 
   return (
     <div>
+        <div> 
         <div> 
       <h4 style={{textAlign:'center',marginTop:"15px"}}><b style={{fontSize:"30px"}}>Chiller Status </b></h4>
       </div>
@@ -243,8 +262,13 @@ const dateValue = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chi
 {
     chillerfilterDate===null?<HighchartsReact highcharts={Highcharts} options={chillersStatus} />:<HighchartsReact highcharts={Highcharts} options={chillersStatusFiltered} />
 }
+</div>
+<hr style={{border:"10px solid black"}}/>
 
-        
+<div> 
+<ThermalStatus/>
+</div>
+
     </div>
   )
 }

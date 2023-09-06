@@ -6,11 +6,12 @@ import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 
 function ChillerDashboard() {
+    const host="121.242.232.211"
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
      //declaring empty array to fetch data
     const [thermalStoredwaterTemp,setThermalStoredWaterTemp]=useState([])
-    const thermalTempApi="http://localhost:5000/thermal/storedWaterTemp"
+    const thermalTempApi=`http://${host}:5000/thermal/storedWaterTemp`
 
     //defining functions for fetching data(get request)
 
@@ -49,7 +50,7 @@ function ChillerDashboard() {
         align: 'left'
     },
     xAxis: {
-        categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        //categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -73,19 +74,19 @@ function ChillerDashboard() {
     series: [
         {
             name: 'C1 Loading',
-            data: [406292, 260000, 107000, 68300, 27500, 14500,406292, 260000, 107000, 68300, 27500, 14500,406292, 260000, 107000, 68300, 27500, 14500,406292, 260000, 107000, 68300, 27500, 14500,406292]
+            data: [0]
         },
         {
             name: 'c2 Loading',
-            data: [51086, 136000, 5500, 141000, 107180, 77000,51086, 136000, 5500, 141000, 107180, 77000,51086, 136000, 5500, 141000, 107180, 77000,51086, 136000, 5500, 141000, 107180, 77000]
+            data: [0]
         },
         {
             name: 'c3 Loading',
-            data: [51086, 136000, 5500, 141000, 107180, 77000]
+            data: [0]
         },
         {
             name: 'c4 Loading',
-            data: [51086, 136000, 5500, 141000, 107180, 77000]
+            data: [0]
         }
     ]
 };
@@ -96,7 +97,7 @@ const optionsLine={
         type: 'line'
     },
     title: {
-        text: 'TS Stored Water Temparature',
+        text: 'TS Stored Water Temperature',
         align: 'center',
         style: {
             color: '#cc0000	' // You can replace 'red' with any desired color value
@@ -117,7 +118,7 @@ const optionsLine={
     yAxis: {
         min: 0,
         title: {
-            text: 'Temparature (degrees celsius)'
+            text: 'Temperature (degrees celsius)'
         }
     },
     tooltip: {
@@ -131,7 +132,7 @@ const optionsLine={
     },
     series: [
         {
-            name: 'Ts Water tempararture',
+            name: 'Ts Water temperarture',
             data:  thermalStoredwaterTemp.map((value)=>value.storedwatertemperature)
         },
     ]
@@ -144,7 +145,7 @@ const optionsTemparature={
         type: 'line'
     },
     title: {
-        text: 'Condenser in/out Temparature',
+        text: 'Condenser in/out Temperature',
         align: 'left',
         style: {
             color: '#cc0000	' // You can replace 'red' with any desired color value
@@ -156,7 +157,7 @@ const optionsTemparature={
     //     align: 'left'
     // },
     xAxis: {
-        categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        //categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -165,7 +166,7 @@ const optionsTemparature={
     yAxis: {
         min: 0,
         title: {
-            text: 'Temparature (degrees celsius)'
+            text: 'Temperature (degrees celsius)'
         }
     },
     tooltip: {
@@ -180,12 +181,12 @@ const optionsTemparature={
     series: [
         {
             name: 'Condenser inlet',
-            data: [10, 18, 16, 6, 27, 45,62, 26, 70, 68, 50, 15,29, 20, 70, 30, 27, 14,92, 26, 100, 30, 50, 45,92],
+            data: [0],
             color:'#800080'
         },
         {
             name: 'Condenser outlet',
-            data: [92, 60, 70, 30, 75, 45,92, 26, 17, 68, 27, 45,62, 26, 70, 68, 50, 14,46, 26, 17, 68, 75, 15,29],
+            data: [0],
             color:"#FB4346"
         },
     ]
@@ -197,7 +198,7 @@ const optionsEvaporatorTemparature={
         type: 'line'
     },
     title: {
-        text: 'Evaporator in/out Temparature',
+        text: 'Evaporator in/out Temperature',
         align: 'left',
         style: {
             color: '#cc0000	' // You can replace 'red' with any desired color value
@@ -209,7 +210,7 @@ const optionsEvaporatorTemparature={
     //     align: 'left'
     // },
     xAxis: {
-        categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        //categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -218,7 +219,7 @@ const optionsEvaporatorTemparature={
     yAxis: {
         min: 0,
         title: {
-            text: 'Temparature (degrees celsius)'
+            text: 'Temperature (degrees celsius)'
         }
     },
     tooltip: {
@@ -235,13 +236,13 @@ const optionsEvaporatorTemparature={
     series: [
         {
             name: 'Evaporator inlet',
-            data: [11,19,21,23,25,13,15,17,27,51,53,55,57,29,35,37,31,33,39,41,43,45,47,49,],
+            data: [0],
             color:'#02ccfe',
 
         },
         {
             name: 'Evaporator outlet',
-            data: [92, 60, 70, 30, 75, 45,92, 26, 17, 68, 27, 45,62, 26, 70, 68, 50, 14,46, 26, 17, 68, 75, 15,29],
+            data: [0],
             color:" #1c305c"
         },
     ]
@@ -268,21 +269,21 @@ const optionsEvaporatorTemparature={
         </div> */}
         <div class="row" style={{marginLeft:"20px"}}>
   <div class="col-6">
-    <h2><b>3.76</b></h2>
+    <h2><b>__</b></h2>
     <p style={{color:'gray'}}>Average of C1 COP</p>
   </div>
   <div class="col-6">
-    <h2><b>3.36</b></h2>
+    <h2><b>__</b></h2>
     <p style={{color:'gray'}} > Average of C2 COP</p>
   </div>
   <br/>
   <br/>
   <div class="col-6" style={{marginTop:"20px"}}>
-    <h2><b>3.64</b></h2>
+    <h2><b>__</b></h2>
     <p style={{color:'gray'}}>Average of C3 COP</p>
   </div>
   <div class="col-6" style={{marginTop:"20px"}}>
-  <h2><b>3.64</b></h2>
+  <h2><b>__</b></h2>
 <p style={{color:'gray'}}>Average of C3 COP</p>
 
   </div>
@@ -326,11 +327,11 @@ const optionsEvaporatorTemparature={
     <div class="col-4">
       <div style={{textAlign:"center"}}> 
       <div> 
-      <h2><b>54.98</b></h2>
+      <h2><b>__</b></h2>
         <p style={{color:"gray"}}>Average of Evaporator Flowrate</p>
         </div>
         <div>
-        <h2><b>54.18</b></h2>
+        <h2><b>__</b></h2>
         <p style={{color:"gray"}}>Average of Condenser Flowrate</p> 
         </div>
         

@@ -19,7 +19,7 @@ const [receivedData,setReceivedDate]=useState([])
     };
 
   const AlertsData=()=>{
-    axios.get(`http://localhost:5000/Alert/Logs`).then((res)=>{
+    axios.get(`http://${host}:5000/Alert/Logs`).then((res)=>{
       const dataResponse=res.data
       setAlerts(dataResponse)
   
@@ -30,7 +30,7 @@ const [receivedData,setReceivedDate]=useState([])
 
   const FilterAlertsData = async () => {
 
-    axios.post(`http://${host}:5000/Alerts/filter`, { systemName: filterAlert })
+    axios.post(`http://localhost:5000/Alerts/filter`, { systemName: filterAlert })
     .then(response => {
       const Dataresponse=response.data
           //console.log(response.data);
@@ -96,8 +96,9 @@ console.log(alerts)
         onChange={handleAlertChange}
       
       >
-  <option selected>Filter Alerts</option>
-  <option value="Building Load">Building consumption</option>
+  <option value="Alert Logs" >Filter Alerts</option>
+  {/* <option value="Alert Logs">Alert Logs</option> */}
+  <option value="Building Load">Building Load</option>
   <option value="Chiller">Chillers</option>
   <option value="Thermal Storage">Thermal</option>
 </select>

@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 
 
 function RooftopSolar() {
+  const host='121.242.232.211'
     const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
 
@@ -37,7 +38,7 @@ function RooftopSolar() {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post('http://localhost:5000/roofTopHourly', { date: formattedDate });
+          const response = await axios.post(`http://${host}:5000/roofTopHourly`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
@@ -55,7 +56,7 @@ function RooftopSolar() {
 
       //----------function to get request for initial graph befor date filters------------//
       const RooftopDataFetch=()=>{
-        axios.get("http://localhost:5000/current/roofTopHourlygraph").then((res)=>{
+        axios.get(`http://${host}:5000/current/roofTopHourlygraph`).then((res)=>{
           const response=res.data
           setCurrentRooftopData(response)
         
@@ -103,7 +104,7 @@ console.log(currentRooftopData)
                     }
           },
           dataLabels: {
-            enabled: true
+            enabled: false
           },
           title: {
             // text: "Wheeled In Solar",
@@ -239,7 +240,7 @@ var CurrentRoofTop = {
               }
     },
     dataLabels: {
-      enabled: true
+      enabled: false
     },
     title: {
       // text: "Wheeled In Solar",
@@ -353,6 +354,12 @@ var CurrentRoofTop = {
   }
 }
 
+
+const now = new Date();
+const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
+const [month, day, year] = local.split("/"); // Split the date by "/"
+const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
+const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
   return (
     <div>
         <div>
@@ -363,7 +370,7 @@ var CurrentRoofTop = {
       {/* <div class='row' style={{display:'flex'}}>
         <div>  */}
       <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
-  <div className="col">
+  <div className="col-10">
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
@@ -373,6 +380,7 @@ var CurrentRoofTop = {
      
     </div>
   </div>
+  <div class="col-2"><h3>{dateValue}</h3></div>
 
  
 </div>

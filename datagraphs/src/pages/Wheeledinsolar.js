@@ -13,12 +13,13 @@ import { Link } from "react-router-dom";
 
 
 function WheeledInsolar() {
+  const host='121.242.232.211'
     const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
     const [wmsMeterdata,setWmsMeterdata]=useState([])
     const [loading, setLoading] = useState(false);
-    const inveterApi="http://localhost:5000/initial/wheeledinsolr"
-    const WmsMeterResponse="http://localhost:5000/initialgraph/wmsMeter"
+    const inveterApi=`http://${host}:5000/initial/wheeledinsolr`
+    const WmsMeterResponse=`http://${host}:5000/initialgraph/wmsMeter`
 
 
     const [inverterInitial,setInverterInitial]=useState([])
@@ -380,7 +381,7 @@ initialgraphdata.push({"inverterTimestamp":roundedTime})
       // },
       yaxis: {
         title: {
-          text: 'Active Power (kWh)',
+          text: 'Active Power (kW)',
         }
       },
       xaxis: {
@@ -533,7 +534,7 @@ initialgraphdata.push({"inverterTimestamp":roundedTime})
       // },
       yaxis: {
         title: {
-          text: 'Active Power (kWh)',
+          text: 'Active Power (kW)',
         }
       },
       xaxis: {
