@@ -13,6 +13,7 @@ const emailto =['ems@respark.iitm.ac.in']
 
 const util = require('util');
 const conQuery = util.promisify(con.query).bind(con);
+const meterDataQuery=util.promisify(meterDb.query).bind(meterDb)
 const chakradbQuery = util.promisify(chakradb.query).bind(chakradb);
 //faheera@respark.iitm.ac.in
 
@@ -243,7 +244,7 @@ emptyArray.forEach(obj => {
         for(let i=0;i<response.length;i++){
           const date = new Date(response[i].received_time)
           const localTimeString = date.toLocaleString();
-          finalresultValue.push({'chargingAVG':response[i].upschargingenergy,"dischargingAVG":response[i].negative_energy,"batteryStatus":response[i].upsbatterystatus,"timestamp":localTimeString,"pack_usable_soc":response[i].packsoc})
+          finalresultValue.push({'chargingAVG':response[i].upschargingenergy,"dischargingAVG":response[i].negative_energy,"batteryStatus":response[i].upsbatterystatus,"timestamp":localTimeString,"pack_usable_soc":response[i].packsoc,"BatteryCurrent":response[i].batterycurrent,"BatteryVoltage":response[i].batteryvoltage})
 
         }
         res.send(finalresultValue)
@@ -285,6 +286,35 @@ emptyArray.forEach(obj => {
 
 
     //-----------------------end of api---------------------//
+
+
+    //----------------------------dashboard battery  filtered graph api---------------------------------//
+    app.post("/dashboard/filtered/Battery",async(req,res)=>{
+      const {date}=req.body
+      const resultValue=[]
+      meterDb.query(`select * from meterdata.batteryhourly where date(received_time) = '${date}'`,function(err,result,feilds){
+       // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+        if(err){
+              console.log(err)
+          }
+          else{
+              const response=(JSON.parse(JSON.stringify(result)))
+              for(let i=0;i<response.length;i++){
+                let date = new Date(response[i].received_time);
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                // const seconds = date.getSeconds().toString().padStart(2, '0');
+                const timestamp = `${hours}:${minutes}`;
+                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].total_upschargingenergy_diff),"dischargingEnergy":parseFloat(response[i].total_upsdidchargingenergy_diff)*-1,"idleEnergy":parseFloat(response[i].idle_energystatues),"Pacsoc":parseInt(response[i].max_pacsoc),"energy_available":response[i].energy_available})
+
+              }
+              res.send(resultValue)
+              console.log(resultValue.length)
+          }
+      })
+      
+  })
+  //---------------------------------------end of api---------------------------------------------------------//
 
     //SELECT * FROM EMSUPSbattery WHERE upstimestamp >= CURDATE() AND upstimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) order by upstimestamp desc
 
@@ -386,10 +416,11 @@ emptyArray.forEach(obj => {
  
         
     })
-
+    
+//-------------------building consumption system overview api-------------------------------//
     app.get('/BuildingConsumptionPage2',async(req,res)=>{
       const finalValue=[]
-      con.query("SELECT Gridhourly.Energy as GridEnergy, UPSbatteryHourly.polledTime as timestamp , UPSbatteryHourly.discharhingEnergy as BatteryDischarEnergy, UPSbatteryHourly.chargingEnergy as BatteryChargeEnergy,Wheeledhourly.Energy as WheeledEnergy,rooftopHourly.Energy as RooftopEnergy FROM Gridhourly JOIN UPSbatteryHourly ON Gridhourly.polledTime = UPSbatteryHourly.polledTime  JOIN Wheeledhourly ON Wheeledhourly.polledTime=Gridhourly.polledTime JOIN rooftopHourly on rooftopHourly.polledTime=Gridhourly.polledTime  where date(UPSbatteryHourly.polledTime)=CURDATE();",function(err,result,feilds){
+      con.query("SELECT * FROM buildingConsumption  where date(polledTime) = curdate();",function(err,result,feilds){
         //DATE_SUB(CURDATE(), INTERVAL 1 DAY)
         
         //SELECT Gridhourly.Energy as GridEnergy, Gridhourly.polledTime as timestamp, rooftopHourly.energy as RooftopEnergy , UPSbatteryHourly.discharhingEnergy as BatteryDischarEnergy, chargingEnergy as BatteryChargeEnergy,Wheeledhourly.Energy as WheeledEnergy FROM Gridhourly JOIN rooftopHourly ON Gridhourly.polledTime = rooftopHourly.polledTime JOIN UPSbatteryHourly ON rooftopHourly.polledTime = UPSbatteryHourly.polledTime JOIN Wheeledhourly ON Wheeledhourly.polledTime=rooftopHourly.polledTime  where date(Gridhourly.polledTime)=CURDATE();
@@ -399,12 +430,12 @@ emptyArray.forEach(obj => {
         else{
           const response=(JSON.parse(JSON.stringify(result)))
           for(let i=0;i<response.length;i++){
-            let date = new Date(response[i].timestamp);
+            let date = new Date(response[i].polledTime);
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
             // const seconds = date.getSeconds().toString().padStart(2, '0');
             const timestampVal = `${hours}:${minutes}`;
-            finalValue.push({"Timestamp":timestampVal,"GridEnergy":Math.trunc(response[i].GridEnergy),"RooftopEnergy":Math.trunc(response[i].RooftopEnergy),"BatteryDischarEnergy":response[i].BatteryDischarEnergy,"BatteryChargeEnergy":response[i].BatteryChargeEnergy,"WheeledInSolar":response[i].WheeledEnergy})
+            finalValue.push({"Timestamp":timestampVal,"GridEnergy":Math.trunc(response[i].gridEnergy),"RooftopEnergy":Math.trunc(response[i].rooftopEnergy),"BatteryDischarEnergy":response[i].BatteryDischarEnergy,"BatteryChargeEnergy":response[i].BatteryChargeEnergy,"WheeledInSolar":Math.round(response[i].wheeledinEnergy),"thermalDischarge":parseInt(response[i].thermalDischarge)*-1})
             
           }
           res.send(finalValue)
@@ -413,6 +444,38 @@ emptyArray.forEach(obj => {
         }
       })
     })
+    //---------------------------------------END   OF API -----------------------------------------------------//
+
+
+    //---------- building consumption system overview filtered graph api -----------------------------------//
+    app.post('/filteredGraph/BuildingConsumptionPage2',async(req,res)=>{
+      const {date}=req.body
+      const finalValue=[]
+      con.query(`SELECT * FROM buildingConsumption  where date(polledTime) = '${date}'`,function(err,result,feilds){
+        //DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        
+        //SELECT Gridhourly.Energy as GridEnergy, Gridhourly.polledTime as timestamp, rooftopHourly.energy as RooftopEnergy , UPSbatteryHourly.discharhingEnergy as BatteryDischarEnergy, chargingEnergy as BatteryChargeEnergy,Wheeledhourly.Energy as WheeledEnergy FROM Gridhourly JOIN rooftopHourly ON Gridhourly.polledTime = rooftopHourly.polledTime JOIN UPSbatteryHourly ON rooftopHourly.polledTime = UPSbatteryHourly.polledTime JOIN Wheeledhourly ON Wheeledhourly.polledTime=rooftopHourly.polledTime  where date(Gridhourly.polledTime)=CURDATE();
+        if(err){
+          console.log(err)
+        }
+        else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].polledTime);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestampVal = `${hours}:${minutes}`;
+            finalValue.push({"Timestamp":timestampVal,"GridEnergy":Math.trunc(response[i].gridEnergy),"RooftopEnergy":Math.trunc(response[i].rooftopEnergy),"BatteryDischarEnergy":response[i].BatteryDischarEnergy,"BatteryChargeEnergy":response[i].BatteryChargeEnergy,"WheeledInSolar":Math.round(response[i].wheeledinEnergy),"thermalDischarge":parseInt(response[i].thermalDischarge)*-1})
+            
+          }
+          res.send(finalValue)
+           console.log(response.length)
+
+        }
+      })
+    })
+    //------------------------END of API---------------------------------------------------//
 
 
     
@@ -511,7 +574,7 @@ emptyArray.forEach(obj => {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 
-        // thermal api
+        // -------------------------thermal dashboard api for initial graph--------------------------------//
         app.get("/thermal", (req,res)=>{
             // let c = 0
             // let chk = 0
@@ -531,6 +594,30 @@ emptyArray.forEach(obj => {
             })
 
         })
+        //----------------------------- end of api --------------------------------------------//
+        // thermal dashboard api  for date filter api -------------------------------//
+        app.post("/thermal/datefilter", (req,res)=>{
+          const {date}=req.body
+          console.log(date)
+          // let c = 0
+          // let chk = 0
+          // const timarr = []
+          // var output = []
+          con.query(`select coolingEnergy,timeInHour from ThermalStorageProcessed where DATE(recordTime) = '${date}'`,function(err,result){
+              var output = {"0":{chillerEnergy: 0},"1":{chillerEnergy: 0},"2":{chillerEnergy: 0},"3":{chillerEnergy: 0},"4":{chillerEnergy: 0},"5":{chillerEnergy: 0},"6":{chillerEnergy: 0},"7":{chillerEnergy: 0},"8":{chillerEnergy: 0},"9":{chillerEnergy: 0},"10":{chillerEnergy: 0},"11":{chillerEnergy: 0},"12":{chillerEnergy: 0},"13":{chillerEnergy: 0},"14":{chillerEnergy: 0},"15":{chillerEnergy: 0},"16":{chillerEnergy: 0},"17":{chillerEnergy: 0},"18":{chillerEnergy: 0},"19":{chillerEnergy: 0},"20":{chillerEnergy: 0},"21":{chillerEnergy: 0},"22":{chillerEnergy: 0},"23":{chillerEnergy: 0}}
+              if(err){
+                  console.log(err)
+              }else{
+                  for (const res of result){
+                      output[res.timeInHour] = {"chillerEnergy":res.coolingEnergy}
+                  }
+              }
+              console.log(output)
+              res.send(output)
+          })
+
+      })
+        //-------------------end of api----------------------------------//
 
         
         // thermal Temp api
@@ -724,11 +811,15 @@ let CP12_1= {'CP12_1Energy':0,'CP12_1TotalSession':0,'CP12_1NoOf_chargers':0}
 let CP13_1= {'CP13_11Energy':0,'CP13_1TotalSession':0,'CP13_1NoOf_chargers':0}
 let CP14_1= {'CP14_1Energy':0,'CP14_1TotalSession':0,'CP14_1NoOf_chargers':0}
 
-
-let ActiveChargingpoint=""
 let NoOfChargers=0
 let previousTimestamp = null;
 let totalUsageTime = 0;
+let LEV1_1Status=""
+let LEV4_1Status=""
+let CP11_1Status=""
+let CP12_1Status=""
+let CP13_1Status=""
+let CP14_1Status=""
 
 
 
@@ -736,10 +827,10 @@ for(let i=0;i<response.length;i++){
     
     if(response[i].chargpointname==="LEV1_1"){
         LEV1_1.LEV1_1Energy+=parseFloat(response[i].energyconsumption)
-         LEV1_1.LEV1_1TotalSession+=(response[i].totalsessions)
+         LEV1_1.LEV1_1TotalSession=(response[i].totalsessions)
          if(parseFloat(response[i].energyconsumption)>0){
             LEV1_1.LEV1_1NoOf_chargers="Active"
-            ActiveChargingpoint=(response[i].chargpointname)
+            LEV1_1Status=("active")
             NoOfChargers+=1
          }
          if (response[i].totalsessions === 1) {
@@ -759,10 +850,11 @@ for(let i=0;i<response.length;i++){
     }
     if(response[i].chargpointname==="LEV4_1"){
         LEV4_1.LEV4_1Energy+=parseFloat(response[i].energyconsumption)
-        LEV4_1.LEV4_1TotalSession+=(response[i].totalsessions)
+        LEV4_1.LEV4_1TotalSession=(response[i].totalsessions)
         if(parseFloat(response[i].energyconsumption)>0){
             LEV4_1.LEV4_NoOf_chargers="Active"
-            ActiveChargingpoint=(response[i].chargpointname)
+            // ActiveChargingpoint=(response[i].chargpointname)
+            LEV4_1Status=("active")
             NoOfChargers+=1
         }
          if (response[i].totalsessions === 1) {
@@ -780,10 +872,11 @@ for(let i=0;i<response.length;i++){
     
     if(response[i].chargpointname==="CP11_1"){
         CP11_1.CP11_1Energy+=parseFloat(response[i].energyconsumption)
-        CP11_1.CP11_1TotalSession+=(response[i].totalsessions)
+        CP11_1.CP11_1TotalSession=(response[i].totalsessions)
         if(parseFloat(response[i].energyconsumption)>0){
             CP11_1.CP11_1NoOf_chargers="Active"
-            ActiveChargingpoint=(response[i].chargpointname)
+           // ActiveChargingpoint=(response[i].chargpointname)
+           CP11_1Status=("active")
             NoOfChargers+=1
          }
          if (response[i].totalsessions === 1) {
@@ -800,11 +893,12 @@ for(let i=0;i<response.length;i++){
     }
     if(response[i].chargpointname==="CP12_1"){
         CP12_1.CP12_1Energy+=parseFloat(response[i].energyconsumption)
-        CP12_1.CP12_1TotalSession+=(response[i].totalsessions)
+        CP12_1.CP12_1TotalSession=(response[i].totalsessions)
         //console.log(LEV4_1,"line number 94")
         if(parseFloat(response[i].energyconsumption)>0){
             CP12_1.CP12_1NoOf_chargers="Active"
-            ActiveChargingpoint=(response[i].chargpointname)
+            //ActiveChargingpoint=(response[i].chargpointname)
+            CP12_1Status=("active")
             NoOfChargers+=1
          }
          if (response[i].totalsessions === 1) {
@@ -820,10 +914,11 @@ for(let i=0;i<response.length;i++){
     }
     if(response[i].chargpointname==="CP13_1"){
         CP13_1.CP13_11Energy+=parseFloat(response[i].energyconsumption)
-        CP13_1.CP13_1TotalSession+=(response[i].totalsessions)
+        CP13_1.CP13_1TotalSession=(response[i].totalsessions)
         if(parseFloat(response[i].energyconsumption)>0){
             CP13_1.CP13_1NoOf_chargers="Active"
-            ActiveChargingpoint=(`${response[i].chargpointname}`)
+            //ActiveChargingpoint=(`${response[i].chargpointname}`)
+            CP13_1Status=("active")
             NoOfChargers+=1
          }
          if (response[i].totalsessions === 1) {
@@ -841,10 +936,11 @@ for(let i=0;i<response.length;i++){
     }
     if(response[i].chargpointname==="CP14_1"){
         CP14_1.CP14_1Energy+=parseFloat(response[i].energyconsumption)
-        CP14_1.CP14_1TotalSession+=(response[i].totalsessions)
+        CP14_1.CP14_1TotalSession=(response[i].totalsessions)
         if(parseFloat(response[i].energyconsumption)>0){
             CP14_1.CP14_1NoOf_chargers="Active"
-            ActiveChargingpoint=(response[i].chargpointname)
+            //ActiveChargingpoint=(response[i].chargpointname)
+            CP14_1Status=("active")
             NoOfChargers+=1
          }
          if (response[i].totalsessions === 1) {
@@ -870,7 +966,7 @@ for(let i=0;i<response.length;i++){
 // let CP14_1= {'CP14_1Energy':0,'CP14_1TotalSession':0,'CP14_1NoOf_chargers':0}
 const finalresult=[]
 const totalEnergy=(LEV1_1.LEV1_1Energy+LEV4_1.LEV4_1Energy+CP11_1.CP11_1Energy+CP12_1.CP12_1Energy+CP13_1.CP13_11Energy+CP14_1.CP14_1Energy)
-const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.CP11_1TotalSession+CP12_1.CP12_1TotalSession+CP13_1.CP13_1TotalSession+CP14_1.CP14_1Energy)
+const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.CP11_1TotalSession+CP12_1.CP12_1TotalSession+CP13_1.CP13_1TotalSession+CP14_1.CP14_1TotalSession)
 //   let LEV1_1=0
 //     let LEV4_1=0
 //     let CP11_1=0
@@ -881,8 +977,8 @@ const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.
 //console.log(LEV1_1+LEV4_1+CP11_1+CP12_1+CP13_1+CP14_1)
 const totalUsageTimeHours = Math.round(totalUsageTime / 3600000);
 
-
-finalresult.push({"totalEnergy":totalEnergy,"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"currentActiveDevice":ActiveChargingpoint,"totalTimeusage":totalUsageTimeHours})
+                                 
+finalresult.push({"totalEnergy":totalEnergy.toFixed(1),"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"totalTimeusage":totalUsageTimeHours,"LEV1_1Status":LEV1_1Status,"LEV4_1Status":LEV4_1Status,"CP11_1Status":CP11_1Status,"CP12_1Status":CP12_1Status,"CP13_1Status":CP13_1Status,"CP14_1Status":CP14_1Status})
 //console.log(LEV1_1.LEV1_1Energy+LEV4_1.LEV4_1Energy+CP12_1.CP12_1Energy+CP13_1.CP13_11Energy+ CP13_1.CP13_11Energy+CP13_1.CP14_1Energy)
             //res.status(200).send( result );
             res.status(200).send( finalresult );
@@ -1112,19 +1208,8 @@ app.get("/Alert/Logs",async(req,res)=>{
 app.post("/Alerts/filter", async (req, res) => {
     const { systemName } = req.body;
     const AlertFilter = [];
-    // let query;
-    // if (systemName==="Building Load") {
-    //     query = `select * from alertLogs where systemName ='${systemName}'`;
-    //   }
-    //   if (systemName==="Chillers") {
-    //     query = `select * from alertLogs where systemName ='${systemName}'`;
-    //     console.log("filtered chillers alert")
-    //   }
-    //   if (systemName==="Thermal") {
-    //     query = `select * from alertLogs where systemName ='${systemName}'`;
-    //     console.log("filtered thermal alert")
-    //   }
-    const query=`select * from alertLogs where systemName ='${systemName}'`
+    if(systemName==="Alert Logs"){
+      let query="select * from alertLogs order by alerttime desc"
       con.query(query, (error, results) => {
         if (error) {
           console.error(error);
@@ -1147,6 +1232,55 @@ app.post("/Alerts/filter", async (req, res) => {
         //console.log(AlertFilter);
         return res.json(AlertFilter);
       });
+    }
+    else{
+      let query=`select * from alertLogs where systemName ='${systemName}' order by alerttime desc `
+      con.query(query, (error, results) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ message: 'An error occurred' });
+        }
+        console.log(results.length,`filter for ${systemName}  alert executed`);
+        for (let i = 0; i < results.length; i++) {
+          const date = new Date(results[i].alerttime);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          const timestamp = `${hours}:${minutes}`;
+          const year = date.getFullYear().toString();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          const formattedDate = `${day}/${month}/${year}`;
+          const timeview = [formattedDate, timestamp];
+    
+          AlertFilter.push({"id":results[i].recordId,"alerttimereceived":timeview,"alert":results[i].alert,"limitvalue":results[i].limitvalue,"systemName":results[i].systemName,"severity":results[i].severity,"action":results[i].action});
+        }
+        //console.log(AlertFilter);
+        return res.json(AlertFilter);
+      });
+    }
+   
+      // con.query(query, (error, results) => {
+      //   if (error) {
+      //     console.error(error);
+      //     return res.status(500).json({ message: 'An error occurred' });
+      //   }
+      //   console.log(results.length,`filter for ${systemName}  alert executed`);
+      //   for (let i = 0; i < results.length; i++) {
+      //     const date = new Date(results[i].alerttime);
+      //     const hours = date.getHours().toString().padStart(2, '0');
+      //     const minutes = date.getMinutes().toString().padStart(2, '0');
+      //     const timestamp = `${hours}:${minutes}`;
+      //     const year = date.getFullYear().toString();
+      //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      //     const day = date.getDate().toString().padStart(2, '0');
+      //     const formattedDate = `${day}/${month}/${year}`;
+      //     const timeview = [formattedDate, timestamp];
+    
+      //     AlertFilter.push({"id":results[i].recordId,"alerttimereceived":timeview,"alert":results[i].alert,"limitvalue":results[i].limitvalue,"systemName":results[i].systemName,"severity":results[i].severity,"action":results[i].action});
+      //   }
+      //   //console.log(AlertFilter);
+      //   return res.json(AlertFilter);
+      // });
   });
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1222,81 +1356,22 @@ app.get("/acknowledment",async(req,res)=>{
     
 })
 
-// data filtering acording to the selected date for peakdemad data
-app.post("/past/hvacSchneider7230Polling", (req, res) => {
-    const { date,endDate} = req.body;
-   
-    const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}' And totalApparentPower2>3900 `;
-    chakradb.query(query, (error, results) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'An error occurred' });
-      }
-      return res.json(results);
-    });
-  });
+
+
   
   
   // data filtering for single days data
-  app.post("/singleday/hvacSchneider7230Polling", (req, res) => {
+  app.get("/singleday/hvacSchneider7230Polling", (req, res) => {
       const { date} = req.body;
+      const filterData = [];
      
-      const query = `SELECT * FROM hvacSchneider7230Polling WHERE DATE(polledTime) = '${date}' And totalApparentPower2>2000 `;
-      chakradb.query(query, (error, results) => {
+      const query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) ="2023-08-31"`;
+      meterDb.query(query, (error, results) => {
         if (error) {
           console.error(error);
           return res.status(500).json({ message: 'An error occurred' });
         }
-        return res.json(results);
-      });
-    });
-
-    //---------------------------//
-    
-    
-    
-    app.post("/filter/hvacSchneider7230Polling", (req, res) => {
-  const { date, endDate,month } = req.body;
-  const filterData = [];
-  console.log(date, endDate);
-
-  let query;
-  if (endDate) {
-    query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}'`;
-    console.log('bar graph executed');
-  }
-//   else if(month){
-//     query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
-//     console.log("month query executed")
-//   }
-  // else {
-  //     if(month){
-  //   query = `SELECT * FROM peakdemanddaily where  YEAR(polledTime)="2023" and MONTH(polledTime) = '${month}'`;
-  //   console.log("month query executed")
-  // }
-
-  //   // Filter by month
-  //   // const year = date.substring(0, 4);
-  //   // const month = date.substring(5, 7);
-  //   // const firstDayOfMonth = `${year}-${month}-01`;
-  //   // const lastDayOfMonth = `${year}-${month}-31`; // Assuming maximum 31 days per month
-
-  //   // query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${firstDayOfMonth}' AND '${lastDayOfMonth}'`;
-  //   // console.log('line graph executed');
-    
-  // }
-  else{
-    query = `SELECT * FROM peakdemandquarter WHERE DATE(polledTime) = '${date}'`;
-    console.log('single day filter executed')
-
-  }
-
-  meterDb.query(query, (error, results) => {
-    if (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'An error occurred' });
-    }
-    console.log(results.length);
+        console.log(results.length);
     for (let i = 0; i < results.length; i++) {
       const date = new Date(results[i].polledTime);
       const hours = date.getHours().toString().padStart(2, '0');
@@ -1308,16 +1383,94 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
       const formattedDate = `${day}/${month}/${year}`;
       const timeview = [formattedDate, timestamp];
 
-      filterData.push({ "timestamp": timeview, "peakdemand": Math.trunc(results[i].peakdemand) });
+      filterData.push({ "timestamp": timeview, "peakdemand": Math.trunc(results[i].peakdemand),"limitLine":parseInt(4000) });
+    }
+    console.log(filterData);
+    return res.json(filterData);
+      });
+    });
+
+    //---------------------------//
+    
+    
+    //-----------------Daily peakDemand filtered api------------------//
+    app.post("/filter/hvacSchneider7230Polling", (req, res) => {
+  const { date, endDate,month } = req.body;
+  const filterData = [];
+  console.log(date, endDate);
+
+  let query;
+  if (endDate) {
+    query = `SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN '${date}' AND '${endDate}'`;
+    console.log('bar graph executed');
+  }
+//  else{
+//     query = `SELECT * FROM peakdemandquarter WHERE DATE(polledTime) = '${date}'`;
+//     console.log('single day filter executed')
+
+//   }
+
+  meterDb.query(query, (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred' });
+    }
+    console.log(results.length);
+    for (let i = 0; i < results.length; i++) {
+      const date = new Date(results[i].polledTime);
+      let value=date.toLocaleString()
+      const dateValue=value.split(",")
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const timestamp = `${hours}:${minutes}`;
+      const year = date.getFullYear().toString();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${day}/${month}/${year}`;
+      const timeview = [formattedDate, timestamp];
+
+      filterData.push({ "timestamp": dateValue[0], "peakdemand": Math.trunc(results[i].peakdemand),"limitLine":parseInt(4000) });
     }
     console.log(filterData);
     return res.json(filterData);
   });
 });
 
+
+
+
+app.get("/peak/initialgraph",async(req,res)=>{
+  meterDb.query("SELECT * FROM peakdemanddaily WHERE DATE(polledTime) BETWEEN DATE(CURDATE() - INTERVAL 7 DAY) AND DATE(CURDATE() - INTERVAL 1 DAY);",function(err,result,feilds){
+      const viewData=[]
+      if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+              let date=new Date(response[i].polledTime)
+              let value=date.toLocaleString()
+              const dateValue=value.split(",")
+              console.log(value)
+              const hours = date.getHours().toString().padStart(2, '0');
+         const minutes = date.getMinutes().toString().padStart(2, '0');
+         // const seconds = date.getSeconds().toString().padStart(2, '0');
+         const timestamp = `${hours}:${minutes}`;
+              viewData.push({"polledTime":dateValue[0],"peakdemand":Math.trunc(response[i].peakdemand)})
+
+
+          }
+          res.send(viewData)
+          console.log(viewData)
+      }
+  })
+  
+})
+//-------------------------------end of api-------------------------------------//
       
-      
-      
+  
+
+//--------------------current day PeakDemand api ----------------------------------//      
        app.get("/peak/hvacSchneider7230Polling",async(req,res)=>{
         meterDb.query("select * from peakdemandquarter where DATE(polledTime)=curdate();",function(err,result,feilds){
             const viewData=[]
@@ -1332,7 +1485,7 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
                const minutes = date.getMinutes().toString().padStart(2, '0');
                // const seconds = date.getSeconds().toString().padStart(2, '0');
                const timestamp = `${hours}:${minutes}`;
-                    viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].peakdemand)})
+                viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].peakdemand),"limitLine":parseInt(4000)})
 
 
                 }
@@ -1342,8 +1495,42 @@ app.post("/past/hvacSchneider7230Polling", (req, res) => {
         })
         
     })
+
+  //---------------------------------END of api---------------------------------------//
+
+  //-----------------single day filter PeakDemand api--------------------//
+
+  app.post("/singleDayFilter/hvacSchneider7230Polling", (req, res) => {
+    const { date} = req.body;
+    const viewData=[]
+   
+    const query = `select * from peakdemandquarter where DATE(polledTime)='${date}' `;
+    meterDb.query(query, (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
+      const response=(JSON.parse(JSON.stringify(results)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].polledTime)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+    viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].peakdemand),"limitLine":parseInt(4000)})
+
+
+    }
+      console.log(viewData)
+      return res.json(viewData);
+    });
+  });
+
+  //----------------------------END of api
     
      // wheeled in solar data filter according to datewise
+
+
 
 //---------initial graph--------------//
 app.get("/initial/wheeledinsolr", (req, res) => {
@@ -1896,6 +2083,114 @@ console.log(formattedDate,"line 1680");
 
 
   //---------------------end of api-----------------//
+
+
+
+
+  app.get("/Thermal/Chillers/Status", async (req, res) => {
+    try {
+      const FinalData = [];
+  
+      // Query the first database (con) for thermal Status table
+      const result1 = await conQuery("SELECT * FROM thermalStatus where date(polledTime)=curdate();");
+      const response1 = JSON.parse(JSON.stringify(result1));
+  
+      for (let i = 0; i < response1.length; i++) {
+        const date = new Date(response1[i].polledTime);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const timestamp = `${hours}:${minutes}`;
+  
+        // Query the second database (meterDB) for Chiller status table
+        const result2 = await meterDataQuery("SELECT * FROM chillarstatus where date(timestamp)=curdate()");
+        const response2 = JSON.parse(JSON.stringify(result2));
+  
+        // Check if response2 has a valid element at index i
+        if (response2[i]) {
+          FinalData.push({
+            "polledTime": timestamp,
+            "chiller1Status": response2[i].chillar1,
+            "chiller2Status": response2[i].chillar2,
+            "chiller3Status": response2[i].chillar3,
+            "chiller4Status": response2[i].chillar4,
+            "chiller5Status": response2[i].chillar5,
+            "chiller6Status": response2[i].chillar6,
+            "chiller7Status": response2[i].chillar7,
+            "chiller8Status": response2[i].chillar8,
+            // "ThermalCHGStatus": parseInt(response1[i].chgStatus),
+            "thermalDCHGStatus": parseInt((response1[i].dchgStatus)),
+          });
+        } else {
+          // Handle the case where response2 doesn't have a valid element at index i
+          // You can choose to skip or handle this case as needed
+          console.log(`No data available for index ${i} in response2`);
+        }
+      }
+  
+      console.log(FinalData);
+      res.send(FinalData);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("An error occurred");
+    }
+  });
+
+
+  app.post("/Thermal/Chillers/Status/datefilters", async (req, res) => {
+    const { date } = req.body;
+    console.log(date);
+    try {
+      const FinalData = [];
+  
+      // Format the date into a valid SQL date format (assuming date is in ISO format)
+      const formattedDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
+  
+      // Query the first database (con) for thermal Status table
+      const result1 = await conQuery(`SELECT * FROM thermalStatus WHERE DATE(polledTime)='${formattedDate}'`);
+      const response1 = JSON.parse(JSON.stringify(result1));
+  
+  
+      for (let i = 0; i < response1.length; i++) {
+        const date = new Date(response1[i].polledTime);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const timestamp = `${hours}:${minutes}`;
+  
+        // Query the second database (meterDB) for Chiller status table
+        const result2 = await meterDataQuery(`SELECT * FROM chillarstatus WHERE DATE(timestamp)='${formattedDate}'`);
+        const response2 = JSON.parse(JSON.stringify(result2));
+  
+        // Check if response2 has a valid element at index i
+        if (response2[i]) {
+          FinalData.push({
+            "polledTime": timestamp,
+            "chiller1Status": response2[i].chillar1,
+            "chiller2Status": response2[i].chillar2,
+            "chiller3Status": response2[i].chillar3,
+            "chiller4Status": response2[i].chillar4,
+            "chiller5Status": response2[i].chillar5,
+            "chiller6Status": response2[i].chillar6,
+            "chiller7Status": response2[i].chillar7,
+            "chiller8Status": response2[i].chillar8,
+            // "ThermalCHGStatus": parseInt(response1[i].chgStatus),
+            "thermalDCHGStatus": parseInt((response1[i].dchgStatus)),
+          });
+        } else {
+          // Handle the case where response2 doesn't have a valid element at index i
+          // You can choose to skip or handle this case as needed
+          console.log(`No data available for index ${i} in response2`);
+        }
+      }
+  
+      console.log(FinalData);
+      res.send(FinalData);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("An error occurred");
+    }
+  });
+  
+  
 
 
 
