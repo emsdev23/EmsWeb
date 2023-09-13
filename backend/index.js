@@ -975,7 +975,7 @@ const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.
 //     let CP14_1=0
 
 //console.log(LEV1_1+LEV4_1+CP11_1+CP12_1+CP13_1+CP14_1)
-const totalUsageTimeHours = Math.round(totalUsageTime / 3600000);
+const totalUsageTimeHours =(totalUsageTime / 3600000);
 
                                  
 finalresult.push({"totalEnergy":totalEnergy.toFixed(1),"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"totalTimeusage":totalUsageTimeHours,"LEV1_1Status":LEV1_1Status,"LEV4_1Status":LEV4_1Status,"CP11_1Status":CP11_1Status,"CP12_1Status":CP12_1Status,"CP13_1Status":CP13_1Status,"CP14_1Status":CP14_1Status})
@@ -2088,107 +2088,145 @@ console.log(formattedDate,"line 1680");
 
 
   app.get("/Thermal/Chillers/Status", async (req, res) => {
-    try {
+ 
       const FinalData = [];
-  
-      // Query the first database (con) for thermal Status table
-      const result1 = await conQuery("SELECT * FROM thermalStatus where date(polledTime)=curdate();");
-      const response1 = JSON.parse(JSON.stringify(result1));
-  
-      for (let i = 0; i < response1.length; i++) {
-        const date = new Date(response1[i].polledTime);
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const timestamp = `${hours}:${minutes}`;
-  
-        // Query the second database (meterDB) for Chiller status table
-        const result2 = await meterDataQuery("SELECT * FROM chillarstatus where date(timestamp)=curdate()");
-        const response2 = JSON.parse(JSON.stringify(result2));
-  
-        // Check if response2 has a valid element at index i
-        if (response2[i]) {
-          FinalData.push({
-            "polledTime": timestamp,
-            "chiller1Status": response2[i].chillar1,
-            "chiller2Status": response2[i].chillar2,
-            "chiller3Status": response2[i].chillar3,
-            "chiller4Status": response2[i].chillar4,
-            "chiller5Status": response2[i].chillar5,
-            "chiller6Status": response2[i].chillar6,
-            "chiller7Status": response2[i].chillar7,
-            "chiller8Status": response2[i].chillar8,
-            // "ThermalCHGStatus": parseInt(response1[i].chgStatus),
-            "thermalDCHGStatus": parseInt((response1[i].dchgStatus)),
-          });
-        } else {
-          // Handle the case where response2 doesn't have a valid element at index i
-          // You can choose to skip or handle this case as needed
-          console.log(`No data available for index ${i} in response2`);
+      meterDb.query("SELECT * FROM chillarstatus where date(timestamp)=curdate();",function(error,result,feild){
+        if(error){
+          console.log(error)
         }
-      }
-  
-      console.log(FinalData);
-      res.send(FinalData);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("An error occurred");
-    }
+        else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for (let i = 0; i < response.length; i++) {
+            const date = new Date(response[i].timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`;
+      
+            // Check if response2 has a valid element at index i
+              FinalData.push({
+                "polledTime": timestamp,
+                "chiller1Status": response[i].chillar1,
+                "chiller2Status": response[i].chillar2,
+                "chiller3Status": response[i].chillar3,
+                "chiller4Status": response[i].chillar4,
+                "chiller5Status": response[i].chillar5,
+                "chiller6Status": response[i].chillar6,
+                "chiller7Status": response[i].chillar7,
+                "chiller8Status": response[i].chillar8,
+                "ThermalCHGStatus": parseInt(response[i].thermalchg),
+                "thermalDCHGStatus": parseInt((response[i].thermaldischg)),
+              });
+          }
+      
+          console.log(FinalData);
+          res.send(FinalData);
+
+        }
+      })
+
   });
 
 
   app.post("/Thermal/Chillers/Status/datefilters", async (req, res) => {
     const { date } = req.body;
-    console.log(date);
-    try {
-      const FinalData = [];
-  
-      // Format the date into a valid SQL date format (assuming date is in ISO format)
-      const formattedDate = new Date(date).toISOString().slice(0, 19).replace('T', ' ');
-  
-      // Query the first database (con) for thermal Status table
-      const result1 = await conQuery(`SELECT * FROM thermalStatus WHERE DATE(polledTime)='${formattedDate}'`);
-      const response1 = JSON.parse(JSON.stringify(result1));
-  
-  
-      for (let i = 0; i < response1.length; i++) {
-        const date = new Date(response1[i].polledTime);
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const timestamp = `${hours}:${minutes}`;
-  
-        // Query the second database (meterDB) for Chiller status table
-        const result2 = await meterDataQuery(`SELECT * FROM chillarstatus WHERE DATE(timestamp)='${formattedDate}'`);
-        const response2 = JSON.parse(JSON.stringify(result2));
-  
-        // Check if response2 has a valid element at index i
-        if (response2[i]) {
-          FinalData.push({
-            "polledTime": timestamp,
-            "chiller1Status": response2[i].chillar1,
-            "chiller2Status": response2[i].chillar2,
-            "chiller3Status": response2[i].chillar3,
-            "chiller4Status": response2[i].chillar4,
-            "chiller5Status": response2[i].chillar5,
-            "chiller6Status": response2[i].chillar6,
-            "chiller7Status": response2[i].chillar7,
-            "chiller8Status": response2[i].chillar8,
-            // "ThermalCHGStatus": parseInt(response1[i].chgStatus),
-            "thermalDCHGStatus": parseInt((response1[i].dchgStatus)),
-          });
-        } else {
-          // Handle the case where response2 doesn't have a valid element at index i
-          // You can choose to skip or handle this case as needed
-          console.log(`No data available for index ${i} in response2`);
+    const FinalData = [];
+      meterDb.query(`SELECT * FROM chillarstatus where date(timestamp)='${date}';`,function(error,result,feild){
+        if(error){
+          console.log(error)
         }
-      }
-  
-      console.log(FinalData);
-      res.send(FinalData);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("An error occurred");
-    }
+        else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for (let i = 0; i < response.length; i++) {
+            const date = new Date(response[i].timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`;
+      
+            // Check if response2 has a valid element at index i
+              FinalData.push({
+                "polledTime": timestamp,
+                "chiller1Status": response[i].chillar1,
+                "chiller2Status": response[i].chillar2,
+                "chiller3Status": response[i].chillar3,
+                "chiller4Status": response[i].chillar4,
+                "chiller5Status": response[i].chillar5,
+                "chiller6Status": response[i].chillar6,
+                "chiller7Status": response[i].chillar7,
+                "chiller8Status": response[i].chillar8,
+                "ThermalCHGStatus": parseInt(response[i].thermalchg),
+                "thermalDCHGStatus": parseInt((response[i].thermaldischg)),
+              });
+          }
+      
+          console.log(FinalData);
+          res.send(FinalData);
+
+        }
+      })
   });
+
+  //------------------------lto battery data api----------------------------------------------//
+  app.get("/battery/lto",async(req,res)=>{
+    const BatteryValue=[]
+    unprocesseddata.query("SELECT * FROM ltoBatteryData where date(recordTimestamp)=curdate() order by recordTimestamp desc limit 1 ;",function(err,result,feilds){
+           if(err){
+               console.log(err)
+           }
+           else{
+               const response=(JSON.parse(JSON.stringify(result)))
+               for(let i=0;i<response.length;i++){
+                let date = new Date(response[i].recordTimestamp);
+                //const timeVal=date.toLocaleDateString()
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestampVal = `${hours}:${minutes}:${seconds}`;
+            BatteryValue.push({"polledTime":timestampVal,"batteryVoltage":response[i].batteryVoltage,"batteryCurrent":response[i].batteryCurrent,"mainContactorStatus":response[i].mainContactorStatus,"prechargeContactorStatus":response[i].prechargeContactorStatus,"batteryStatus":response[i].batteryStatus,"packSOC":response[i].packSOC,"packUsableSOC":response[i].packUsableSOC})
+
+               }
+               res.send(BatteryValue)
+               console.log(BatteryValue)
+           }
+       })
+
+
+      
+  })
+  //------------------------------  END OF API---------------------------------------------------//
+
+  //--------------------------------lto dashboard graph initial graph----------------------------//
+  app.get("/dashboard/LTOBattery",async(req,res)=>{
+    const resultValue=[]
+    let  idleState=""
+    con.query("select * from LTObatteryHourly where date(polledTime) = curdate();",function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              if(response[i].chargingEnergy==null && response[i].dischargingEnergy==null){
+                idleState=0.1
+              }
+              else{
+                idleState=0
+              }
+              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy)*-1,"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
+
+            }
+            res.send(resultValue)
+            console.log(resultValue.length)
+        }
+    })
+    
+})
+  //-------------------------------------------END OF API----------------------------------------//
   
   
 
