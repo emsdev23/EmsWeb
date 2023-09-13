@@ -46,7 +46,7 @@ function Control() {
 
 
 
-  const batteryurl='http://localhost:5000/Batterydata'
+  const batteryurl='http://121.242.232.211:5000/Batterydata'
 
 
 //  function batteryData() {
@@ -499,12 +499,19 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
               <td><h4>:</h4></td>
               <td><h4>{Math.round(packSoc[packSoc.length - 1])}</h4></td>
             </tr>
+            <tr> 
+            <td> 
+              <div class="progress" style={{height:"30px",color:"black",background:"gray"}}>
+              <div class="progress-bar" role="progressbar" style={{ width: `${Math.round(packSoc[packSoc.length - 1])}%`,color:"white"}} aria-valuenow={Math.round(packSoc[packSoc.length - 1])} aria-valuemin="0" aria-valuemax="100">{Math.round(packSoc[packSoc.length - 1])}%</div>
+              </div>
+              </td>
+            </tr>
             <tr style={{marginTop:"30px"}}>
               <td><h4 style={{ color: "teal" }}><b>Current Status</b></h4></td>
               <td><h4>:</h4></td>
               <td><h4>{currentStatus[currentStatus.length - 1]}</h4></td>
             </tr>
-            <tr> 
+            {/* <tr> 
             {packSoc[packSoc.length - 1] >= 65  ? (
   <img src={batteryfull} alt="batteryfull" style={{ width: "100px", height: "100px" }} />
 ) : packSoc[packSoc.length - 1] <= 20 ? (
@@ -512,7 +519,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
 ) : (
   <img src={image2} alt="batteryhalf" style={{ width: "100px", height: "100px" }} />
 )}
-            </tr>
+            </tr> */}
             <tr> 
               <td><h4  style={{ color: "teal" }}><b>Current (A)</b></h4></td>
               <td><h4>:</h4></td>

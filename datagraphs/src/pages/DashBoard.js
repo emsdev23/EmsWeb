@@ -29,7 +29,14 @@ import Navbar from '../components/Navbar';
 import BatteryHourly from './BatteryHourly';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import InsertChartIcon from '@mui/icons-material/InsertChart';
+import InfoIcon from '@mui/icons-material/Info';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import LTOBatteryHourly from './LTOBatteryHourly';
+
+
+import InfoTooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 // import {Link} from 'react-router-dom';
+// import './DashBoard.css';
 
 
 //import { LineChart,AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
@@ -162,7 +169,7 @@ function DashBoard() {
   const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
   const powerFactor= `http://${host}:5000/schneider7230readings`
   const diesel=`http://${host}:5000/dashboard/Deisel`
-  const chargerdate=`http://localhost:5000/dashboard/EvCharger`
+  const chargerdate=`http://${host}:5000/dashboard/EvCharger`
   const thermalApi=`http://${host}:5000/thermal/summaryCard`
 
   var totalrooftopgeneration
@@ -870,7 +877,7 @@ console.log(totaldaysumvalue)
           }
           console.log(WheeledinsolarperformanceValue)
 
-           values.push(Math.round(gridunprocess),Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),0)
+           values.push(Math.round(gridunprocess),Math.trunc(totalrooftopgeneration),Math.trunc(totalsolargeneration),dieselvalue)
            console.log(values)
 
 
@@ -1088,8 +1095,8 @@ options: {
 
 
     //co2 reduction calculation
-    const co2=((((parseFloat(totalsolargeneration)+parseFloat(totalrooftopgeneration))/1000)*0.81).toFixed(2))
-    console.log((((parseFloat(totalsolargeneration)+parseFloat(totalrooftopgeneration))/1000)*0.81).toFixed(2))
+    const co2=((((parseFloat(totalsolargeneration)+parseFloat(totalrooftopgeneration))/1000)*0.71).toFixed(2))
+    console.log((((parseFloat(totalsolargeneration)+parseFloat(totalrooftopgeneration))/1000)*0.71).toFixed(2))
     let co2ErrorValue=co2>100?0:co2
 
     
@@ -1373,7 +1380,7 @@ const calculatedHeight = `calc(100vh - 100px)`;
 
 let ThermalStatus=""
 for(let i=0;i<thermalOverviewData.length;i++){
-if(thermalOverviewData[i].chargingPump1Power>0 || thermalOverviewData[i].chargingPump1Power>0){
+if(thermalOverviewData[i].chargingPump1Power>0 || thermalOverviewData[i].chargingPump2Power>0){
   ThermalStatus="CHARGING"
 
 }
@@ -1381,7 +1388,7 @@ if(thermalOverviewData[i].dischargingPump1Power>0 || thermalOverviewData[i].disc
   ThermalStatus="DISCHARGING"
 
 }
-if((thermalOverviewData[i].chargingPump1Power==0 && thermalOverviewData[i].chargingPump2Power==0) &&  ((thermalOverviewData[i].dischargingPump1Power==0||thermalOverviewData[i].dischargingPump1Power==null) && thermalOverviewData[i].dischargingPump2Power==0) ){
+if(((thermalOverviewData[i].chargingPump1Power==0 || thermalOverviewData[i].chargingPump1Power==null) && (thermalOverviewData[i].chargingPump2Power==0|| thermalOverviewData[i].chargingPump2Power==null)) &&  ((thermalOverviewData[i].dischargingPump1Power==0 || thermalOverviewData[i].dischargingPump1Power==null) && (thermalOverviewData[i].dischargingPump2Power==0 || thermalOverviewData[i].dischargingPump2Power==null)) ){
   ThermalStatus="IDLE"
 
 }
@@ -1390,7 +1397,12 @@ console.log(thermalOverviewData)
 
 
 
-      
+    
+//info text for co2 redunction card
+const longText = " According to CEA Emission Database,2021 the weighted C02 emissions factor is 0.71 tCO2/MWh Amount of CO2 Reduced = 0.71* Renewable Energy Generated "
+
+
+
 
   return (
     <div>
@@ -1405,29 +1417,24 @@ console.log(thermalOverviewData)
   <div class="container-fluid">
 
   <div class="card1" style={{width: "100%", height: calculatedHeight,justifyContent: 'center', marginTop:0, background: 'white', color: "white"}} >
+  <h3 style={{textAlign:"end",color:"#b03d2b",textAlign:"center",marginTop:"20px"}}><b>{currentdate}</b></h3>
 <div   class="card-body d-flex flex-column justify-content-center">
- 
-{/* <div></div> */}
 <div class="row" >
-<h3 style={{textAlign:"end",color:"#b03d2b",textAlign:"center",marginTop:"20px"}}><b>{currentdate}</b></h3>
-<div class="col-sm-6 mb-3 mb-sm-0"  >
+
+<div class="col-sm-4 mb-3 mb-sm-0"  >
 <div  style={{ position: 'relative' }}>
 
         <ReactApexChart options={state.options} series={state.series} type="donut" width={'100%'} height={'400px'}  />
         <Link to='/peakgraph' style={{ textDecoration: 'none' }}> 
-        <h5 class="card-title" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'black', zIndex: 1 }}><b>Building Consumption</b></h5>
+        <p class="card-title" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'black', zIndex: 1 }}><b>Building Consumption</b></p>
         </Link>
       </div>
-{/* <div class="row" >
-
-</div> */}
 </div>
-<div  class="col-sm-6 mb-3 mb-sm-0" >
-<div style={{marginTop:"10px"}}> 
+<div  class="col-sm-8 mb-3 mb-sm-0" >
+<div style={{marginTop:"10px",marginLeft:"30px"}}> 
 <div class="data-container-legends">
     <span>
     <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#1fc270'/> &nbsp; <b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Grid</b> </span>
-    {/* <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Grid</b></span>    */}
     </span>
     <span>
     <span style={{ color: '#5e5d5c' }}><BsFillCircleFill color='#FFAE42'/> &nbsp;<b style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}>Rooftop</b> </span>
@@ -1443,83 +1450,79 @@ console.log(thermalOverviewData)
     </span>
   </div>
   
-  <div style={{ color: '#5e5d5c', textAlign: 'right', fontSize: "22px",marginTop:"30px" }}> 
+  <div style={{ color: '#5e5d5c', textAlign: 'right', fontSize: "22px",marginTop:"30px",marginRight:"80px"}}> 
  
  <h5><b>*Energy in kWh</b></h5>
 
 </div>
-
-
-{/* <span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#1fc270'/></b> </span> <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Grid</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
-<span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#FFAE42'/></b> </span><span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Rooftop</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
-<span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#FF5349'/></b> </span>  <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Wheeledinsolar</b></span> &nbsp; &nbsp; &nbsp; &nbsp; 
-<span style={{ color: '#5e5d5c' }}><b><BsFillCircleFill color='#546E7A'/></b> </span>  <span style={{ color: 'black', textAlign: 'right',fontSize:"18px"}}><b>Diesel</b></span> &nbsp; &nbsp; &nbsp; &nbsp;  */}
 </div>
 <br/>
-  <div class="data-container" style={{marginRight:"25%"}}>
-    <span>
-      <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "25px",}}>Wheeled in solar:</b>
-      </span>
-      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-        {Math.trunc(totalsolargeneration)}
-      </span>
-    </span>
-    <span>
-      <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "25px"}}>Diesel:</b>
-      </span>
-      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-        {dieselvalue}
-      </span>
-    </span>
+
+  <div class="container">
+  <div class="row">
+    <div class="col-6">
+      <table> 
+        <tr> 
+          <td><b style={{ fontSize: "25px",color: '#5e5d5c',marginLeft:"50px"}}>Wheeled in solar:</b></td>
+          <td style={{ fontSize: "25px",color:"black"}} >{Math.trunc(totalsolargeneration)}</td>
+        </tr>
+      </table>
     
+    </div>
+    <div class="col-6">
+    <table style={{marginLeft:"50px"}}> 
+        <tr> 
+          <td><b style={{ fontSize: "25px",color: '#5e5d5c'}}>Diesel:</b></td>7
+          <td style={{ fontSize: "25px",color:"black"}} >{dieselvalue}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  </div>
+  <br/>
+  <div class="container" style={{ marginTop:"10px"}}>
+  <div class="row">
+    <div class="col-6">
+      <table> 
+        <tr> 
+          <td><b style={{ fontSize: "25px",color: '#5e5d5c',marginLeft:"50px"}}>Rooftop{' '} :</b></td> 
+          <td style={{ fontSize: "25px",color:"black"}} >{Math.trunc(totalrooftopgeneration)}</td>
+        </tr>
+      </table>
+    
+    </div>
+    <div class="col-6">
+    <table style={{marginLeft:"50px"}}> 
+        <tr> 
+          <td><b style={{ fontSize: "25px",color: '#5e5d5c'}}>Grid{' '} :</b></td>
+          <td style={{ fontSize: "25px",color:"black"}} >{Math.round(gridunprocess)}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
   </div>
 
   <br/>
-  <div class="data-container" style={{marginRight:"20%"}}>
-    <span>
-      <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "25px",}}>Rooftop:</b>
-      </span>
-      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-      {Math.trunc(totalrooftopgeneration)}
-      </span>
-    </span>
-    <span>
-      <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "25px"}}>Grid:</b>
-      </span>
-      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-      {Math.round(gridunprocess)}
-      </span>
-    </span>
+  <div class="container" style={{ marginTop:"10px"}}>
+  <div class="row">
+    <div class="col-6">
+      <table > 
+        <tr> 
+          <td><b style={{ fontSize: "25px",color: '#5e5d5c',marginLeft:"50px"}}>Power Factor(Min){' '} :</b></td>
+          <td style={{ fontSize: "25px",color:"black"}} > {minimum_powerfactor}</td>
+        </tr>
+      </table>
+    
+    </div>
+    <div class="col-6">
+    <table style={{marginLeft:"50px"}} > 
+        <tr> 
+          <td><b style={{ fontSize: "25px",color: '#5e5d5c'}}>Power Factor(Avg){' '} :</b></td>
+          <td style={{ fontSize: "25px",color:"black"}} >{average_powerfactor}</td>
+        </tr>
+      </table>
+    </div>
   </div>
-
-
-<br/>
-<div class="data-container"style={{ marginTop:"10px"}}>
-  <div> 
-    <span>
-      <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "22px"}}>Power Factor(Min):</b>
-      </span>
-      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px" }}>
-      {minimum_powerfactor}
-      </span>
-    </span>
-    </div>
-   
-  <div> 
-    <span>
-      <span style={{ color: '#5e5d5c' }}>
-        <b style={{ fontSize: "22px"}}>Power Factor(Avg):</b>
-      </span>
-      <span style={{ color: 'black', textAlign: 'right', fontSize: "22px"}}>
-      {average_powerfactor}
-      </span>
-    </span>
-    </div>
   </div>
 
 {/* <div class="data-container"style={{ marginTop:"10px",marginRight:"3%"}}>
@@ -1728,9 +1731,19 @@ console.log(thermalOverviewData)
   <div class="col-sm-4">
     <div class="card"  style={{width:"100%",height:"100%", background: 'lineargradient(to top, rgb(184, 204, 195), white)',color:"white"}}>
       <div class="card-body">
-        <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>CO<sub>2</sub> Reduction</b></h4>
-        <hr/>
-        {/* <p class="card-text">Daily Reduction in Emission:</p> */}
+        <div class="row"> 
+        <div class="col-10"> 
+        <h4 class="card-title" style={{textAlign:"center",color:"#145369",marginLeft:"50px"}}><b>CO<sub>2</sub> Reduction</b></h4>
+        </div>
+        <div class="col-2"> 
+        <InfoTooltip title={longText} style={{color:"gray"}}>
+       <InfoOutlinedIcon />
+      </InfoTooltip>
+        </div>
+
+        </div>
+        <br/>
+        <br/>
         {/* <p style={{textAlign:"end",color:"black"}}>{currentdate}</p> */}
         <h5 style={{color:"black",textAlign:"center",fontSize:"30px"}}> Today's</h5>
         <h5 style={{color:"black",textAlign:"center",fontSize:"30px"}}> <b>CO<sub>2</sub> Reduction:</b></h5>
@@ -1741,7 +1754,7 @@ console.log(thermalOverviewData)
          <br></br>
          </h1>
 
-         <h5 style={{textAlign:"center",color:"black",fontSize:"20px"}}><b> tCO2/MWh</b></h5>
+         <h5 style={{textAlign:"center",color:"black",fontSize:"20px"}}><b>Tons of CO2 equivalent</b></h5>
 
         {/* <img src="https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-flat-template-with-co2-leaves-for-concept-design-png-image_4674847.png" alt="co2" width="200" height="200" style={{ textalign: "center", borderRadius:"100px"}}/> */}
 
@@ -1792,7 +1805,7 @@ console.log(thermalOverviewData)
       <br/>
       <tr class="icon">
       <td><b style={{color:"black"}}></b></td>
-        <td><span>{chillerval2['chiller5'] <= 1.2 || chillerval2['chiller5'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td><span>{chillerval2['chiller5'] <= 800 || chillerval2['chiller5'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
         <td>{chillerval2['chiller6'] === 0 || chillerval2['chiller6'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
         <td>{chillerval2['chiller7'] === 0 || chillerval2['chiller7'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
         <td>{chillerval2['chiller8'] === 0 || chillerval2['chiller8'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
@@ -1801,7 +1814,7 @@ console.log(thermalOverviewData)
     <br/>
     
     <div class="card-text"style={{color:"black",font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px',marginTop:"10px" }}> 
-    <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Thermal Status</b></h4>
+    <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Thermal Storage Status</b></h4>
     {/* <br/> */}
     {/* <h3 style={{color:"black",textAlign:"center"}}>{ThermalStatus}</h3> */}
     <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px',margin: '0 auto'}}> 
@@ -1848,28 +1861,17 @@ console.log(thermalOverviewData)
 
   
 
-  <div class="col-sm-8" style={{marginTop:"5%"}}>
+  <div class="col-sm-6" style={{marginTop:"5%"}}>
     <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
       <div class="card-body">
       {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
       <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>UPS Battery</b></h4> 
         <hr/>
         <div id="chart2"> 
-   {/* {
-      apexcharts?<ReactApexChart options={apexcharts.options} series={apexcharts.series} type="bar" height='270px'/>:<div ><CircularProgress style={{color: "black"}} ></CircularProgress><h3>Graph Loading.... </h3></div>
-
-     
-   } */}
        <BatteryHourly/>
   
    </div>
    <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
-        {/* <table style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'20px', margin: '0 auto'}}>
-          <tr>
-    <td><b style={{color:"#5e5d5c"}}>Pack Soc(%):</b></td>
-    <td><span style={{color:"black"}}> {packSoc[packSoc.length-1]}</span></td>
-  </tr>
-</table> */}
           <br/>
 
         </div>
@@ -1878,10 +1880,24 @@ console.log(thermalOverviewData)
   </div>
 
 
-  {/* let totalEnergy=''
- let totalSessions=''
- let NoOfchargersused=''
- let totalHours='' */}
+  <div class="col-sm-6" style={{marginTop:"5%"}}>
+    <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
+      <div class="card-body">
+      {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
+      <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>LTO Battery</b></h4> 
+        <hr/>
+        <div id="chart2"> 
+        <LTOBatteryHourly/>
+  
+   </div>
+   <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
+          <br/>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="col-sm-4"  style={{marginTop:"5%"}}>
      <div class="card" style={{width:"100%", height:"100%",background: 'lineargradient(to right, lightblue, white)',color:"white"}}>
        <div class="card-body">
@@ -1970,6 +1986,9 @@ console.log(thermalOverviewData)
        </div>
      </div>
   </div>
+
+
+  
 
 
 

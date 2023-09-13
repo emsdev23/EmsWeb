@@ -9,10 +9,10 @@ import 'react-datepicker/dist/react-datepicker.css';
 import ReactApexChart from 'react-apexcharts';
 import BuildindConsumptionPage2 from './BuildindConsumptionPage2';
 import Grid from '@mui/material/Grid';
-
+ 
 
 const host = "http://121.242.232.211:5000/peak/hvacSchneider7230Polling"
-const pastdata="http://localhost:5000/peak/initialgraph"
+const pastdata="http://121.242.232.211:5000/peak/initialgraph"
 
 function Peakdemandgraphs() {
 
@@ -52,7 +52,7 @@ const handleSubmit = (event) => {
 
 
 const CurrentGraph=()=>{
-  axios.get('http://localhost:5000/peak/hvacSchneider7230Polling').then((res)=>{
+  axios.get('http://121.242.232.211:5000/peak/hvacSchneider7230Polling').then((res)=>{
     const dataresponse=res.data
     setInitialGraph(dataresponse)
    
@@ -98,7 +98,7 @@ const pastSevenDaysGraph=()=>{
       const formattedStartDate = startDate ? new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       const formattedEndDate = endDate ? new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post('http://localhost:5000/filter/hvacSchneider7230Polling', {
+      const response = await axios.post('http://121.242.232.211:5000/filter/hvacSchneider7230Polling', {
         date: formattedStartDate,
         endDate: formattedEndDate
       });
@@ -118,7 +118,7 @@ const pastSevenDaysGraph=()=>{
     try {
       const formattedStartDate = singledayFilter ? new Date(singledayFilter.getTime() - singledayFilter.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post('http://localhost:5000/singleDayFilter/hvacSchneider7230Polling', {
+      const response = await axios.post('http://121.242.232.211:5000/singleDayFilter/hvacSchneider7230Polling', {
         date: formattedStartDate,
       });
     

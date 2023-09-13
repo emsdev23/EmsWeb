@@ -13,7 +13,7 @@ function BuildindConsumptionPage2() {
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const [graph,setGraph]=useState([])
-    const graphDataUrl=`http://localhost:5000/BuildingConsumptionPage2`
+    const graphDataUrl=`http://${host}:5000/BuildingConsumptionPage2`
 
 
     const [data, setData] = useState([]);
@@ -42,7 +42,7 @@ function BuildindConsumptionPage2() {
         try {
           const formattedDate = systemOverviewfilterDate ? new Date(systemOverviewfilterDate.getTime() - systemOverviewfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://localhost:5000/filteredGraph/BuildingConsumptionPage2`, {
+          const response = await axios.post(`http://${host}:5000/filteredGraph/BuildingConsumptionPage2`, {
             date: formattedDate,
           });
         

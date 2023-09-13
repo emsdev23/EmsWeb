@@ -70,27 +70,6 @@
     margin-right: 40px;
   }
 
-/* 
-  @keyframes blinkAnimation {
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-  
-  .icon {
-    animation: blinkAnimation 3s ease-in-out infinite;
-  }
-
-  #chillercard{
-    background: 'lineargradient(to right, lighred, white)'
-  }
-   */
 
 
 

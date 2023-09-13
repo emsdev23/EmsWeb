@@ -26,7 +26,7 @@ const Thermal = () => {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post(`http://localhost:5000/thermal/datefilter`, { date: formattedDate });
+          const response = await axios.post(`http://121.242.232.211:5000/thermal/datefilter`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
@@ -44,7 +44,7 @@ const Thermal = () => {
 
   
     const namelist = () =>{
-     axios.get("http://localhost:5000/thermal").then((res)=>setResult(res.data))
+     axios.get("http://121.242.232.211:5000/thermal").then((res)=>setResult(res.data))
     }
 
    

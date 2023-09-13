@@ -41,7 +41,7 @@ function BatteryHourly() {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post(`http://localhost:5000/dashboard/filtered/Battery`, { date: formattedDate });
+          const response = await axios.post(`http://${host}:5000/dashboard/filtered/Battery`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);

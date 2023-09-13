@@ -12,7 +12,7 @@ function ChillersStatus() {
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
 
-    const ChillerApi=`http://localhost:5000/Thermal/Chillers/Status`
+    const ChillerApi=`http://${host}:5000/Thermal/Chillers/Status`
     const [chillerData, setchillerData] = useState([]);
 
     const [data, setData] = useState([]);
@@ -43,7 +43,7 @@ function ChillersStatus() {
         try {
           const formattedStartDate = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chillerfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://localhost:5000/Thermal/Chillers/Status/datefilters`, {
+          const response = await axios.post(`http://${host}:5000/Thermal/Chillers/Status/datefilters`, {
             date: formattedStartDate,
           });
         

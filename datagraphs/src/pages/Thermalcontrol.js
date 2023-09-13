@@ -68,7 +68,7 @@ function Thermalcontrol() {
     ADPvalveStatus=thermalOverviewData[i].ADPvalveStatus
     BDPvalveStatus=thermalOverviewData[i].BDPvalveStatus
     HvalveStatus=thermalOverviewData[i].HvalveStatus
-    if(thermalOverviewData[i].chargingPump1Power>0 || thermalOverviewData[i].chargingPump1Power>0){
+    if(thermalOverviewData[i].chargingPump1Power>0 || thermalOverviewData[i].chargingPump2Power>0){
       Status="CHARGING"
 
     }
@@ -76,7 +76,7 @@ function Thermalcontrol() {
       Status="DISCHARGING"
 
     }
-    if((thermalOverviewData[i].chargingPump1Power==0 && thermalOverviewData[i].chargingPump2Power==0) &&  ((thermalOverviewData[i].dischargingPump1Power==0 || thermalOverviewData[i].dischargingPump1Power==null) && thermalOverviewData[i].dischargingPump2Power==0) ){
+    if(((thermalOverviewData[i].chargingPump1Power==0 || thermalOverviewData[i].chargingPump1Power==null) && (thermalOverviewData[i].chargingPump2Power==0|| thermalOverviewData[i].chargingPump2Power==null)) &&  ((thermalOverviewData[i].dischargingPump1Power==0 || thermalOverviewData[i].dischargingPump1Power==null) && (thermalOverviewData[i].dischargingPump2Power==0 || thermalOverviewData[i].dischargingPump2Power==null)) ){
       Status="IDLE"
 
     }
@@ -137,7 +137,7 @@ function Thermalcontrol() {
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://localhost:5000/thermal/controll`, formattedData)
+        axios.post(`http://${host}:5000/thermal/controll`, formattedData)
           .then((response) => {
             const result = response.data;
             setThermalData({
