@@ -68,11 +68,11 @@ export const SidebarData = [
         path: '/Status/chillersStatus',
         icon: <SevereColdIcon />,
       },
-      {
-        title: 'ThermalStatus',
-        path: '/Status/thermalStatus',
-        icon: <ThermostatAutoRoundedIcon />,
-      },
+      // {
+      //   title: 'ThermalStatus',
+      //   path: '/Status/thermalStatus',
+      //   icon: <ThermostatAutoRoundedIcon />,
+      // },
       // {
       //   title: 'Chillers',
       //   // path: '/chillersDashboard',
@@ -149,6 +149,11 @@ export const SidebarData = [
       {
         title: 'Thermal control',
         path: '/Control/thermal',
+        icon: <ThermostatAutoIcon />
+      },
+      {
+        title: 'LTO Battery  control',
+        path: '/control/ltoBattery',
         icon: <ThermostatAutoIcon />
       },
      
