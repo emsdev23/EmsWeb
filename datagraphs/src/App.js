@@ -24,6 +24,7 @@ import ChillerDashboard from './pages/ChillerDashboard';
 import ChillersStatus from './pages/ChillersStatus';
 import ThermalStatus from './pages/ThermalStatus';
 import SampleFile from './pages/SamplFile';
+import LTObattery from './pages/LTObattery';
 
 function LocationContext(props) {
   const location = useLocation();
@@ -61,6 +62,7 @@ function App() {
             <Route path="/Status/chillersStatus" element={<ChillersStatus/>}/>
             <Route path="/Status/thermalStatus" element={<ThermalStatus/>}/>
             <Route path="/ups" element={<SampleFile/>}/>
+            <Route path="/control/ltoBattery" element={<LTObattery/>}/>
             
           </Routes>
         </div>
