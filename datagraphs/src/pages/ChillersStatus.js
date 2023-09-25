@@ -115,40 +115,51 @@ const chillersStatus = {
             data: chillerData.map((chiller1)=>chiller1.thermalDCHGStatus),
             color:"green"
             //stack: 'Europe'
-        },{
+        },
+        {
+            name: 'Chiller8',
+            data: chillerData.map((chiller8)=>chiller8.chiller8Status),
+            //stack: 'North America'
+        },
+        {
+            name: 'Chiller7',
+            data: chillerData.map((chiller7)=>chiller7.chiller7Status),
+            //stack: 'North America'
+        },
+        {
+            name: 'Chiller6',
+            data: chillerData.map((chiller6)=>chiller6.chiller6Status),
+           // stack: 'Europe'
+        },
+        {
+            name: 'Chiller5',
+            data: chillerData.map((chiller5)=>chiller5.chiller5Status),
+            //stack: 'Europe'
+        },
+        {
+            name: 'Chiller4',
+            data:  chillerData.map((chiller4)=>chiller4.chiller4Status),
+            //stack: 'North America'
+        },
+        {
+            name: 'Chiller3',
+            data:  chillerData.map((chiller3)=>chiller3.chiller3Status),
+            //stack: 'North America'
+        },
+        {
+            name: 'Chiller2',
+            data: chillerData.map((chiller2)=>chiller2.chiller2Status),
+            color:"#d2b48c"
+           // stack: 'Europe'
+        },
+        
+        
+        {
         name: 'Chiller1',
         data: chillerData.map((chiller1)=>chiller1.chiller1Status),
         //stack: 'Europe'
-    }, {
-        name: 'Chiller2',
-        data: chillerData.map((chiller2)=>chiller2.chiller2Status),
-       // stack: 'Europe'
-    }, {
-        name: 'Chiller3',
-        data:  chillerData.map((chiller3)=>chiller3.chiller3Status),
-        //stack: 'North America'
-    }, {
-        name: 'Chiller4',
-        data:  chillerData.map((chiller4)=>chiller4.chiller4Status),
-        //stack: 'North America'
-    },
-    {
-        name: 'Chiller5',
-        data: chillerData.map((chiller5)=>chiller5.chiller5Status),
-        //stack: 'Europe'
-    }, {
-        name: 'Chiller6',
-        data: chillerData.map((chiller6)=>chiller6.chiller6Status),
-       // stack: 'Europe'
-    }, {
-        name: 'Chiller7',
-        data: chillerData.map((chiller7)=>chiller7.chiller7Status),
-        //stack: 'North America'
-    }, {
-        name: 'Chiller8',
-        data: chillerData.map((chiller8)=>chiller8.chiller8Status),
-        //stack: 'North America'
-    }]
+    }  
+     ]
 };
 
 

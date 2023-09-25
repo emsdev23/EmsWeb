@@ -1861,7 +1861,7 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
 
   
 
-  <div class="col-sm-6" style={{marginTop:"5%"}}>
+  <div class="col-sm-8" style={{marginTop:"5%"}}>
     <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
       <div class="card-body">
       {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
@@ -1880,23 +1880,7 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
   </div>
 
 
-  <div class="col-sm-6" style={{marginTop:"5%"}}>
-    <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
-      <div class="card-body">
-      {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
-      <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>LTO Battery</b></h4> 
-        <hr/>
-        <div id="chart2"> 
-        <LTOBatteryHourly/>
   
-   </div>
-   <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
-          <br/>
-
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="col-sm-4"  style={{marginTop:"5%"}}>
      <div class="card" style={{width:"100%", height:"100%",background: 'lineargradient(to right, lightblue, white)',color:"white"}}>
@@ -1987,6 +1971,24 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
      </div>
   </div>
 
+
+  <div class="col-sm-12" style={{marginTop:"5%"}}>
+    <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
+      <div class="card-body">
+      {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
+      <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>LTO Battery</b></h4> 
+        <hr/>
+        <div id="chart2"> 
+        <LTOBatteryHourly/>
+  
+   </div>
+   <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
+          <br/>
+
+        </div>
+      </div>
+    </div>
+  </div>
 
   
 

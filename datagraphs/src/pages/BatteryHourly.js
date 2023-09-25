@@ -136,6 +136,8 @@ function BatteryHourly() {
                 text: "SoC(%)",
               },
               opposite: true, // Display the secondary y-axis on the opposite side of the chart
+            min: 0, // Set the minimum value for the yAxis
+            max: 100, // Set the maximum value for the yAxis
             },
           ],
     }
@@ -210,6 +212,8 @@ function BatteryHourly() {
               text: "SoC(%)",
             },
             opposite: true, // Display the secondary y-axis on the opposite side of the chart
+            min: 0, // Set the minimum value for the yAxis
+            max: 100, // Set the maximum value for the yAxis
           },
         ],
   }
