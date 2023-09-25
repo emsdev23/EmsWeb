@@ -787,23 +787,23 @@ app.get("/dashboard/Deisel",async(req,res)=>{
 
 //--------------------Ev charger card api--------------------//
 app.get("/dashboard/EvCharger",async(req,res)=>{
-    con.query("select * from evcharger where date(servertime)=curdate();",function(error,result){
-        //select * from evcharger where date(servertime)=curdate()
-        //SELECT * FROM evcharger WHERE DATE(servertime) = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
-        const LEV1_1=[]
-        const LEV4_1=[]
-        const CP11_1=[]
-        const CP12_1=[]
-        const CP13_1=[]
-        const CP14_1=[]
-        const energyValue=[]
+  con.query("select * from evcharger where date(servertime)=curdate();",function(error,result){
+      //select * from evcharger where date(servertime)=curdate()
+      //SELECT * FROM evcharger WHERE DATE(servertime) = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+      const LEV1_1=[]
+      const LEV4_1=[]
+      const CP11_1=[]
+      const CP12_1=[]
+      const CP13_1=[]
+      const CP14_1=[]
+      const energyValue=[]
 
-        let resultval=0
-        if(error){
-            console.log(error)
-        }
-        else{
-            const response=(JSON.parse(JSON.stringify(result)))
+      let resultval=0
+      if(error){
+          console.log(error)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
 let LEV1_1= {'LEV1_1Energy':0,'LEV1_1TotalSession':0,'LEV1_1NoOf_chargers':0} 
 let LEV4_1= {'LEV4_1Energy':0,'LEV4_1TotalSession':0,'LEV4_NoOf_chargers':0}
 let CP11_1= {'CP11_1Energy':0,'CP11_1TotalSession':0,'CP11_1NoOf_chargers':0}
@@ -824,138 +824,138 @@ let CP14_1Status=""
 
 
 for(let i=0;i<response.length;i++){
-    
-    if(response[i].chargpointname==="LEV1_1"){
-        LEV1_1.LEV1_1Energy+=parseFloat(response[i].energyconsumption)
-         LEV1_1.LEV1_1TotalSession=(response[i].totalsessions)
-         if(parseFloat(response[i].energyconsumption)>0){
-            LEV1_1.LEV1_1NoOf_chargers="Active"
-            LEV1_1Status=("active")
-            NoOfChargers+=1
-         }
-         if (response[i].totalsessions === 1) {
-            if (previousTimestamp) {
-              const currentTimestamp = new Date(response[i].servertime);
-              const timeDifference = currentTimestamp - previousTimestamp;
-              console.log(timeDifference)
-              console.log(response[i].chargpointname)
-              totalUsageTime += timeDifference;
-            }
-            previousTimestamp = new Date(response[i].servertime);
+  
+  if(response[i].chargpointname==="LEV1_1"){
+      LEV1_1.LEV1_1Energy+=parseFloat(response[i].energyconsumption)
+       LEV1_1.LEV1_1TotalSession=(response[i].totalsessions)
+       if(parseFloat(response[i].energyconsumption)>0){
+          LEV1_1.LEV1_1NoOf_chargers="Active"
+          LEV1_1Status=("active")
+          NoOfChargers+=1
+       }
+       if (response[i].totalsessions === 1) {
+          if (previousTimestamp) {
+            const currentTimestamp = new Date(response[i].servertime);
+            const timeDifference = currentTimestamp - previousTimestamp;
+            console.log(timeDifference)
+            console.log(response[i].chargpointname)
+            totalUsageTime += timeDifference;
           }
-         
-         
-        
-        //console.log(LEV1_1,"line number 81")
-    }
-    if(response[i].chargpointname==="LEV4_1"){
-        LEV4_1.LEV4_1Energy+=parseFloat(response[i].energyconsumption)
-        LEV4_1.LEV4_1TotalSession=(response[i].totalsessions)
-        if(parseFloat(response[i].energyconsumption)>0){
-            LEV4_1.LEV4_NoOf_chargers="Active"
-            // ActiveChargingpoint=(response[i].chargpointname)
-            LEV4_1Status=("active")
-            NoOfChargers+=1
+          previousTimestamp = new Date(response[i].servertime);
         }
-         if (response[i].totalsessions === 1) {
-            if (previousTimestamp) {
-              const currentTimestamp = new Date(response[i].servertime);
-              const timeDifference = currentTimestamp - previousTimestamp;
-              console.log(timeDifference)
-              totalUsageTime += timeDifference;
-            }
-            previousTimestamp = new Date(response[i].servertime);
+       
+       
+      
+      //console.log(LEV1_1,"line number 81")
+  }
+  if(response[i].chargpointname==="LEV4_1"){
+      LEV4_1.LEV4_1Energy+=parseFloat(response[i].energyconsumption)
+      LEV4_1.LEV4_1TotalSession=(response[i].totalsessions)
+      if(parseFloat(response[i].energyconsumption)>0){
+          LEV4_1.LEV4_NoOf_chargers="Active"
+          // ActiveChargingpoint=(response[i].chargpointname)
+          LEV4_1Status=("active")
+          NoOfChargers+=1
+      }
+       if (response[i].totalsessions === 1) {
+          if (previousTimestamp) {
+            const currentTimestamp = new Date(response[i].servertime);
+            const timeDifference = currentTimestamp - previousTimestamp;
+            console.log(timeDifference)
+            totalUsageTime += timeDifference;
           }
-        
-        //console.log(LEV4_1,"line number 85")
-    }
-    
-    if(response[i].chargpointname==="CP11_1"){
-        CP11_1.CP11_1Energy+=parseFloat(response[i].energyconsumption)
-        CP11_1.CP11_1TotalSession=(response[i].totalsessions)
-        if(parseFloat(response[i].energyconsumption)>0){
-            CP11_1.CP11_1NoOf_chargers="Active"
-           // ActiveChargingpoint=(response[i].chargpointname)
-           CP11_1Status=("active")
-            NoOfChargers+=1
-         }
-         if (response[i].totalsessions === 1) {
-            if (previousTimestamp) {
-              const currentTimestamp = new Date(response[i].servertime);
-              const timeDifference = currentTimestamp - previousTimestamp;
-              console.log(timeDifference)
-              console.log(response[i].chargpointname)
-              totalUsageTime += timeDifference;
-            }
-            previousTimestamp = new Date(response[i].servertime);
+          previousTimestamp = new Date(response[i].servertime);
+        }
+      
+      //console.log(LEV4_1,"line number 85")
+  }
+  
+  if(response[i].chargpointname==="CP11_1"){
+      CP11_1.CP11_1Energy+=parseFloat(response[i].energyconsumption)
+      CP11_1.CP11_1TotalSession=(response[i].totalsessions)
+      if(parseFloat(response[i].energyconsumption)>0){
+          CP11_1.CP11_1NoOf_chargers="Active"
+         // ActiveChargingpoint=(response[i].chargpointname)
+         CP11_1Status=("active")
+          NoOfChargers+=1
+       }
+       if (response[i].totalsessions === 1) {
+          if (previousTimestamp) {
+            const currentTimestamp = new Date(response[i].servertime);
+            const timeDifference = currentTimestamp - previousTimestamp;
+            console.log(timeDifference)
+            console.log(response[i].chargpointname)
+            totalUsageTime += timeDifference;
           }
-        //console.log(LEV4_1,"line number 90")
-    }
-    if(response[i].chargpointname==="CP12_1"){
-        CP12_1.CP12_1Energy+=parseFloat(response[i].energyconsumption)
-        CP12_1.CP12_1TotalSession=(response[i].totalsessions)
-        //console.log(LEV4_1,"line number 94")
-        if(parseFloat(response[i].energyconsumption)>0){
-            CP12_1.CP12_1NoOf_chargers="Active"
-            //ActiveChargingpoint=(response[i].chargpointname)
-            CP12_1Status=("active")
-            NoOfChargers+=1
-         }
-         if (response[i].totalsessions === 1) {
-            if (previousTimestamp) {
-              const currentTimestamp = new Date(response[i].servertime);
-              const timeDifference = currentTimestamp - previousTimestamp;
-              console.log(timeDifference)
-              console.log(response[i].chargpointname)
-              totalUsageTime += timeDifference;
-            }
-            previousTimestamp = new Date(response[i].servertime);
+          previousTimestamp = new Date(response[i].servertime);
+        }
+      //console.log(LEV4_1,"line number 90")
+  }
+  if(response[i].chargpointname==="CP12_1"){
+      CP12_1.CP12_1Energy+=parseFloat(response[i].energyconsumption)
+      CP12_1.CP12_1TotalSession=(response[i].totalsessions)
+      //console.log(LEV4_1,"line number 94")
+      if(parseFloat(response[i].energyconsumption)>0){
+          CP12_1.CP12_1NoOf_chargers="Active"
+          //ActiveChargingpoint=(response[i].chargpointname)
+          CP12_1Status=("active")
+          NoOfChargers+=1
+       }
+       if (response[i].totalsessions === 1) {
+          if (previousTimestamp) {
+            const currentTimestamp = new Date(response[i].servertime);
+            const timeDifference = currentTimestamp - previousTimestamp;
+            console.log(timeDifference)
+            console.log(response[i].chargpointname)
+            totalUsageTime += timeDifference;
           }
-    }
-    if(response[i].chargpointname==="CP13_1"){
-        CP13_1.CP13_11Energy+=parseFloat(response[i].energyconsumption)
-        CP13_1.CP13_1TotalSession=(response[i].totalsessions)
-        if(parseFloat(response[i].energyconsumption)>0){
-            CP13_1.CP13_1NoOf_chargers="Active"
-            //ActiveChargingpoint=(`${response[i].chargpointname}`)
-            CP13_1Status=("active")
-            NoOfChargers+=1
-         }
-         if (response[i].totalsessions === 1) {
-            if (previousTimestamp) {
-              const currentTimestamp = new Date(response[i].servertime);
-              const timeDifference = currentTimestamp - previousTimestamp;
-              console.log(timeDifference)
-              console.log(response[i].chargpointname)
-              totalUsageTime += timeDifference;
-            }
-            previousTimestamp = new Date(response[i].servertime);
+          previousTimestamp = new Date(response[i].servertime);
+        }
+  }
+  if(response[i].chargpointname==="CP13_1"){
+      CP13_1.CP13_11Energy+=parseFloat(response[i].energyconsumption)
+      CP13_1.CP13_1TotalSession=(response[i].totalsessions)
+      if(parseFloat(response[i].energyconsumption)>0){
+          CP13_1.CP13_1NoOf_chargers="Active"
+          //ActiveChargingpoint=(`${response[i].chargpointname}`)
+          CP13_1Status=("active")
+          NoOfChargers+=1
+       }
+       if (response[i].totalsessions === 1) {
+          if (previousTimestamp) {
+            const currentTimestamp = new Date(response[i].servertime);
+            const timeDifference = currentTimestamp - previousTimestamp;
+            console.log(timeDifference)
+            console.log(response[i].chargpointname)
+            totalUsageTime += timeDifference;
           }
-        
-       // console.log(LEV4_1,"line number 98")
-    }
-    if(response[i].chargpointname==="CP14_1"){
-        CP14_1.CP14_1Energy+=parseFloat(response[i].energyconsumption)
-        CP14_1.CP14_1TotalSession=(response[i].totalsessions)
-        if(parseFloat(response[i].energyconsumption)>0){
-            CP14_1.CP14_1NoOf_chargers="Active"
-            //ActiveChargingpoint=(response[i].chargpointname)
-            CP14_1Status=("active")
-            NoOfChargers+=1
-         }
-         if (response[i].totalsessions === 1) {
-            if (previousTimestamp) {
-              const currentTimestamp = new Date(response[i].servertime);
-              const timeDifference = currentTimestamp - previousTimestamp;
-              console.log(timeDifference)
-              console.log(response[i].chargpointname)
-              totalUsageTime += timeDifference;
-            }
-            previousTimestamp = new Date(response[i].servertime);
+          previousTimestamp = new Date(response[i].servertime);
+        }
+      
+     // console.log(LEV4_1,"line number 98")
+  }
+  if(response[i].chargpointname==="CP14_1"){
+      CP14_1.CP14_1Energy+=parseFloat(response[i].energyconsumption)
+      CP14_1.CP14_1TotalSession=(response[i].totalsessions)
+      if(parseFloat(response[i].energyconsumption)>0){
+          CP14_1.CP14_1NoOf_chargers="Active"
+          //ActiveChargingpoint=(response[i].chargpointname)
+          CP14_1Status=("active")
+          NoOfChargers+=1
+       }
+       if (response[i].totalsessions === 1) {
+          if (previousTimestamp) {
+            const currentTimestamp = new Date(response[i].servertime);
+            const timeDifference = currentTimestamp - previousTimestamp;
+            console.log(timeDifference)
+            console.log(response[i].chargpointname)
+            totalUsageTime += timeDifference;
           }
-        //console.log(LEV4_1,"line number 102")
-    }
-    
+          previousTimestamp = new Date(response[i].servertime);
+        }
+      //console.log(LEV4_1,"line number 102")
+  }
+  
 }
 
 // let LEV1_1= {'LEV1_1Energy':0,'LEV1_1TotalSession':0,'LEV1_1NoOf_chargers':0} 
@@ -977,19 +977,21 @@ const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.
 //console.log(LEV1_1+LEV4_1+CP11_1+CP12_1+CP13_1+CP14_1)
 const totalUsageTimeHours =(totalUsageTime / 3600000);
 
-                                 
+                               
 finalresult.push({"totalEnergy":totalEnergy.toFixed(1),"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"totalTimeusage":totalUsageTimeHours,"LEV1_1Status":LEV1_1Status,"LEV4_1Status":LEV4_1Status,"CP11_1Status":CP11_1Status,"CP12_1Status":CP12_1Status,"CP13_1Status":CP13_1Status,"CP14_1Status":CP14_1Status})
 //console.log(LEV1_1.LEV1_1Energy+LEV4_1.LEV4_1Energy+CP12_1.CP12_1Energy+CP13_1.CP13_11Energy+ CP13_1.CP13_11Energy+CP13_1.CP14_1Energy)
-            //res.status(200).send( result );
-            res.status(200).send( finalresult );
-            console.log(finalresult)
-            console.log('Total Usage Time (hours):', totalUsageTimeHours);
-            //console.log(totalEnergy)
+          //res.status(200).send( result );
+          res.status(200).send( finalresult );
+          console.log(finalresult)
+          console.log('Total Usage Time (hours):', totalUsageTimeHours);
+          //console.log(totalEnergy)
 
-        }
+      }
 
-    })
+  })
 })
+//--------------------------END OF API-------------------------//
+
 
 //------------------------------battery 5min analystics  ------------------------------//
 app.get("/analytics/battery", async (req, res) => {
@@ -2194,6 +2196,39 @@ console.log(formattedDate,"line 1680");
   })
   //------------------------------  END OF API---------------------------------------------------//
 
+  //----------------------------LTOLTOBattery instantanious controll-----------------------------------//
+  app.post('/LTOBattery/controll', function (req, res) {
+    const date = new Date();
+
+let day = date.getDate();
+let month = date.getMonth() + 1;
+let year = date.getFullYear();
+let hours=date.getHours();
+let minutes=date.getMinutes();
+let seconds=date.getSeconds();
+
+// This arrangement can be altered based on how we want the date's format to appear.
+let currentDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+console.log(currentDate)
+//var polledTimeStamp=formattedDate
+
+    const { functionCode, controlStatus} = req.body;
+    console.log(req.body)
+    const sql = 'INSERT INTO ltoInstantControl (functionCode, controlStatus,recordTime) VALUES (?, ?, ?)';
+    con.query(sql, [functionCode, controlStatus,currentDate], function (error, results, fields) {
+        if (error) {
+            return res.status(500).send(error);
+        }
+        else{
+            console.log(results)
+            res.status(200).send('parameter  added successfully!');
+        }
+        //return 
+    });
+});
+  //-------------------------------END OF API----------------------------------------------//
+  
+
   //--------------------------------lto dashboard graph initial graph----------------------------//
   app.get("/dashboard/LTOBattery",async(req,res)=>{
     const resultValue=[]
@@ -2217,7 +2252,7 @@ console.log(formattedDate,"line 1680");
               else{
                 idleState=0
               }
-              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy)*-1,"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
+              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy),"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
 
             }
             res.send(resultValue)
@@ -2228,7 +2263,40 @@ console.log(formattedDate,"line 1680");
 })
   //-------------------------------------------END OF API----------------------------------------//
   
-  
+  app.post("/dashboard/dateFilter/LTOBattery",async(req,res)=>{
+    const {date}=req.body
+    const resultValue=[]
+    let  idleState=""
+    con.query(`select * from LTObatteryHourly where date(polledTime) = '${date}'`,function(err,result,feilds){
+
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+             for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              if(response[i].chargingEnergy==null && response[i].dischargingEnergy==null){
+                idleState=0.1
+              }
+              else{
+                idleState=0
+              }
+              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy),"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
+
+            }
+            res.send(resultValue)
+            console.log(resultValue)
+        }
+    })
+    
+})
 
 
 
