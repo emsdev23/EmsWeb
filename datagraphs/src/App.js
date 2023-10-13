@@ -25,6 +25,10 @@ import ChillersStatus from './pages/ChillersStatus';
 import ThermalStatus from './pages/ThermalStatus';
 import SampleFile from './pages/SamplFile';
 import LTObattery from './pages/LTObattery';
+import PeakDemandAnalysis from './pages/PeakDemandAnalysis';
+import LTOAnalytics from './pages/LTOAnalytics';
+import HotWaterStorage from './pages/HotWaterStorage';
+import Diesel_Analysis from './components/Diesel_Analysis';
 
 function LocationContext(props) {
   const location = useLocation();
@@ -63,6 +67,10 @@ function App() {
             <Route path="/Status/thermalStatus" element={<ThermalStatus/>}/>
             <Route path="/ups" element={<SampleFile/>}/>
             <Route path="/control/ltoBattery" element={<LTObattery/>}/>
+            <Route path="/PeakDemandAnalysis" element={<PeakDemandAnalysis/>}/>
+            <Route path="/LTOBattery_Analytics" element={<LTOAnalytics/>}/>
+            <Route path="/HotWter_Storage" element={<HotWaterStorage/>}/>
+            <Route path="/Diesel_Analysis" element={<Diesel_Analysis/>}/>
             
           </Routes>
         </div>
