@@ -1,11 +1,11 @@
 const mysql=require('mysql2')
 
 const con=mysql.createConnection({
-    host:'121.242.232.211',
+    host:'43.205.196.66',
     user:'emsroot',
     password:'22@teneT',
     database:'EMS',
-    port:3306
+    port:3307
 })
 con.connect((err)=>{
     if(err){
@@ -18,11 +18,11 @@ con.connect((err)=>{
 
 
 const meterDb=mysql.createConnection({
-    host:'121.242.232.211',
+    host:'43.205.196.66',
     user:'emsroot',
     password:'22@teneT',
     database:'meterdata',
-    port:3306
+    port:3307
 })
 meterDb.connect((err)=>{
     if(err){
@@ -32,25 +32,6 @@ meterDb.connect((err)=>{
         console.log(' METERDATA DB connected......')
     }
 })
-
-
-const hashtic=mysql.createConnection({
-    host:'localhost',
-    user:'root',
-    password:'22@teneT',
-    database:'HASHTIC',
-    port:3306
-})
-hashtic.connect((err)=>{
-    if(err){
-        console.log("HASHTIC DB not connected")
-    }
-    else{
-        console.log(' HASHTIC DB connected......')
-    }
-})
-
-
 
 const chakradb=mysql.createConnection({
     host:'121.242.232.151',
@@ -79,7 +60,7 @@ const unprocesseddata=mysql.createConnection({
 })
 unprocesseddata.connect((err)=>{
     if(err){
-        console.log("unprocesseddata not connected")
+        console.log(' unprocesseddata not  connected......')
     }
     else{
         console.log('unprocesseddata connected......')
@@ -88,10 +69,24 @@ unprocesseddata.connect((err)=>{
 })
 
 
-
+const EMSDB=mysql.createConnection({
+    host:'121.242.232.211',
+    user:'emsroot',
+    password:'22@teneT',
+    database:'EMS',
+    port:3306
+})
+EMSDB.connect((err)=>{
+    if(err){
+        console.log("EMSDB  not connected")
+    }
+    else{
+        console.log(' EMSDB  connected......')
+    }
+})
 
 
 
 
  
-module.exports={con,chakradb,unprocesseddata,hashtic,meterDb};
+module.exports={con,chakradb,unprocesseddata,meterDb,EMSDB};

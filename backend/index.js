@@ -1,6 +1,6 @@
 const express=require('express')
 const timeout = require('connect-timeout')
-const {con,chakradb,unprocesseddata,hashtic,meterDb}=require('./connect')
+const {con,chakradb,unprocesseddata,meterDb,EMSDB}=require('./connect')
 const app=express()
 const alert = express()
 const cors = require("cors");
@@ -68,18 +68,17 @@ app.use(
     })
 
     app.get("/meterdata",async(req,res)=>{
-        con.query("  SELECT * FROM EMSMeterData WHERE metertimestamp >= CURDATE() AND metertimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY) ",function(err,result,feilds){
-            if(err){
-                console.log(err)
-            }
-            else{
-                const response=(JSON.parse(JSON.stringify(result)))
-                res.send(response)
-                console.log(response.length)
-            }
-        })
-        
-    })
+      con.query("select sum(Energy) as SolarEnergy from Wheeledhourly where date(polledTime) = curdate();",function(err,result,feilds){
+          if(err){
+              console.log(err)
+          }
+          else{
+              const response=(JSON.parse(JSON.stringify(result)))
+              res.send(response)
+              console.log(response.length)
+          }
+      })
+})
 
     
     
@@ -260,7 +259,8 @@ emptyArray.forEach(obj => {
     //---------------------------battery Dashboard--------------------//
     app.get("/dashboard/Battery",async(req,res)=>{
       const resultValue=[]
-      meterDb.query("select * from meterdata.batteryhourly where date(received_time) = curdate();",function(err,result,feilds){
+      let  IdleState=0
+      con.query("select * from UPSbatteryHourly where date(polledTime) = curdate();",function(err,result,feilds){
        // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
         if(err){
               console.log(err)
@@ -268,12 +268,16 @@ emptyArray.forEach(obj => {
           else{
               const response=(JSON.parse(JSON.stringify(result)))
               for(let i=0;i<response.length;i++){
-                let date = new Date(response[i].received_time);
+                let date = new Date(response[i].polledTime);
                 const hours = date.getHours().toString().padStart(2, '0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
                 // const seconds = date.getSeconds().toString().padStart(2, '0');
                 const timestamp = `${hours}:${minutes}`;
-                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].total_upschargingenergy_diff),"dischargingEnergy":parseFloat(response[i].total_upsdidchargingenergy_diff)*-1,"idleEnergy":parseFloat(response[i].idle_energystatues),"Pacsoc":parseInt(response[i].max_pacsoc),"energy_available":response[i].energy_available})
+                if((response[i].chargingEnergy==null || response[i].chargingEnergy===0) && (response[i].discharhingEnergy==null || response[i].discharhingEnergy===0) ){
+                  IdleState=parseFloat(0.1)
+                }
+
+                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].discharhingEnergy),"idleEnergy":IdleState,"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
 
               }
               res.send(resultValue)
@@ -292,7 +296,8 @@ emptyArray.forEach(obj => {
     app.post("/dashboard/filtered/Battery",async(req,res)=>{
       const {date}=req.body
       const resultValue=[]
-      meterDb.query(`select * from meterdata.batteryhourly where date(received_time) = '${date}'`,function(err,result,feilds){
+      let  IdleState=0
+      con.query(`select * from UPSbatteryHourly where date(polledTime) = '${date}'`,function(err,result,feilds){
        // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
         if(err){
               console.log(err)
@@ -300,12 +305,18 @@ emptyArray.forEach(obj => {
           else{
               const response=(JSON.parse(JSON.stringify(result)))
               for(let i=0;i<response.length;i++){
-                let date = new Date(response[i].received_time);
+                let date = new Date(response[i].polledTime);
                 const hours = date.getHours().toString().padStart(2, '0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
                 // const seconds = date.getSeconds().toString().padStart(2, '0');
                 const timestamp = `${hours}:${minutes}`;
-                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].total_upschargingenergy_diff),"dischargingEnergy":parseFloat(response[i].total_upsdidchargingenergy_diff)*-1,"idleEnergy":parseFloat(response[i].idle_energystatues),"Pacsoc":parseInt(response[i].max_pacsoc),"energy_available":response[i].energy_available})
+                if((response[i].chargingEnergy==null || response[i].chargingEnergy===0) && (response[i].discharhingEnergy==null || response[i].discharhingEnergy===0) ){
+                  IdleState=parseFloat(0.1)
+                }
+                else{
+                  IdleState=parseInt(0)
+                }
+                resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].discharhingEnergy),"idleEnergy":IdleState,"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
 
               }
               res.send(resultValue)
@@ -1474,7 +1485,7 @@ app.get("/peak/initialgraph",async(req,res)=>{
 
 //--------------------current day PeakDemand api ----------------------------------//      
        app.get("/peak/hvacSchneider7230Polling",async(req,res)=>{
-        meterDb.query("select * from peakdemandquarter where DATE(polledTime)=curdate();",function(err,result,feilds){
+        con.query("SELECT max(totalApparentPower2) as totalApparentPower2 ,polledTime FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)=curdate() GROUP BY DATE_FORMAT(polledTime, '%Y-%m-%d %H:%i');",function(err,result,feilds){
             const viewData=[]
             if(err){
                 console.log(err)
@@ -1487,7 +1498,7 @@ app.get("/peak/initialgraph",async(req,res)=>{
                const minutes = date.getMinutes().toString().padStart(2, '0');
                // const seconds = date.getSeconds().toString().padStart(2, '0');
                const timestamp = `${hours}:${minutes}`;
-                viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].peakdemand),"limitLine":parseInt(4000)})
+                viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].totalApparentPower2),"limitLine":parseInt(4000)})
 
 
                 }
@@ -1506,8 +1517,8 @@ app.get("/peak/initialgraph",async(req,res)=>{
     const { date} = req.body;
     const viewData=[]
    
-    const query = `select * from peakdemandquarter where DATE(polledTime)='${date}' `;
-    meterDb.query(query, (error, results) => {
+    const query = `SELECT max(totalApparentPower2) as totalApparentPower2 ,polledTime FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)='${date}' GROUP BY DATE_FORMAT(polledTime, '%Y-%m-%d %H:%i') `;
+    con.query(query, (error, results) => {
       if (error) {
         console.error(error);
         return res.status(500).json({ message: 'An error occurred' });
@@ -1519,7 +1530,7 @@ app.get("/peak/initialgraph",async(req,res)=>{
    const minutes = date.getMinutes().toString().padStart(2, '0');
    // const seconds = date.getSeconds().toString().padStart(2, '0');
    const timestamp = `${hours}:${minutes}`;
-    viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].peakdemand),"limitLine":parseInt(4000)})
+    viewData.push({"polledTime":timestamp,"peakdemand":Math.trunc(response[i].totalApparentPower2),"limitLine":parseInt(4000)})
 
 
     }
@@ -1547,7 +1558,7 @@ app.get("/initial/wheeledinsolr", (req, res) => {
   const INV7=[]
   const INV8=[]
  
-  const query = 'SELECT * FROM inverterprocessinghourly WHERE DATE(invertertimestamp) = curdate();'
+  const query = 'SELECT * FROM inverterprocessinghourly WHERE DATE(invertertimestamp) = curdate() order by invertertimestamp asc;'
   meterDb.query(query, (error, results) => {
     if (error) {
       console.error(error);
@@ -1949,7 +1960,7 @@ console.log(formattedDate,"line 1680");
 
   //--------------------------end of api-----------------------------------//
 
-
+//----------------------chiller Dashboard api`s ----------------------------------------------//
   //-------------------------------thermal stored water temparature api-----------------------//
   app.get("/thermal/storedWaterTemp",async(req,res)=>{
     const thermalWaterTemp=[]
@@ -1977,6 +1988,97 @@ console.log(formattedDate,"line 1680");
     })
   })
   //--------------------------------end of api----------------------------//
+
+
+  //-----------------------------chiller Loading api-------------------------------//
+  app.get("/chillerDashboard/ChillerLoading",async(req,res)=>{
+    const ChillerLoadingData=[]
+    meterDb.query("SELECT * FROM meterdata.chillarloading order by lastTimestamp desc",function(error,result,feild){
+      if(error){
+        console.log(error)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          let date=new Date(response[i].lastTimestamp)
+          const hours = date.getHours().toString().padStart(2, '0');
+     const minutes = date.getMinutes().toString().padStart(2, '0');
+     // const seconds = date.getSeconds().toString().padStart(2, '0');
+     const timestamp = `${hours}:${minutes}`;
+     ChillerLoadingData.push({"polledTime":timestamp,"c1loading":parseFloat(response[i].c1loading),"c2loading":parseFloat(response[i].c2loading),"c3loading":parseFloat(response[i].c3loading),"c4loading":parseFloat(response[i].c4loading)})
+
+
+      }
+      console.log(ChillerLoadingData.length)
+        res.send(ChillerLoadingData)
+
+        
+      }
+    })
+  })
+
+
+//----------------------------END of chiller Loading api-------------------------------------//
+
+//---------------------------------thermalinletoutlet (condenser and evaporator)-----------------------//
+
+app.get("/chillerDashboard/thermalinletoutlet/condenser/evaporator",async(req,res)=>{
+  const thermalinletoutletData=[]
+  meterDb.query("SELECT * FROM thermalinletoutlet where date(polledTime)=curdate()",function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].polledTime)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   thermalinletoutletData.push({"polledTime":timestamp,"avg_commonHeaderinletTemp":parseFloat(response[i].avg_commonHeaderinletTemp),"avg_commonHeaderoutletTemp":parseFloat(response[i].avg_commonHeaderoutletTemp),"avg_condenserLineInletTemp":parseFloat(response[i].avg_condenserLineInletTemp),"avg_condenserLineOutletTemp":parseFloat(response[i].avg_condenserLineOutletTemp),"avg_commonHeaderFlowrate":parseFloat(response[i].avg_commonHeaderFlowrate),"avg_condenserLineFlowrate":parseFloat(response[i].avg_condenserLineFlowrate)})
+
+
+    }
+    console.log(thermalinletoutletData.length)
+      res.send(thermalinletoutletData)
+
+      
+    }
+  })
+})
+
+//-------------------------------END of thermalinletoutlet (condenser and evaporator) api---------------------------------//
+
+//---------------------------------Average of C1 cop to C4 cop--------------------------------------//
+app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
+  const chillarCOP=[]
+  meterDb.query("SELECT * FROM meterdata.chillarcop;",function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   chillarCOP.push({"polledTime":timestamp,"avg_c1cop":parseFloat(response[i].c1cop),"avg_c2cop":parseFloat(response[i].c2cop),"avg_c3cop":parseFloat(response[i].c3cop),"avg_c4cop":parseFloat(response[i].c4cop)})
+
+
+    }
+    console.log(chillarCOP.length)
+      res.send(chillarCOP)
+
+      
+    }
+  })
+})
+
+//----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
+  //----------------------------------------END of chillerDashboard api`s ----------------------------//
 
   //-------------------------------------tharmalStorage summary card---------------------//
 
@@ -2263,7 +2365,193 @@ console.log(currentDate)
 })
   //-------------------------------------------END OF API----------------------------------------//
   
-  app.post("/dashboard/dateFilter/LTOBattery",async(req,res)=>{
+
+  //-------------------------------------LTO perminute current/voltage api------------------------//
+  app.get("/current_VS_voltage/LTOBattery",async(req,res)=>{
+    const resultValue=[]
+    unprocesseddata.query("SELECT * FROM ltoBatteryData where date(recordTimestamp)=curdate() GROUP BY DATE_FORMAT(recordTimestamp, '%Y-%m-%d %H:%i') ;",function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              resultValue.push({"PolledTime":timestamp,"BatteryVoltage":parseFloat(response[i].batteryVoltage),"BatteryCurrent":parseFloat(response[i].batteryCurrent)})
+
+            }
+            res.send(resultValue)
+            console.log(resultValue.length)
+        }
+    })
+    
+})
+  //--------------------------------------END of api---------------------------------------------//
+
+  //------------------------------------------LTO perminute filtered graph api-----------------------//
+  app.post("/current_VS_voltage/LTOBattery/filtered",async(req,res)=>{
+    const {date}=req.body
+    const resultValue=[]
+    unprocesseddata.query(`SELECT * FROM ltoBatteryData where date(recordTimestamp)='${date}' GROUP BY DATE_FORMAT(recordTimestamp, '%Y-%m-%d %H:%i')`,function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              resultValue.push({"PolledTime":timestamp,"BatteryVoltage":parseFloat(response[i].batteryVoltage),"BatteryCurrent":parseFloat(response[i].batteryCurrent)})
+
+            }
+            res.send(resultValue)
+            console.log(resultValue.length)
+        }
+    })
+    
+})
+  //------------------------------------------- END of api--------------------------------------------//
+
+
+  //-----------------------------------lto 5 min energy vs packsoc api--------------------------------//
+
+  app.get("/Ltoanalytics/energy_VS_packsoc", async (req, res) => {
+    const {date}=req.body
+    unprocesseddata.query("SELECT * FROM ltoBatteryData where date(recordTimestamp)=curdate() GROUP BY DATE_FORMAT(recordTimestamp, '%Y-%m-%d %H:%i')", function (error, result) {
+      
+      const batteryData = [];
+      const energy = [];
+      const packsoc = [];
+      const timestamp = [];
+      const resultData=[]
+  
+      if (error) {
+        console.log(error);
+      } else {
+        const response = JSON.parse(JSON.stringify(result));
+        for (let i = 0; i < response.length; i++) {
+          if (response[i].packSOC) {
+            if (response[i].batteryStatus==="IDLE") {
+              //energy.push(response[i].idle_energystatues);
+              packsoc.push(response[i].packSOC);
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":0.01,"timestamp":timestamp,"batteryStatus":response[i].batteryStatus})
+
+            }
+            if (response[i].batteryStatus==="DCHG") {
+              energy.push((response[i].dischargingEnergy)*-1);
+              packsoc.push(response[i].packSOC);
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat((response[i].dischargingEnergy/100)*-1),"timestamp":timestamp,"batteryStatus":"Discharging"})
+            }
+            if (response[i].batteryStatus==="CHG") {
+              energy.push(response[i].chargingEnergy);
+              packsoc.push(response[i].packSOC);
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat(response[i].chargingEnergy/100),"timestamp":timestamp,"batteryStatus":"Charging"})
+            }
+          }
+        }
+  
+  
+        res.send(resultData);
+        console.log(result.length)
+      }
+    });
+  });
+  //-----------------------------------END of api------------------------------------------------------//
+
+
+  //----------------------------------LTO 5min energy vs pacsoc filtered api---------------------//
+  app.post("/Ltoanalytics/energy_VS_packsoc/DateFilter", async (req, res) => {
+    const {date}=req.body
+    unprocesseddata.query(`SELECT * FROM ltoBatteryData where date(recordTimestamp)='${date}' GROUP BY DATE_FORMAT(recordTimestamp, '%Y-%m-%d %H:%i')`, function (error, result) {
+      
+      const batteryData = [];
+      const energy = [];
+      const packsoc = [];
+      const timestamp = [];
+      const resultData=[]
+  
+      if (error) {
+        console.log(error);
+      } else {
+        const response = JSON.parse(JSON.stringify(result));
+        for (let i = 0; i < response.length; i++) {
+          if (response[i].packSOC) {
+            if (response[i].batteryStatus==="IDLE") {
+              //energy.push(response[i].idle_energystatues);
+              packsoc.push(response[i].max_pacsoc);
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":0.01,"timestamp":timestamp,"batteryStatus":response[i].batteryStatus})
+
+            }
+            if (response[i].batteryStatus==="DCHG") {
+              energy.push((response[i].total_ltodischargingenergy_diff)*-1);
+              packsoc.push(response[i].packSOC);
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat((response[i].dischargingEnergy/100)*-1),"timestamp":timestamp,"batteryStatus":"Discharging"})
+            }
+            if (response[i].batteryStatus==="CHG") {
+              energy.push(response[i].total_ltochargingenergy_diff);
+              packsoc.push(response[i].packSOC);
+              let date = new Date(response[i].recordTimestamp);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              //timestamp.push(date);
+
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat(response[i].chargingEnergy/100),"timestamp":timestamp,"batteryStatus":"Charging"})
+            }
+          }
+        }
+  
+  
+        res.send(resultData);
+        console.log(result.length)
+      }
+    });
+  });
+  //---------------------------------- END of api-----------------------------------------------//
+  
+  //--------------------------------------lto dashboard date filter data api -----------------------//
+    app.post("/dashboard/dateFilter/LTOBattery",async(req,res)=>{
     const {date}=req.body
     const resultValue=[]
     let  idleState=""
@@ -2288,15 +2576,686 @@ console.log(currentDate)
               else{
                 idleState=0
               }
-              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy),"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
+              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy)*-1,"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
 
             }
             res.send(resultValue)
-            console.log(resultValue)
+            console.log(resultValue.length)
         }
     })
     
 })
+  //------------------------------------------------END OF API----------------------------------//
+
+
+  //-------------------------------PeakDemand analysis dashboard api---------------------------------//
+  app.get("/PeakDemand/Dashboard/Analysis",async(req,res)=>{
+    const PeakDemandDetails=[]
+    const MaxPeakDemand=[]
+    let MaxDemand=0
+    let Time=""
+    let CountLevel1=0
+    let CountLevel2=0
+    let CountLevel3=0
+    let CountLevel4=0
+    let CountLevel5=0
+    let CountLevel6=0
+    let CountAboveLimit=0
+    let CountBellowLimit=0
+    let SumOfEnergy=0
+    let Percentage=0
+    const differences = [];
+    let LevelWisePercentage=[]
+    let CountLevecrossLimit1_4100To4200_Percentage=0
+    let CountLevecrossLimit1_4200To4300_Percentage=0
+    let CountLevecrossLimit1_4300To4400_Percentage=0
+    let CountLevecrossLimit1_4400To4500_Percentage=0
+    let CountLevecrossLimit1_4500To4600_Percentage=0
+    let CountLevecrossLimit1_4600_Percentage=0
+    con.query("SELECT * FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'",function(err,result,feilds){
+      //SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00' order by polledTime desc 
+           if(err){
+               console.log(err)
+           }
+           else{
+               const response=(JSON.parse(JSON.stringify(result)))
+               for(let i=0;i<response.length;i++){
+                let date = new Date(response[i].polledTime);
+                //const timeVal=date.toLocaleDateString()
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestampVal = `${hours}:${minutes}:${seconds}`;
+
+        
+            if(response[i].totalApparentPower2>=4100 && response[i].totalApparentPower2<4200){
+              CountLevel1+=1
+            }
+            if(response[i].totalApparentPower2>=4200 && response[i].totalApparentPower2<4300){
+              CountLevel2+=1
+            }
+            if(response[i].totalApparentPower2>=4300 && response[i].totalApparentPower2<4400){
+              CountLevel3+=1
+            }
+            if(response[i].totalApparentPower2>=4400 && response[i].totalApparentPower2<4500){
+              CountLevel4+=1
+            }
+            if(response[i].totalApparentPower2>=4500 && response[i].totalApparentPower2<4600){
+              CountLevel5+=1
+            }
+            if(response[i].totalApparentPower2>=4600 && response[i].totalApparentPower2<4700){
+              CountLevel6+=1
+            }
+            if(response[i].totalApparentPower2>=4100 ){
+              CountAboveLimit+=1
+            }
+            if(response[i].totalApparentPower2<4100){
+              CountBellowLimit+=1
+            }
+
+
+            CountLevecrossLimit1_4100To4200_Percentage=(CountLevel1/response.length)*100
+            CountLevecrossLimit1_4200To4300_Percentage=(CountLevel2/response.length)*100
+            CountLevecrossLimit1_4300To4400_Percentage=(CountLevel3/response.length)*100
+            CountLevecrossLimit1_4400To4500_Percentage=(CountLevel4/response.length)*100
+            CountLevecrossLimit1_4500To4600_Percentage=(CountLevel5/response.length)*100
+            CountLevecrossLimit1_4600_Percentage=(CountLevel6/response.length)*100
+
+            LevelWisePercentage.push({
+              "Time":timestampVal,
+              "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
+              "CountLevecrossLimit1_4200To4300_Percentage":CountLevecrossLimit1_4200To4300_Percentage,
+              "CountLevecrossLimit1_4300To4400_Percentage":CountLevecrossLimit1_4300To4400_Percentage,
+              "CountLevecrossLimit1_4400To4500_Percentage":CountLevecrossLimit1_4400To4500_Percentage,
+              "CountLevecrossLimit1_4500To4600_Percentage":CountLevecrossLimit1_4500To4600_Percentage,
+              "CountLevecrossLimit1_4600_Percentage":CountLevecrossLimit1_4600_Percentage,
+             })
+
+           
+
+            
+
+          
+           //---------------calculate MAX demand value--------------------------//
+            if(response[i].totalApparentPower2 > MaxDemand){
+              MaxDemand=Math.round(response[i].totalApparentPower2)
+              Time=timestampVal
+            }
+            
+            CountBellowLimitPercentage=(CountBellowLimit/response.length)*100
+            CountAboveLimitPercentage=(CountAboveLimit/response.length)*100
+
+         
+
+
+           
+            //PeakDemandDetails.push({"polledTime":timestampVal,"MaxDemand":MaxDemand,"peaddemand":response[i].peakDemand})
+
+               }
+
+               // Loop through the peak demand values starting from the second element
+               for (let i = 1; i < response.length; i++) {
+                if (response[i].totalApparentPower2 !== null) {
+                  // Calculate the difference between the current and previous peak demand values
+                  const difference = Math.abs(parseFloat(response[i].totalApparentPower2) - parseFloat(response[i - 1].totalApparentPower2));
+                  
+                  // Store the difference in the array
+                  differences.push(difference);
+                }
+              }
+           
+              let countLevelZero_Fivety=0
+              let countLeve2Fivety_Hundred=0
+              let countLeve3Hundred_oneFivety=0
+              let countLeve4oneFivety_twohundred=0
+              let countLeve5twohundred_twoFifty=0
+              let countLeve6twoFifty=0
+
+              for (let i=0;i<differences.length;i++){
+
+                if(differences[i]>0 && differences[i]<50 ){
+                  countLevelZero_Fivety+=1
+                }
+                if(differences[i]>=50 && differences[i]<100 ){
+                  countLeve2Fivety_Hundred+=1
+                }
+                if(differences[i]>=100 && differences[i]<150 ){
+                  countLeve3Hundred_oneFivety+=1
+                }
+                if(differences[i]>=150 && differences[i]<200 ){
+                  countLeve4oneFivety_twohundred+=1
+                }
+                if(differences[i]>=200 && differences[i]<250 ){
+                  countLeve5twohundred_twoFifty+=1
+                }
+                if(differences[i]>=250){
+                  countLeve6twoFifty+=1
+                }
+
+
+              }
+
+              let countLevelZero_FivetyPercentage=(countLevelZero_Fivety/response.length)*100
+              let countLevel2Fivety_HundredPercentage=(countLeve2Fivety_Hundred/response.length)*100
+              let countLevel3Hundred_oneFivetyPercentage=(countLeve3Hundred_oneFivety/response.length)*100
+              let countLeve4oneFivety_twohundredPercentage=(countLeve4oneFivety_twohundred/response.length)*100
+              let countLeve5twohundred_twoFiftyPercentage=(countLeve5twohundred_twoFifty/response.length)*100
+              let countLeve6twoFiftyPercentage=(countLeve6twoFifty/response.length)*100
+
+
+               
+               
+               //console.log(countLevelZero_Fivety,countLeve2Fivety_Hundred,countLeve3Hundred_oneFivety,countLeve4oneFivety_twohundred)
+               
+               //console.log(MaxDemand,Time,CountLevel1,CountLevel2,CountLevel3,CountLevel4,CountLevel5,CountLevel6,CountAboveLimit,CountBellowLimit,SumOfEnergy,CountBellowLimitPercentage,CountAboveLimitPercentage)
+               console.log(response.length)
+               PeakDemandDetails.push({
+                "maxDemand":MaxDemand,
+                "MaxDemandTime":Time,
+                "CountLevecrossLimit1_4100To4200":CountLevel1,
+                "CountLevecrossLimit2_4200To4300":CountLevel2,
+                "CountLevecrossLimit3_4300To4400":CountLevel3,
+                "CountLevecrossLimit4_4400To4500":CountLevel4,
+                "CountLevecrossLimit5_4500To4600":CountLevel5,
+                "CountLevecrossLimit6_4600":CountLevel6,
+                "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
+                "CountAbove_4100":CountAboveLimit,
+                "CountBellow_4100":CountBellowLimit,
+                "CountAbovePercentage_4100":parseFloat((CountAboveLimitPercentage).toFixed(2)),
+                "countBellowPercentage_4100":parseFloat((CountBellowLimitPercentage).toFixed(2)),
+                "countLevelZero_Fivety":countLevelZero_Fivety,
+                "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
+                "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
+                "countLeve4oneFivety_twohundred":countLeve4oneFivety_twohundred,
+                "countLeve5twohundred_twoFifty":countLeve5twohundred_twoFifty,
+                "countLeve6twoFifty":countLeve6twoFifty,
+                "countLevelZero_FivetyPercentage":parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
+                "countLevel2Fivety_HundredPercentage":parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
+                "countLevel3Hundred_oneFivetyPercentage":parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
+                "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
+                "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
+                "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
+                "LevelWisePercentage":LevelWisePercentage
+              })
+              console.log(LevelWisePercentage.length)
+              res.send(PeakDemandDetails)
+
+           }
+       })
+
+
+      
+  })
+
+  //---------------------------------END of api------------------------------------------------------//
+
+//------------------------------------PeakDemand Analysis filtered data------------------------------//
+app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
+  const {date}=req.body
+  const PeakDemandDetails=[]
+  const MaxPeakDemand=[]
+  console.log(date)
+  let MaxDemand=0
+  let Time=""
+  let CountLevel1=0
+  let CountLevel2=0
+  let CountLevel3=0
+  let CountLevel4=0
+  let CountLevel5=0
+  let CountLevel6=0
+  let CountAboveLimit=0
+  let CountBellowLimit=0
+  let SumOfEnergy=0
+  let Percentage=0
+  const differences = [];
+  let LevelWisePercentage=[]
+  let CountLevecrossLimit1_4100To4200_Percentage=0
+  let CountLevecrossLimit1_4200To4300_Percentage=0
+  let CountLevecrossLimit1_4300To4400_Percentage=0
+  let CountLevecrossLimit1_4400To4500_Percentage=0
+  let CountLevecrossLimit1_4500To4600_Percentage=0
+  let CountLevecrossLimit1_4600_Percentage=0
+  // let CountBellowLimitPercentage=0
+  // let CountAboveLimitPercentage=0
+  con.query(`SELECT * FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)='${date}'  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'`,function(err,result,feilds){
+    //SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00' order by polledTime desc 
+         if(err){
+             console.log(err)
+         }
+         else{
+             const response=(JSON.parse(JSON.stringify(result)))
+             for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              //const timeVal=date.toLocaleDateString()
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+          const seconds = date.getSeconds().toString().padStart(2, '0');
+          const timestampVal = `${hours}:${minutes}:${seconds}`;
+
+      
+          if(response[i].totalApparentPower2>=4100 && response[i].totalApparentPower2<4200){
+            CountLevel1+=1
+          }
+          if(response[i].totalApparentPower2>=4200 && response[i].totalApparentPower2<4300){
+            CountLevel2+=1
+          }
+          if(response[i].totalApparentPower2>=4300 && response[i].totalApparentPower2<4400){
+            CountLevel3+=1
+          }
+          if(response[i].totalApparentPower2>=4400 && response[i].totalApparentPower2<4500){
+            CountLevel4+=1
+          }
+          if(response[i].totalApparentPower2>=4500 && response[i].totalApparentPower2<4600){
+            CountLevel5+=1
+          }
+          if(response[i].totalApparentPower2>=4600 && response[i].totalApparentPower2<4700){
+            CountLevel6+=1
+          }
+          if(response[i].totalApparentPower2>=4100 ){
+            CountAboveLimit+=1
+          }
+          if(response[i].totalApparentPower2<4100){
+            CountBellowLimit+=1
+          }
+
+
+          CountLevecrossLimit1_4100To4200_Percentage=(CountLevel1/response.length)*100
+          CountLevecrossLimit1_4200To4300_Percentage=(CountLevel2/response.length)*100
+          CountLevecrossLimit1_4300To4400_Percentage=(CountLevel3/response.length)*100
+          CountLevecrossLimit1_4400To4500_Percentage=(CountLevel4/response.length)*100
+          CountLevecrossLimit1_4500To4600_Percentage=(CountLevel5/response.length)*100
+          CountLevecrossLimit1_4600_Percentage=(CountLevel6/response.length)*100
+
+          LevelWisePercentage.push({
+            "Time":timestampVal,
+            "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
+            "CountLevecrossLimit1_4200To4300_Percentage":CountLevecrossLimit1_4200To4300_Percentage,
+            "CountLevecrossLimit1_4300To4400_Percentage":CountLevecrossLimit1_4300To4400_Percentage,
+            "CountLevecrossLimit1_4400To4500_Percentage":CountLevecrossLimit1_4400To4500_Percentage,
+            "CountLevecrossLimit1_4500To4600_Percentage":CountLevecrossLimit1_4500To4600_Percentage,
+            "CountLevecrossLimit1_4600_Percentage":CountLevecrossLimit1_4600_Percentage,
+           })
+
+           CountBellowLimitPercentage=(CountBellowLimit/response.length)*100
+          CountAboveLimitPercentage=(CountAboveLimit/response.length)*100
+
+         
+
+          
+
+          
+
+         //---------------calculate MAX demand value--------------------------//
+          if(response[i].totalApparentPower2 > MaxDemand){
+            MaxDemand=Math.round(response[i].totalApparentPower2)
+            Time=timestampVal
+          }
+          
+          
+
+       
+
+
+         
+          //PeakDemandDetails.push({"polledTime":timestampVal,"MaxDemand":MaxDemand,"peaddemand":response[i].peakDemand})
+
+             }
+
+             // Loop through the peak demand values starting from the second element
+             for (let i = 1; i < response.length; i++) {
+              if (response[i].totalApparentPower2 !== null) {
+                // Calculate the difference between the current and previous peak demand values
+                const difference = Math.abs(parseFloat(response[i].totalApparentPower2) - parseFloat(response[i - 1].totalApparentPower2));
+                
+                // Store the difference in the array
+                differences.push(difference);
+              }
+            }
+         
+            let countLevelZero_Fivety=0
+            let countLeve2Fivety_Hundred=0
+            let countLeve3Hundred_oneFivety=0
+            let countLeve4oneFivety_twohundred=0
+            let countLeve5twohundred_twoFifty=0
+            let countLeve6twoFifty=0
+
+            for (let i=0;i<differences.length;i++){
+
+              if(differences[i]>0 && differences[i]<50 ){
+                countLevelZero_Fivety+=1
+              }
+              if(differences[i]>=50 && differences[i]<100 ){
+                countLeve2Fivety_Hundred+=1
+              }
+              if(differences[i]>=100 && differences[i]<150 ){
+                countLeve3Hundred_oneFivety+=1
+              }
+              if(differences[i]>=150 && differences[i]<200 ){
+                countLeve4oneFivety_twohundred+=1
+              }
+              if(differences[i]>=200 && differences[i]<250 ){
+                countLeve5twohundred_twoFifty+=1
+              }
+              if(differences[i]>=250){
+                countLeve6twoFifty+=1
+              }
+
+
+            }
+
+            let countLevelZero_FivetyPercentage=(countLevelZero_Fivety/response.length)*100
+            let countLevel2Fivety_HundredPercentage=(countLeve2Fivety_Hundred/response.length)*100
+            let countLevel3Hundred_oneFivetyPercentage=(countLeve3Hundred_oneFivety/response.length)*100
+            let countLeve4oneFivety_twohundredPercentage=(countLeve4oneFivety_twohundred/response.length)*100
+            let countLeve5twohundred_twoFiftyPercentage=(countLeve5twohundred_twoFifty/response.length)*100
+            let countLeve6twoFiftyPercentage=(countLeve6twoFifty/response.length)*100
+
+
+             
+             
+             //console.log(countLevelZero_Fivety,countLeve2Fivety_Hundred,countLeve3Hundred_oneFivety,countLeve4oneFivety_twohundred)
+             
+             //console.log(MaxDemand,Time,CountLevel1,CountLevel2,CountLevel3,CountLevel4,CountLevel5,CountLevel6,CountAboveLimit,CountBellowLimit,SumOfEnergy,CountBellowLimitPercentage,CountAboveLimitPercentage)
+             console.log(response.length)
+             PeakDemandDetails.push({
+              "maxDemand":MaxDemand,
+              "MaxDemandTime":Time,
+              "CountLevecrossLimit1_4100To4200":CountLevel1,
+              "CountLevecrossLimit2_4200To4300":CountLevel2,
+              "CountLevecrossLimit3_4300To4400":CountLevel3,
+              "CountLevecrossLimit4_4400To4500":CountLevel4,
+              "CountLevecrossLimit5_4500To4600":CountLevel5,
+              "CountLevecrossLimit6_4600":CountLevel6,
+              "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
+              "CountAbove_4100":CountAboveLimit,
+              "CountBellow_4100":CountBellowLimit,
+              "CountAbovePercentage_4100":parseFloat((CountAboveLimitPercentage).toFixed(2)),
+              "countBellowPercentage_4100":parseFloat((CountBellowLimitPercentage).toFixed(2)),
+              "countLevelZero_Fivety":countLevelZero_Fivety,
+              "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
+              "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
+              "countLeve4oneFivety_twohundred":countLeve4oneFivety_twohundred,
+              "countLeve5twohundred_twoFifty":countLeve5twohundred_twoFifty,
+              "countLeve6twoFifty":countLeve6twoFifty,
+              "countLevelZero_FivetyPercentage":parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
+              "countLevel2Fivety_HundredPercentage":parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
+              "countLevel3Hundred_oneFivetyPercentage":parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
+              "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
+              "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
+              "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
+              "LevelWisePercentage":LevelWisePercentage
+            })
+            console.log(LevelWisePercentage.length)
+            res.send(PeakDemandDetails)
+
+         }
+     })
+
+
+    
+})
+//------------------------------------- END of api ---------------------------------------------//
+  //-----------------------------------------PeakDeamnd Hourly analysis---------------------------------//
+  app.get("/PeakDemand/Analysis/Hourly",async(req,res)=>{
+    const resultValue=[]
+  
+    con.query("select * from EMS.peakdemandHourly where date(polledTime) = curdate();",function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              let FormatedDtae=date.toLocaleString()
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              if(response[i].peakdemand>=4100){
+                resultValue.push({"PolledTime":FormatedDtae,"PeakDemand":response[i].peakdemand})
+              }
+              
+
+            }
+            res.send(resultValue)
+            //console.log(resultValue.length)
+        }
+    })
+    
+})
+  //-----------------------------------------END  of api-------------------------------------------------//
+
+
+  //--------------------------------peakDemand Hourly filtered Analysis---------------------------------//
+  app.post("/PeakDemand/Analysis/Hourly/DateFiltered",async(req,res)=>{
+    const resultValue=[]
+    const {date}=req.body
+  
+    con.query(`select * from EMS.peakdemandHourly where date(polledTime) = '${date}'`,function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              let FormatedDtae=date.toLocaleString()
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              if(response[i].peakdemand>=4100){
+                resultValue.push({"PolledTime":FormatedDtae,"PeakDemand":response[i].peakdemand})
+              }
+              
+
+            }
+            res.send(resultValue)
+            console.log("PeakHourly applied")
+        }
+    })
+    
+})
+  //--------------------------------------END of api-----------------------------------------------------//
+
+
+  //---------------------------------peakDemand Sum of energy api---------------------------------------//
+  app.get("/PeakDemand/Analysis/SumOfEnergy",async(req,res)=>{
+    const resultValue=[]
+    let SumOfEnergy=0
+    con.query("select * from peakDemandvs where date(polledTime) = curdate();",function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              let FormatedDtae=date.toLocaleString()
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+
+              if(response[i].peakDemand>=4300 && response[i].gridEnergy!==null ){
+                SumOfEnergy+=response[i].gridEnergy
+                //console.log(SumOfEnergy)
+              }
+              
+
+            }
+            let endSum=[parseFloat(SumOfEnergy.toFixed(2))]
+            res.send(endSum)
+            console.log(SumOfEnergy)
+        }
+    })
+    
+})
+
+
+  //------------------------------------------END of api-----------------------------------------------//
+
+  app.post("/PeakDemand/Analysis/SumOfEnergy/dateFiltered",async(req,res)=>{
+    const resultValue=[]
+    let SumOfEnergy=0
+    const {date}=req.body
+    con.query(`select * from peakDemandvs where date(polledTime) = '${date}'`,function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              let FormatedDtae=date.toLocaleString()
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+
+              if(response[i].peakDemand>=4300 && response[i].gridEnergy!==null ){
+                SumOfEnergy+=response[i].gridEnergy
+                //console.log(SumOfEnergy)
+              }
+              
+
+            }
+            let endSum=[parseFloat(SumOfEnergy.toFixed(2))]
+            res.send(endSum)
+            console.log(SumOfEnergy)
+        } 
+    })
+    
+})
+  
+
+//-------------------------------Deisel 1 to 5 graph api-----------------------------------------------//
+
+app.get("/Deisel/analytics/graph",async(req,res)=>{
+  const resultValue=[]
+  meterDb.query("SELECT * FROM meterdata.diselenergyquaterly where date(timestamp)=curdate();",function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].timestamp);
+            let FormatedDtae=date.toLocaleString()
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`
+            resultValue.push({"TimeStamp":timestamp,
+            "DGNum_1_energy_difference":parseFloat(response[i].DGNum_1_energy_difference),
+            "DGNum_2_energy_difference":parseFloat(response[i].DGNum_2_energy_difference),
+            "DGNum_3_energy_difference":parseFloat(response[i].DGNum_3_energy_difference),
+            "DGNum_4_energy_difference":parseFloat(response[i].DGNum_4_energy_difference),
+            "DGNum_5_energy_difference":parseFloat(response[i].DGNum_5_energy_difference),
+            
+
+          })
+        }
+         
+          res.send(resultValue)
+          console.log(resultValue)
+      }
+  })
+  
+})
+
+
+//-------------------------------- END of api ----------------------------------------------------------//
+
+
+
+
+//-------------------------------Deisel 1 to 5 graph  date filter api-----------------------------------------------//
+
+app.post("/Deisel/analytics/graph/DateFilter",async(req,res)=>{
+  const {date}=req.body
+  const resultValue=[]
+  meterDb.query(`SELECT * FROM meterdata.diselenergyquaterly where date(timestamp)='${date}'`,function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].timestamp);
+            let FormatedDtae=date.toLocaleString()
+            console.log(FormatedDtae)
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`
+            resultValue.push({"TimeStamp":timestamp,
+            "DGNum_1_energy_difference":parseFloat(response[i].DGNum_1_energy_difference),
+            "DGNum_2_energy_difference":parseFloat(response[i].DGNum_2_energy_difference),
+            "DGNum_3_energy_difference":parseFloat(response[i].DGNum_3_energy_difference),
+            "DGNum_4_energy_difference":parseFloat(response[i].DGNum_4_energy_difference),
+            "DGNum_5_energy_difference":parseFloat(response[i].DGNum_5_energy_difference),
+            
+
+          })
+        }
+         
+          res.send(resultValue)
+          console.log(resultValue)
+      }
+  })
+  
+})
+
+
+//-------------------------------- END of api ----------------------------------------------------------//
+
+
+
+//--------------------------------Hot Storage api-------------------------------------------------------//
+app.get("/HotWaterStorage",async(req,res)=>{
+  const resultValue=[]
+  EMSDB.query("SELECT *FROM EMS.HotWaterStorage where date(recordtimestamp)=curdate() order by recordtimestamp desc limit 1;",function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].recordtimestamp);
+            let FormatedDtae=date.toLocaleString()
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestamp = `${hours}:${minutes}`
+            resultValue.push({"TimeStamp":FormatedDtae,
+            "recirculationFlowRate":response[i].recirculationFlowRate,
+            "freshWaterFlowRate":response[i].freshWaterFlowRate,
+            "freshWaterTemperature":response[i].freshWaterTemperature,
+            "recirculationTemperature":response[i].recirculationTemperature,
+            "hotWaterDeliveryTemperature":response[i].hotWaterDeliveryTemperature,
+            "tankBottomTemperature":response[i].tankBottomTemperature,
+            "tankTopTemperature":response[i].tankTopTemperature,
+            "hotWaterdeliveryRate":response[i].hotWaterdeliveryRate,
+            "pressure":response[i].pressure
+          })
+        }
+         
+          res.send(resultValue)
+          console.log(resultValue)
+      }
+  })
+  
+})
+//---------------------------------------END of api--------------------------------------------------//
 
 
 
