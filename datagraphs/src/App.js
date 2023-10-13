@@ -28,7 +28,7 @@ import LTObattery from './pages/LTObattery';
 import PeakDemandAnalysis from './pages/PeakDemandAnalysis';
 import LTOAnalytics from './pages/LTOAnalytics';
 import HotWaterStorage from './pages/HotWaterStorage';
-import Diesel_Analysis from './components/Diesel_Analysis';
+import Diesel_Analysis from './pages/Diesel_Analysis';
 
 function LocationContext(props) {
   const location = useLocation();
