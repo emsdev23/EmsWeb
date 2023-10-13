@@ -15,6 +15,10 @@ import * as Gricons from 'react-icons/gr'
 import AddchartRoundedIcon from '@mui/icons-material/AddchartRounded';
 import ThermostatAutoRoundedIcon from '@mui/icons-material/ThermostatAutoRounded';
 import DownloadingIcon from '@mui/icons-material/Downloading';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import BatterySaverIcon from '@mui/icons-material/BatterySaver';
+import HotTubIcon from '@mui/icons-material/HotTub';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 
 
 
@@ -54,14 +58,34 @@ export const SidebarData = [
         icon: <TbIcons.TbSolarPanel2 />
       },
       {
+        title: 'Diesel Analysis',
+        path: '/Diesel_Analysis',
+        icon: <LocalGasStationIcon />
+      },
+      {
         title: 'UPS Battery',
         path: '/Battery_Analytics',
         icon: <TbIcons.TbBatteryAutomotive />
       },
       {
+        title: 'LTO Battery',
+        path: '/LTOBattery_Analytics',
+        icon: <BatterySaverIcon />
+      },
+      {
         title: 'ChillersDashboard',
         path: '/chillers/chillersDashboard',
         icon: <SevereColdIcon />,
+      },
+      {
+        title: 'PeakAnalysis',
+        path: '/PeakDemandAnalysis',
+        icon: <AnalyticsIcon />,
+      },
+      {
+        title: 'HotWter_Storage',
+        path: '/HotWter_Storage',
+        icon: <HotTubIcon />,
       },
       {
         title: 'ChillersStatus',

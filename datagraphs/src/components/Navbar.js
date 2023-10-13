@@ -56,13 +56,14 @@ const SidebarWrap = styled.div`
 //  moving side bar to right
 const SidebarNav = styled.nav`
   background: #15171c;
-  width: 250px;
+  width: 300px;
   height: 100vh;
+  overflow-y: auto; /* Enable vertical scrollbar */
   display: flex;
   justify-content: center;
   position: fixed;
   top: 0;
-  right: ${({ sidebar }) => (sidebar ? '0' : '-100%')}; /* set right to 0 */
+  right: ${({ sidebar }) => (sidebar ? '0' : '-100%')};
   transition: 350ms;
   z-index: 10;
 `;
