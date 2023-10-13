@@ -1,30 +1,28 @@
 import React, { useState, useEffect,useRef  } from 'react';
-import axios from 'axios';
-import ReactApexChart from 'react-apexcharts';
-import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
 import exportingInit from 'highcharts/modules/exporting';
 import exportDataInit from 'highcharts/modules/export-data';
+import axios from 'axios';
+import HighchartsReact from 'highcharts-react-official';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-function BuildindConsumptionPage2() {
-  const host='43.205.196.66'
+function LTOBatteryEnergyPac() {
+
+  const host='localhost'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
-    const [graph,setGraph]=useState([])
-    const graphDataUrl=`http://${host}:5000/BuildingConsumptionPage2`
-
-
+    const energy=`http://${host}:5000/Ltoanalytics/energy_VS_packsoc`
+    const [graphData, setGraphData] = useState([]);
     const [data, setData] = useState([]);
-    const [systemOverviewfilterDate, setSystemOverviewfilterDate] = useState(null);
-    
-
+    const [filterDate, setFilterDate] = useState(null);
+    const [loading, setLoading] = useState(false);
+  
     useEffect(() => {
-        axios.get(graphDataUrl)
+        axios.get(energy)
           .then((res) => {
             const dataResponse = res.data;
-            setGraph(dataResponse);
+            setGraphData(dataResponse);
           })
           .catch((err) => {
             console.log(err);
@@ -32,121 +30,121 @@ function BuildindConsumptionPage2() {
       }, []);
 
 
-      const handleDateChange = (date) => {
-        setSystemOverviewfilterDate(date);
+      console.log(graphData)
+
+
+      const handleEndDateChange = (date) => {
+        setFilterDate(date);
       };
 
 
-      const fetchSystemOverViewData = async () => {
-        //setLoading(true);
+  
+      const fetchData = async () => {
+        setLoading(true);
         try {
-          const formattedDate = systemOverviewfilterDate ? new Date(systemOverviewfilterDate.getTime() - systemOverviewfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
+          const formattedStartDate = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://${host}:5000/filteredGraph/BuildingConsumptionPage2`, {
-            date: formattedDate,
+          const response = await axios.post(`http://${host}:5000/Ltoanalytics/energy_VS_packsoc/DateFilter`, {
+            date: formattedStartDate,
           });
         
           setData(response.data);
-          // setLoading(false);
-          console.log(formattedDate)
+          setLoading(false);
+          console.log(formattedStartDate)
         } catch (error) {
           console.error(error);
-          //setLoading(false);
+          setLoading(false);
         }
       };
 
 
       useEffect(() => {
-        fetchSystemOverViewData();
-    }, [systemOverviewfilterDate]);
+        fetchData();
+    }, [filterDate]);
 
+    console.log(data)
 
-      
-      
-              // Render the Highcharts line graph using the fetched data
+  
+
+// Render the Highcharts line graph using the fetched data
   const options = {
     // Highcharts configuration options
     chart: {
       zoomType: 'x'
   },
-    series: [
+    series: [   {
+        name: "Energy(kWh)",
+        data: graphData.map((val) => val.batteryEnergy),
+        yAxis: 1,
+        type: "area",
+        color:'#5ad688',
+        marker: {
+          enabled: false, // Disable markers for the series
+        },
+      },
       {
-            name:"Roof Top Solar(kWh)",
-            data: graph.map((val)=>(val.RooftopEnergy)),
-            yAxis: 0,
-            type: "line",
-            color:"#00008B"
-          },
-          {
-            name: "Grid(kWh)",
-    data: graph.map((data)=>data.GridEnergy), 
-    yAxis: 0, // Primary y-axis
-    type: "line",
-    color: "#FF0000",
-    dashStyle: "dash",
-          // ...
+        name: "SoC(%)",
+        data: graphData.map((val) => val.packsoc),
+        yAxis: 0,
+        type: "line",
+        color: '#D21404', // Change the color of the "Packsoc" line graph
+        marker: {
+          enabled: false, // Disable markers for the series
         },
-        {
-          name:"Wheeled In Solar(kWh)",
-          data: graph.map((val)=>(val.WheeledInSolar)),
-          yAxis: 0,
-          type: "line",
-          color:"#fcba03"
-        },
-        {
-            name: 'Thermal Discharging Energy',
-            data: graph.map((val)=>val.thermalDischarge),
-            type: 'column',
-            yAxis: 0, // Primary y-axis,
-            color:"#528AAE"
-        }, 
-      ],
-      title: {
+      },
+    
+    
+    ],
+    title: {
         text: null, // Set title text to null
       },
       yAxis: [
         {
           title: {
-            text: "Energy(kWh)",
+            text: "SoC (%)",
           },
         },
         {
           title: {
-            text: "TS Discharge Energy",
+            text: "Energy (kWh)",
           },
           opposite: true, // Display the secondary y-axis on the opposite side of the chart
         },
       ],
-    //   xAxis: {
-    //     type: 'category', // Specify the x-axis as a category axis
-    //     categories: voltcurrent.map((val) => val.timestamp),
-    //     labels: {
-    //       formatter: function () {
-    //         return Highcharts.dateFormat('%H:%M', new Date(this.value)); // Format the x-axis labels as desired
-    //       }
-    //     },
-    //   },
-    // xAxis: {
-    //     type: "category", // Specify the x-axis as a category axis
-    //     categories: voltcurrent.map((val) => val.timestamp),
-    //     labels: {
-    //       formatter: function () {
-    //         const timestamp = this.value;
-    //         return timestamp; // Display the timestamp as the x-axis label
-    //       },
-    //     },
-    //   },
+      tooltip: {
+        enabled: true,
+        theme: 'dark',
+        style: {
+          background: '#222',
+          color: 'black'
+        },
+        formatter: function () {
+          let tooltipText = '';
+    
+          if (this.series.index === 0) {
+            tooltipText = `${this.y} Energy(kWh)`;
+          } else if (this.series.index === 1) {
+            tooltipText = `${this.y}% (SoC)`;
+          }
+    
+          const batteryStatus = graphData[this.point.index].batteryStatus;
+          const timestamp = graphData[this.point.index].timestamp;
+          tooltipText += ` | Battery Status: ${batteryStatus} | Time: ${timestamp}`;
+          
+    
+          return tooltipText;
+        },
+      },
     xAxis: {
         type: "category",
-        categories:  graph.map((data)=>data.Timestamp), // Use the pre-formatted timestamp from the API
+        categories: graphData.map((time) => time.timestamp), // Use the pre-formatted timestamp from the API
       },
       plotOptions: {
         line: {
-            lineWidth: 3, // Increase the line thickness
-            // Set the line to dashed
-          },
+          lineWidth: 2, // Increase the line thickness
+        },
+        
       },
-      
       exporting: {
         enabled: true, // Enable exporting
         buttons: {
@@ -201,89 +199,95 @@ function BuildindConsumptionPage2() {
   };
 
 
-  const systemoverviewfilteredgraph = {
+
+  //---------executing for selected date graph------------//
+  const option = {
     // Highcharts configuration options
     chart: {
       zoomType: 'x'
   },
-    series: [
+    series: [   {
+        name: "Energy(kWh)",
+        data: data.map((val) => val.batteryEnergy),
+        yAxis: 1,
+        type: "area",
+        color:'#5ad688',
+        marker: {
+          enabled: false, // Disable markers for the series
+        },
+      },
       {
-            name:"Roof Top Solar(kWh)",
-            data: data.map((val)=>(val.RooftopEnergy)),
-            yAxis: 0,
-            type: "line",
-            color:"#00008B"
-          },
-          {
-            name: "Grid(kWh)",
-    data: data.map((data)=>data.GridEnergy), 
-    yAxis: 0, // Primary y-axis
-    type: "line",
-    color: "#FF0000",
-    dashStyle: "dash",
-          // ...
+        name: "SoC(%)",
+        data: data.map((val) => val.packsoc),
+        yAxis: 0,
+        type: "line",
+        color: '#D21404', // Change the color of the "Packsoc" line graph
+        marker: {
+          enabled: false, // Disable markers for the series
         },
-        {
-          name:"Wheeled In Solar(kWh)",
-          data: data.map((val)=>(val.WheeledInSolar)),
-          yAxis: 0,
-          type: "line",
-          color:"#fcba03"
-        },
-        {
-            name: 'Thermal Discharging Energy',
-            data: data.map((val)=>val.thermalDischarge),
-            type: 'column',
-            yAxis: 0, // Primary y-axis,
-            color:"#528AAE"
-        }, 
-      ],
-      title: {
+      },
+    
+    
+    ],
+    //   title: {
+    //     text: "Daily Energy cycle v/s SoC", // Set the chart title text
+    //     align: "center", // Align the title to the center
+    //     margin: 10, // Set the margin of the title
+    //     style: {
+    //       fontSize: "30px", // Set the font size of the title
+    //       fontWeight: "bold", // Set the font weight of the title
+    //       fontFamily: undefined, // Use the default font family
+    //       color: "black", // Set the color of the title
+    //     },
+    //   },
+    title: {
         text: null, // Set title text to null
       },
       yAxis: [
         {
           title: {
-            text: "Energy(kWh)",
+            text: "SoC (%)",
           },
         },
         {
           title: {
-            text: "TS Discharge Energy",
+            text: "Energy (kWh)",
           },
           opposite: true, // Display the secondary y-axis on the opposite side of the chart
         },
       ],
-    //   xAxis: {
-    //     type: 'category', // Specify the x-axis as a category axis
-    //     categories: voltcurrent.map((val) => val.timestamp),
-    //     labels: {
-    //       formatter: function () {
-    //         return Highcharts.dateFormat('%H:%M', new Date(this.value)); // Format the x-axis labels as desired
-    //       }
-    //     },
-    //   },
-    // xAxis: {
-    //     type: "category", // Specify the x-axis as a category axis
-    //     categories: voltcurrent.map((val) => val.timestamp),
-    //     labels: {
-    //       formatter: function () {
-    //         const timestamp = this.value;
-    //         return timestamp; // Display the timestamp as the x-axis label
-    //       },
-    //     },
-    //   },
+      tooltip: {
+        enabled: true,
+        theme: 'dark',
+        style: {
+          background: '#222',
+          color: 'black'
+        },
+        formatter: function () {
+          let tooltipText = '';
+    
+          if (this.series.index === 0) {
+            tooltipText = `${this.y} Energy(kWh)`;
+          } else if (this.series.index === 1) {
+            tooltipText = `${this.y}% (SoC)`;
+          }
+    
+          const batteryStatus = data[this.point.index].batteryStatus;
+          const timestamp = data[this.point.index].timestamp;
+          tooltipText += ` | Battery Status: ${batteryStatus} | Time: ${timestamp}`;
+    
+          return tooltipText;
+        },
+      },
     xAxis: {
         type: "category",
-        categories:  data.map((data)=>data.Timestamp), // Use the pre-formatted timestamp from the API
+        categories: data.map((time) => time.timestamp), // Use the pre-formatted timestamp from the API
       },
       plotOptions: {
         line: {
-            lineWidth: 3, // Increase the line thickness
-            // Set the line to dashed
-          },
+          lineWidth: 2, // Increase the line thickness
+        },
       },
-      
       exporting: {
         enabled: true, // Enable exporting
         buttons: {
@@ -337,38 +341,66 @@ function BuildindConsumptionPage2() {
     // ...
   };
 
-
+  
   const now = new Date();
   const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
   const [month, day, year] = local.split("/"); // Split the date by "/"
   const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
-  const dateValue = systemOverviewfilterDate ? new Date(systemOverviewfilterDate.getTime() - systemOverviewfilterDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
+const dateValue = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
+
+
+let  currentBatteryStatus=[]
+for(let i=0;i<graphData.length;i++){
+  if(graphData[i].batteryStatus==="Discharging"){
+    currentBatteryStatus.push("DISCHARGING")
+
+  }
+  if(graphData[i].batteryStatus==="Charging"){
+    currentBatteryStatus.push("CHARGING")
+
+  }
+  if(graphData[i].batteryStatus==="IDLE"){
+    currentBatteryStatus.push("IDLE")
+
+  }
+  
+}
   return (
     <div>
- <div> 
-      <h4 style={{textAlign:'center',marginTop:"15px",color:"brown"}}><b style={{fontSize:"30px"}}>System Overview</b></h4>
-      </div>
+
+        <div> 
+
+        <div> <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Daily Energy cycle v/s SoC</h5></div>
+
 <div class="row">
-  <div class="col-10" > 
+  <div class="col-9" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h5 style={{color:"brown"}}><b>Date :-</b></h5> <DatePicker id="date" className="form-control" selected={systemOverviewfilterDate} onChange={handleDateChange} style={{ width: "200px" }}   />
+          <h5 style={{color:"brown"}}><b> Date :-</b></h5><DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} />
+          
+          <h3 style={{marginLeft:"135%"}}>{dateValue}</h3>
+          
         </label>
         
       </div>
   </div>
-  <div class="col-2"><h3>{dateValue}</h3></div>
+  <div class="col-3">{
+            filterDate===null?<h5 ><b style={{color:"black"}}>Current status:{currentBatteryStatus[currentBatteryStatus.length-1]}</b></h5>:""
+          }</div>
 </div>
-      {/* <hr style={{border:"10px solid black"}}/> */}
-     
-      {/* <h4 style={{color:"brown",textAlign:"center"}}><b>System Overview</b></h4> */}
-      {
-        systemOverviewfilterDate==null?<HighchartsReact highcharts={Highcharts} options={options} />: <HighchartsReact highcharts={Highcharts} options={systemoverviewfilteredgraph} />
-      }
-    
-     {/* <ReactApexChart options={state.options} series={state.series}height="400px" /> */}
+<div> 
+ {/* <div> <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Daily Energy cycle v/s SoC</h5></div> */}
+ {
+    filterDate===null?<HighchartsReact highcharts={Highcharts} options={options} />:<HighchartsReact highcharts={Highcharts} options={option} />
+}
+</div>
+
+        
+        </div>
+         
+      
     </div>
   )
 }
 
-export default BuildindConsumptionPage2
+export default LTOBatteryEnergyPac

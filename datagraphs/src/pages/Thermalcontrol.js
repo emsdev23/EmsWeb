@@ -8,7 +8,7 @@ import * as GiIcons from  'react-icons/gi'
 
 
 function Thermalcontrol() {
-  const host='121.242.232.211'
+  const host='43.205.196.66'
 
   const [thermalData, setThermalData] = useState({
     functioncode: "",
@@ -245,7 +245,7 @@ function Thermalcontrol() {
       <h4 style={{textAlign:"center"}}><b style={{color:"brown"}}>Overview</b></h4>
       <br/>
       <div >
-    <div class="card" style={{background:"white",width:"500px"}}>
+    <div class="card" style={{background:"white",width:"600px"}}>
       <div class="card-body">
       <table style={{ width: "100%", textAlign: "left"}}>
           <tbody>

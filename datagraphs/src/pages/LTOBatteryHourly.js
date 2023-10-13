@@ -9,7 +9,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function LTOBatteryHourly() {
-    const host='121.242.232.211'
+    const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const [LTObattery,setLTObattery]=useState([])
@@ -24,7 +24,7 @@ function LTOBatteryHourly() {
       };
 
     useEffect(() => {
-        axios.get('http://121.242.232.211:5000/dashboard/LTOBattery')
+        axios.get(`http://${host}:5000/dashboard/LTOBattery`)
           .then((res) => {
             const dataResponse = res.data;
             setLTObattery(dataResponse);
@@ -51,7 +51,7 @@ function LTOBatteryHourly() {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post('http://121.242.232.211:5000/dashboard/dateFilter/LTOBattery', { date: formattedDate });
+          const response = await axios.post(`http://${host}:5000/dashboard/dateFilter/LTOBattery`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
@@ -96,14 +96,14 @@ function LTOBatteryHourly() {
         series: [
           {
             name: 'charging  Energy',
-            data: LTObattery.map((val) => val.chargingEnergy),
+            data: LTObattery.map((val) => (val.chargingEnergy/100)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#528AAE',
           },
           {
             name: 'Discharging  Energy',
-            data: LTObattery.map((val) => val.dischargingEnergy),
+            data: LTObattery.map((val) => (val.dischargingEnergy/100)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#00008B',
@@ -167,14 +167,14 @@ function LTOBatteryHourly() {
         series: [
           {
             name: 'charging  Energy',
-            data: singledaydata.map((val) => val.chargingEnergy),
+            data: singledaydata.map((val) => (val.chargingEnergy/100)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#528AAE',
           },
           {
             name: 'Discharging  Energy',
-            data: singledaydata.map((val) => val.dischargingEnergy),
+            data: singledaydata.map((val) => (val.dischargingEnergy/100)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#00008B',

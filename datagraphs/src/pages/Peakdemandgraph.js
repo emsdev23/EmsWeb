@@ -11,8 +11,9 @@ import BuildindConsumptionPage2 from './BuildindConsumptionPage2';
 import Grid from '@mui/material/Grid';
  
 
-const host = "http://121.242.232.211:5000/peak/hvacSchneider7230Polling"
-const pastdata="http://121.242.232.211:5000/peak/initialgraph"
+const iphost='43.205.196.66'
+const host = `http://${iphost}:5000/peak/hvacSchneider7230Polling`
+const pastdata=`http://${iphost}:5000/peak/initialgraph`
 
 function Peakdemandgraphs() {
 
@@ -52,7 +53,7 @@ const handleSubmit = (event) => {
 
 
 const CurrentGraph=()=>{
-  axios.get('http://121.242.232.211:5000/peak/hvacSchneider7230Polling').then((res)=>{
+  axios.get(`http://localhost:5000/peak/hvacSchneider7230Polling`).then((res)=>{
     const dataresponse=res.data
     setInitialGraph(dataresponse)
    
@@ -98,7 +99,7 @@ const pastSevenDaysGraph=()=>{
       const formattedStartDate = startDate ? new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       const formattedEndDate = endDate ? new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post('http://121.242.232.211:5000/filter/hvacSchneider7230Polling', {
+      const response = await axios.post(`http://${iphost}:5000/filter/hvacSchneider7230Polling`, {
         date: formattedStartDate,
         endDate: formattedEndDate
       });
@@ -118,7 +119,7 @@ const pastSevenDaysGraph=()=>{
     try {
       const formattedStartDate = singledayFilter ? new Date(singledayFilter.getTime() - singledayFilter.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post('http://121.242.232.211:5000/singleDayFilter/hvacSchneider7230Polling', {
+      const response = await axios.post(`http://localhost:5000/singleDayFilter/hvacSchneider7230Polling`, {
         date: formattedStartDate,
       });
     
@@ -1039,7 +1040,7 @@ const PeakValueFilteredGraph= {
       <Grid sx={{ flexGrow: 1 }} container spacing={2} >
       
 <Grid item xs={12} sm={6} >
-<h5 style={{textAlign:"center"}}><b>Dily Demand(kVA)</b></h5>
+<h5 style={{textAlign:"center"}}><b>Daily Demand(kVA)</b></h5>
     <form onSubmit={handleSubmit}>
       {/* <br/>
       
@@ -1051,7 +1052,7 @@ const PeakValueFilteredGraph= {
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h6 style={{color:"brown"}}><b>Date :</b></h6> <DatePicker id="date" selected={singledayFilter} onChange={handlesingleDayFilterChange} placeholderText='select date' />
+        <h6 style={{color:"brown"}}><b>Date :</b></h6> <DatePicker id="date" selected={singledayFilter} onChange={handlesingleDayFilterChange} placeholderText='select date' />  
         </label>
       </div>
      

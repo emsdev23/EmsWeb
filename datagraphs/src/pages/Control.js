@@ -22,7 +22,7 @@ import './Battery.css';
 
 
 
-const host = '121.242.232.211'
+const host = '43.205.196.66'
 
 function Control() {
 
@@ -46,7 +46,7 @@ function Control() {
 
 
 
-  const batteryurl='http://121.242.232.211:5000/Batterydata'
+  const batteryurl=`http://${host}:5000/Batterydata`
 
 
 //  function batteryData() {
@@ -181,7 +181,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://localhost:5000/controlls`, formattedData)
+        axios.post(`http://${host}:5000/controlls`, formattedData)
           .then((response) => {
             const result = response.data;
             setFormData({
@@ -497,15 +497,15 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
             <tr >
               <td><h4 style={{ color: "teal" }}><b>SoC(%)</b></h4></td>
               <td><h4>:</h4></td>
-              <td><h4>{Math.round(packSoc[packSoc.length - 1])}</h4></td>
-            </tr>
-            <tr> 
-            <td> 
+              <td>  
               <div class="progress" style={{height:"30px",color:"black",background:"gray"}}>
               <div class="progress-bar" role="progressbar" style={{ width: `${Math.round(packSoc[packSoc.length - 1])}%`,color:"white"}} aria-valuenow={Math.round(packSoc[packSoc.length - 1])} aria-valuemin="0" aria-valuemax="100">{Math.round(packSoc[packSoc.length - 1])}%</div>
               </div>
+              
+              
               </td>
             </tr>
+           
             <tr style={{marginTop:"30px"}}>
               <td><h4 style={{ color: "teal" }}><b>Current Status</b></h4></td>
               <td><h4>:</h4></td>

@@ -6,7 +6,7 @@ import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 
 function ChillerDashboard() {
-    const host="121.242.232.211"
+    const host="43.205.196.66"
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
      //declaring empty array to fetch data

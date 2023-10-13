@@ -8,7 +8,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function ThermalStatus() {
-  const host='121.242.232.211'
+  const host='43.205.196.66'
   exportingInit(Highcharts);
   exportDataInit(Highcharts);
 

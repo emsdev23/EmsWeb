@@ -7,7 +7,7 @@ import swal from 'sweetalert';
 
 function Alerts() {
   
-const host = "121.242.232.211"
+const host = "43.205.196.66"
 const [alerts,setAlerts]=useState([])
 const [filterAlert,setFilterAlert]=useState("")
 const [receivedData,setReceivedDate]=useState([])

@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 
 
 function RooftopSolar() {
-  const host='121.242.232.211'
+  const host='43.205.196.66'
     const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
 

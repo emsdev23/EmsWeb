@@ -9,7 +9,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function BatteryCurrentvolt() {
-  const host='121.242.232.211'
+  const host='43.205.196.66'
 
   const [data, setData] = useState([]);
   const [voltcurrentfilterDate, setVoltcurrentfilterDate] = useState(null);
@@ -319,7 +319,7 @@ const option = {
  
 </div>
 <div> 
-<div > <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Votage v/s Current</h5></div>
+<div > <h5 style={{textAlign:"center",margin:"20px",color:"black", fontSize:"25px",fontWeight:"bold",fontFamily:undefined,color:"brown" }}>Voltage v/s Current</h5></div>
 {
     voltcurrentfilterDate===null? <HighchartsReact highcharts={Highcharts} options={options} />: <HighchartsReact highcharts={Highcharts} options={option} />
 }

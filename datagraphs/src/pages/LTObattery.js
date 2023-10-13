@@ -8,13 +8,14 @@ import * as GiIcons from  'react-icons/gi'
 
 function LTObattery() {
 
+  const host='43.205.196.66'
 
   const [ltoBatteryData,setLtoBatteryData]=useState([])
-  const LTOApi='http://localhost:5000/battery/lto'
+  const LTOApi=`http://${host}:5000/battery/lto`
   const ActualPassKey=7230
   const [pinNumber,setPinNumber]=useState("")
 
-  const host='121.242.232.211'
+
 
   const [ltoBatteryControlData, setLtoBatteryControlData] = useState({
     functioncode: "",
@@ -96,7 +97,7 @@ const handleLTOBatteryControlSubmit = async (event) => {
     dangerMode: false,
   }).then((willContinue) => {
     if (willContinue) {
-      axios.post('http://localhost:5000/LTOBattery/controll', formattedData)
+      axios.post(`http://${host}:5000/LTOBattery/controll`, formattedData)
         .then((response) => {
           const result = response.data;
           setLtoBatteryControlData({
@@ -152,7 +153,7 @@ else{
               <td><h4 style={{ color: "teal" }}><b>SoC(%)</b></h4></td>
               <td><h4>:</h4></td>
               <td> <div class="progress" style={{height:"30px",color:"black",background:"gray"}}>
-              <div class="progress-bar" role="progressbar" style={{ width: `${packSOC}%`,color:"white",background:"#85BB65"}} aria-valuenow={packSOC} aria-valuemin="0" aria-valuemax="100">{packSOC}%</div>
+              <div class="progress-bar" role="progressbar" style={{ width: `${(packSOC)+1}%`,color:"white",background:"#85BB65"}} aria-valuenow={packSOC} aria-valuemin="0" aria-valuemax="100">{packSOC}%</div>
               </div>
               </td>
             </tr>

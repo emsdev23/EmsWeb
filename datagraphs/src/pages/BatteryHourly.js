@@ -9,7 +9,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function BatteryHourly() {
-  const host='121.242.232.211'
+  const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const [battery,setBattery]=useState([])
@@ -135,7 +135,7 @@ function BatteryHourly() {
               title: {
                 text: "SoC(%)",
               },
-              opposite: true, // Display the secondary y-axis on the opposite side of the chart
+                  opposite: true, // Display the secondary y-axis on the opposite side of the chart
             min: 0, // Set the minimum value for the yAxis
             max: 100, // Set the maximum value for the yAxis
             },
@@ -211,7 +211,7 @@ function BatteryHourly() {
             title: {
               text: "SoC(%)",
             },
-            opposite: true, // Display the secondary y-axis on the opposite side of the chart
+                opposite: true, // Display the secondary y-axis on the opposite side of the chart
             min: 0, // Set the minimum value for the yAxis
             max: 100, // Set the maximum value for the yAxis
           },

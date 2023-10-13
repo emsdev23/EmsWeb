@@ -75,7 +75,7 @@ ChartJS.register(
 // ChartJS.register(ArcElement, Tooltip, Legend);
 
 
-const host = "121.242.232.211"
+const host = "43.205.196.66"
 
 
 function DashBoard() {
@@ -159,7 +159,7 @@ function DashBoard() {
   const wms=`http://${host}:5000/wms`
   const solarPerformance=`http://${host}:5000/solarPerformance`
   const sensorurl=`http://${host}:5000/sensorreadings`
-  const meterData=`http://${host}:5000/meterdata`
+  const meterData=`http://localhost:5000/meterdata`
   const acmeterenergy=`http://${host}:5000/acmeterenergy`
   const griddata= `http://${host}:5000/grid`
   const temparature=`http://${host}:5000/thermaltemp`
@@ -311,7 +311,7 @@ function DashBoard() {
   }
  let gridunprocess='';
   for(let i=0;i<grid.length;i++){
-    gridunprocess=(grid[i].cumulative_energy)
+    gridunprocess=(grid[i].Energy)
 
   }
   console.log(grid)
@@ -341,7 +341,7 @@ function DashBoard() {
 
     // powerfactor 
     const  PowerValue=()=>{
-      axios.get("http://121.242.232.211:5000/schneider7230readings").then((res)=>{
+      axios.get(`http://${host}:5000/schneider7230readings`).then((res)=>{
         const dataresponse=res.data
         console.log(dataresponse)
        
@@ -504,45 +504,14 @@ console.log(LEV1_1Status,LEV4_1Status,CP11_1Status,CP12_1Status,CP13_1Status,CP1
 
   
 //---------------------------wheeled in solar card (generation)---------------------------------------------------//
-// initialize variables to store previous and current values
-let previousValue = null;
-let currentValue = null;
-const differenceValue=[]
-const finalDifference=[]
 
 // loop over the array of data and perform subtraction
+let totalsolargeneration=0
 for (let i = 0; i < meter.length; i++) {
-  // set current value to the current item in the array
-  currentValue = meter[i].meterenergy;
-
-  // check if this is not the first item in the array
-  if (previousValue !== null) {
-    // subtract current value from previous value
-    differenceValue.push(currentValue - previousValue);
-
-    // do something with the difference value, such as logging it to the console
-    // console.log(difference);
-  }
-
-  // set previous value to the current value for the next iteration
-  previousValue = currentValue;
+  totalsolargeneration=Math.trunc(meter[i].SolarEnergy)
 }
 
 
-for(let i=0;i<differenceValue.length;i++){
-  if(differenceValue[i]>0 && differenceValue[i]<1){
-   finalDifference.push(differenceValue[i])
-
-}
-}
-
-
-
-const totalgeneration= finalDifference.reduce((accumulator, currentValue) => {
-  return accumulator + currentValue;
-}, 0);
-const totalsolargeneration=(totalgeneration*1000)
-console.log(differenceValue)
 //-----------------------end of calculation---------------------------------------
 
 
@@ -1789,10 +1758,10 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
       <br/>
       <tr class="icon">
         <td><b style={{color:"black"}}></b></td>
-        <td><span>{chillerval[0] === 0 || chillerval[0] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
-        <td>{chillerval[1] === 0 || chillerval[1] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-        <td>{chillerval[2] === 0 || chillerval[2] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-        <td>{chillerval[3] === 0 || chillerval[3] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td><span>{chillerval[0] === 0 || chillerval[0] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td>{chillerval[1] === 0 || chillerval[1] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval[2] === 0 || chillerval[2] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval[3] === 0 || chillerval[3] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
       </tr>
       <br/>
       <tr>
@@ -1805,10 +1774,10 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
       <br/>
       <tr class="icon">
       <td><b style={{color:"black"}}></b></td>
-        <td><span>{chillerval2['chiller5'] <= 800 || chillerval2['chiller5'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
-        <td>{chillerval2['chiller6'] === 0 || chillerval2['chiller6'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-        <td>{chillerval2['chiller7'] === 0 || chillerval2['chiller7'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
-        <td>{chillerval2['chiller8'] === 0 || chillerval2['chiller8'] === undefined ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td><span>{chillerval2['chiller5'] <= 800 || chillerval2['chiller5'] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</span></td>
+        <td>{chillerval2['chiller6'] === 0 || chillerval2['chiller6'] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval2['chiller7'] === 0 || chillerval2['chiller7'] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
+        <td>{chillerval2['chiller8'] === 0 || chillerval2['chiller8'] === null ? <TiWeatherSnow style={{color:"gray",fontSize:'30px'}}/> : <TiWeatherSnow style={{color:"green",fontSize:'30px'}}/>}</td>
       </tr>
     </table>
     <br/>
@@ -1880,7 +1849,7 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
   </div>
 
 
-  
+
 
   <div class="col-sm-4"  style={{marginTop:"5%"}}>
      <div class="card" style={{width:"100%", height:"100%",background: 'lineargradient(to right, lightblue, white)',color:"white"}}>
@@ -1888,16 +1857,6 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
          <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>EV Charger</b>  </h4>
          
          <hr/>
-
-         {/* <div style={{display: 'flex', justifyContent: 'center'}}>
-  <img src={Evcharger} alt="evcharger" width="250px" height="250px" />
-</div> */}
- {/* let LEV1_1Status=""
- let LEV4_1Status=""
- let CP11_1Status=""
- let CP12_1Status=""
- let CP13_1Status=""
- let CP14_1Status="" */}
 <div class="row">
   <div class="col-4">
     <h5 style={{color:"black"}}><b>1</b></h5>
@@ -1961,18 +1920,19 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
     <td><span style={{color:"black"}}>{NoOfchargersused}</span></td>
   </tr>
  
-  <tr>
+  {/*<tr>
     <td><b style={{color:"#5e5d5c"}}>Total hours of usage(hr):</b></td>
     <td><span style={{color:"black"}}>{totalHours}</span></td>
-  </tr>
+  </tr>*/}
 </table>
-         {/* <p> Shavings:</p> */}
+         
        </div>
      </div>
   </div>
 
 
-  <div class="col-sm-12" style={{marginTop:"5%"}}>
+  
+    <div class="col-sm-12" style={{marginTop:"5%"}}>
     <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
       <div class="card-body">
       {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
@@ -1989,8 +1949,6 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
       </div>
     </div>
   </div>
-
-  
 
 
 

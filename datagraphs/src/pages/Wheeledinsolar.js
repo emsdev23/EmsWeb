@@ -13,12 +13,12 @@ import { Link } from "react-router-dom";
 
 
 function WheeledInsolar() {
-  const host='121.242.232.211'
+  const host='43.205.196.66'
     const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
     const [wmsMeterdata,setWmsMeterdata]=useState([])
     const [loading, setLoading] = useState(false);
-    const inveterApi=`http://${host}:5000/initial/wheeledinsolr`
+    const inveterApi=`http://localhost:5000/initial/wheeledinsolr`
     const WmsMeterResponse=`http://${host}:5000/initialgraph/wmsMeter`
 
 
@@ -42,8 +42,8 @@ function WheeledInsolar() {
       setLoading(true);
       try {
         const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
-        const response = await axios.post('http://121.242.232.211:5000/singleday/wheeledinsolr', { date: formattedDate });
-        const meterresponse = await axios.post('http://121.242.232.211:5000/wmsMeter/graphs', { date: formattedDate });
+        const response = await axios.post(`http://localhost:5000/singleday/wheeledinsolr`, { date: formattedDate });
+        const meterresponse = await axios.post(`http://${host}:5000/wmsMeter/graphs`, { date: formattedDate });
         
         setSingledaydata(response.data);
         console.log(singledaydata)

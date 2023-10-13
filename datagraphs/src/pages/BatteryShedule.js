@@ -9,7 +9,7 @@ function BatteryShedule() {
   
   const [pinNumber,setPinNumber]=useState("")
 
-  const host='121.242.232.211'
+  const host='43.205.196.66'
   const [selectedDays, setSelectedDays] = useState([]);
   const [chargestartTime, setChargestartTime] = useState('00:00');
   const [chargeendTime, setChargeendTime] = useState('00:00');
@@ -192,10 +192,10 @@ function BatteryShedule() {
     setChargeendTime("")
     setDischargestarttime("")
     setDischargeendtime("")
- setSlot2chargestartTime("") 
- setSlot2chargeendTime("");
-setSlot2dischargestarttime("");
- setSlot2dischargeendtime("");
+   setSlot2chargestartTime("") 
+   setSlot2chargeendTime("");
+   setSlot2dischargestarttime("");
+   setSlot2dischargeendtime("");
     
 
   };
