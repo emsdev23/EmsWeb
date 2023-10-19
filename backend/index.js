@@ -2612,7 +2612,13 @@ console.log(currentDate)
     let CountLevecrossLimit1_4400To4500_Percentage=0
     let CountLevecrossLimit1_4500To4600_Percentage=0
     let CountLevecrossLimit1_4600_Percentage=0
-    con.query("SELECT * FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'",function(err,result,feilds){
+    let CountRangeof_4100_Above_Below=[0,0]
+    let CountRangeof_4200_Above_Below=[0,0]
+    let CountRangeof_4300_Above_Below=[0,0]
+    let CountRangeof_4400_Above_Below=[0,0]
+    let CountRangeof_4500_Above_Below=[0,0]
+    chakradb.query("SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'",function(err,result,feilds){
+    //chakradb.query(`SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)='${date}'  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'`
       //SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00' order by polledTime desc 
            if(err){
                console.log(err)
@@ -2626,8 +2632,47 @@ console.log(currentDate)
             const minutes = date.getMinutes().toString().padStart(2, '0');
             const seconds = date.getSeconds().toString().padStart(2, '0');
             const timestampVal = `${hours}:${minutes}:${seconds}`;
+            
+          //----------------value range wise above and below---------------------------// 
+            if(response[i].totalApparentPower2>=4100){
+              CountRangeof_4100_Above_Below[0]+=1
+  
+            } 
+            if(response[i].totalApparentPower2<4100){
+              CountRangeof_4100_Above_Below[1]+=1
+  
+            }
+            if(response[i].totalApparentPower2>=4200){
+              CountRangeof_4200_Above_Below[0]+=1
+            }
+  
+            if(response[i].totalApparentPower2<4200){
+              CountRangeof_4200_Above_Below[1]+=1
+            }
+            if(response[i].totalApparentPower2>=4300){
+              CountRangeof_4300_Above_Below[0]+=1
+            }
+            
+            if(response[i].totalApparentPower2<4300){
+              CountRangeof_4300_Above_Below[1]+=1
+            }
+            if(response[i].totalApparentPower2>=4400){
+              CountRangeof_4400_Above_Below[0]+=1
+            }
+            
+            if(response[i].totalApparentPower2<4400){
+              CountRangeof_4400_Above_Below[1]+=1
+            }
+            if(response[i].totalApparentPower2>=4500){
+              CountRangeof_4500_Above_Below[0]+=1
+            }
+            
+            if(response[i].totalApparentPower2<4500){
+              CountRangeof_4500_Above_Below[1]+=1
+            }
 
-        
+            //-------------------end of value range wise above and below--------------------------//
+            
             if(response[i].totalApparentPower2>=4100 && response[i].totalApparentPower2<4200){
               CountLevel1+=1
             }
@@ -2669,6 +2714,7 @@ console.log(currentDate)
               "CountLevecrossLimit1_4400To4500_Percentage":CountLevecrossLimit1_4400To4500_Percentage,
               "CountLevecrossLimit1_4500To4600_Percentage":CountLevecrossLimit1_4500To4600_Percentage,
               "CountLevecrossLimit1_4600_Percentage":CountLevecrossLimit1_4600_Percentage,
+              
              })
 
            
@@ -2748,10 +2794,11 @@ console.log(currentDate)
                //console.log(countLevelZero_Fivety,countLeve2Fivety_Hundred,countLeve3Hundred_oneFivety,countLeve4oneFivety_twohundred)
                
                //console.log(MaxDemand,Time,CountLevel1,CountLevel2,CountLevel3,CountLevel4,CountLevel5,CountLevel6,CountAboveLimit,CountBellowLimit,SumOfEnergy,CountBellowLimitPercentage,CountAboveLimitPercentage)
-               console.log(response.length)
+               console.log( ` total length of the response is ${response.length}`)
                PeakDemandDetails.push({
                 "maxDemand":MaxDemand,
                 "MaxDemandTime":Time,
+                "totalLength":response.length,
                 "CountLevecrossLimit1_4100To4200":CountLevel1,
                 "CountLevecrossLimit2_4200To4300":CountLevel2,
                 "CountLevecrossLimit3_4300To4400":CountLevel3,
@@ -2775,7 +2822,12 @@ console.log(currentDate)
                 "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
                 "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
                 "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
-                "LevelWisePercentage":LevelWisePercentage
+                "LevelWisePercentage":LevelWisePercentage,
+                "CountRangeof_4100_Above_Below":CountRangeof_4100_Above_Below,
+                "CountRangeof_4200_Above_Below":CountRangeof_4200_Above_Below,
+                "CountRangeof_4300_Above_Below":CountRangeof_4300_Above_Below,
+                "CountRangeof_4400_Above_Below":CountRangeof_4400_Above_Below,
+                "CountRangeof_4500_Above_Below":CountRangeof_4500_Above_Below
               })
               console.log(LevelWisePercentage.length)
               res.send(PeakDemandDetails)
@@ -2815,9 +2867,15 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
   let CountLevecrossLimit1_4400To4500_Percentage=0
   let CountLevecrossLimit1_4500To4600_Percentage=0
   let CountLevecrossLimit1_4600_Percentage=0
+  let CountRangeof_4100_Above_Below=[0,0]
+  let CountRangeof_4200_Above_Below=[0,0]
+  let CountRangeof_4300_Above_Below=[0,0]
+  let CountRangeof_4400_Above_Below=[0,0]
+  let CountRangeof_4500_Above_Below=[0,0] 
+  
   // let CountBellowLimitPercentage=0
   // let CountAboveLimitPercentage=0
-  con.query(`SELECT * FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)='${date}'  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'`,function(err,result,feilds){
+  chakradb.query(`SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)='${date}'  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'`,function(err,result,feilds){
     //SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00' order by polledTime desc 
          if(err){
              console.log(err)
@@ -2832,6 +2890,47 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
           const seconds = date.getSeconds().toString().padStart(2, '0');
           const timestampVal = `${hours}:${minutes}:${seconds}`;
 
+
+
+          //------------------------value range wise above and below ------------------------------//
+          if(response[i].totalApparentPower2>=4100){
+            CountRangeof_4100_Above_Below[0]+=1
+
+          } 
+          if(response[i].totalApparentPower2<4100){
+            CountRangeof_4100_Above_Below[1]+=1
+
+          }
+          if(response[i].totalApparentPower2>=4200){
+            CountRangeof_4200_Above_Below[0]+=1
+          }
+
+          if(response[i].totalApparentPower2<4200){
+            CountRangeof_4200_Above_Below[1]+=1
+          }
+          if(response[i].totalApparentPower2>=4300){
+            CountRangeof_4300_Above_Below[0]+=1
+          }
+          
+          if(response[i].totalApparentPower2<4300){
+            CountRangeof_4300_Above_Below[1]+=1
+          }
+          if(response[i].totalApparentPower2>=4400){
+            CountRangeof_4400_Above_Below[0]+=1
+          }
+          
+          if(response[i].totalApparentPower2<4400){
+            CountRangeof_4400_Above_Below[1]+=1
+          }
+          if(response[i].totalApparentPower2>=4500){
+            CountRangeof_4500_Above_Below[0]+=1
+          }
+          
+          if(response[i].totalApparentPower2<4500){
+            CountRangeof_4500_Above_Below[1]+=1
+          }
+
+          //--------------------end of range wise above of below ----------------------------//
       
           if(response[i].totalApparentPower2>=4100 && response[i].totalApparentPower2<4200){
             CountLevel1+=1
@@ -2956,10 +3055,11 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
              //console.log(countLevelZero_Fivety,countLeve2Fivety_Hundred,countLeve3Hundred_oneFivety,countLeve4oneFivety_twohundred)
              
              //console.log(MaxDemand,Time,CountLevel1,CountLevel2,CountLevel3,CountLevel4,CountLevel5,CountLevel6,CountAboveLimit,CountBellowLimit,SumOfEnergy,CountBellowLimitPercentage,CountAboveLimitPercentage)
-             console.log(response.length)
+             console.log( ` total length of the response is ${response.length}`)
              PeakDemandDetails.push({
               "maxDemand":MaxDemand,
               "MaxDemandTime":Time,
+              "totalLength":response.length,
               "CountLevecrossLimit1_4100To4200":CountLevel1,
               "CountLevecrossLimit2_4200To4300":CountLevel2,
               "CountLevecrossLimit3_4300To4400":CountLevel3,
@@ -2983,7 +3083,12 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
               "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
               "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
               "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
-              "LevelWisePercentage":LevelWisePercentage
+              "LevelWisePercentage":LevelWisePercentage,
+              "CountRangeof_4100_Above_Below":CountRangeof_4100_Above_Below,
+              "CountRangeof_4200_Above_Below":CountRangeof_4200_Above_Below,
+              "CountRangeof_4300_Above_Below":CountRangeof_4300_Above_Below,
+              "CountRangeof_4400_Above_Below":CountRangeof_4400_Above_Below,
+              "CountRangeof_4500_Above_Below":CountRangeof_4500_Above_Below
             })
             console.log(LevelWisePercentage.length)
             res.send(PeakDemandDetails)
@@ -2995,6 +3100,76 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
     
 })
 //------------------------------------- END of api ---------------------------------------------//
+
+//--------------------------------Peak analysis hourly Percentage graph (4100-4600)-----------//
+app.get("/PeakDemand/Analysis/HourlyPercentage/graph",async(req,res)=>{
+  const resultValue=[]
+
+  chakradb.query("SELECT HOUR(polledTime) AS hour_of_day, SUM(CASE WHEN totalApparentPower2 BETWEEN 4100 AND 4199 THEN 1 ELSE 0 END) AS count_4100_to_4199,SUM(CASE WHEN totalApparentPower2 BETWEEN 4200 AND 4299 THEN 1 ELSE 0 END) AS count_4200_to_4299,SUM(CASE WHEN totalApparentPower2 BETWEEN 4300 AND 4399 THEN 1 ELSE 0 END) AS count_4300_to_4399,SUM(CASE WHEN totalApparentPower2 BETWEEN 4400 AND 4499 THEN 1 ELSE 0 END) AS count_4400_to_4499,SUM(CASE WHEN totalApparentPower2 BETWEEN 4500 AND 4599 THEN 1 ELSE 0 END) AS count_4500_to_4599,SUM(CASE WHEN totalApparentPower2 >= 4600 THEN 1 ELSE 0 END) AS count_greater_than_4600 FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling WHERE DATE(polledTime) = curdate() GROUP BY hour_of_day",function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+             resultValue.push({
+              "Hours":response[i].hour_of_day,
+              "count_4100_to_4199":parseInt(response[i].count_4100_to_4199),
+              "count_4200_to_4299":parseInt(response[i].count_4200_to_4299),
+              "count_4300_to_4399":parseInt(response[i].count_4300_to_4399),
+              "count_4400_to_4499":parseInt(response[i].count_4400_to_4499),
+              "count_4500_to_4599":parseInt(response[i].count_4500_to_4599),
+              "count_greater_than_4600":parseInt(response[i].count_greater_than_4600)
+            })
+
+          
+          }
+          res.send(resultValue)
+          console.log(resultValue.length)
+      }
+  })
+  
+})
+
+//----------------------------------------------END of api------------------------------------//
+
+
+//-----------------------------Peak analysis Hourly Percentage graph (4100 - 4600)-------------//
+app.post("/PeakDemand/Analysis/HourlyPercentage/graph/DateFiltered",async(req,res)=>{
+  const {date}=req.body
+  const resultValue=[]
+
+  chakradb.query(`SELECT HOUR(polledTime) AS hour_of_day, SUM(CASE WHEN totalApparentPower2 BETWEEN 4100 AND 4199 THEN 1 ELSE 0 END) AS count_4100_to_4199,SUM(CASE WHEN totalApparentPower2 BETWEEN 4200 AND 4299 THEN 1 ELSE 0 END) AS count_4200_to_4299,SUM(CASE WHEN totalApparentPower2 BETWEEN 4300 AND 4399 THEN 1 ELSE 0 END) AS count_4300_to_4399,SUM(CASE WHEN totalApparentPower2 BETWEEN 4400 AND 4499 THEN 1 ELSE 0 END) AS count_4400_to_4499,SUM(CASE WHEN totalApparentPower2 BETWEEN 4500 AND 4599 THEN 1 ELSE 0 END) AS count_4500_to_4599,SUM(CASE WHEN totalApparentPower2 >= 4600 THEN 1 ELSE 0 END) AS count_greater_than_4600 FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling WHERE DATE(polledTime) = '${date}' GROUP BY hour_of_day`,function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+             resultValue.push({
+              "Hours":response[i].hour_of_day,
+              "count_4100_to_4199":parseInt(response[i].count_4100_to_4199),
+              "count_4200_to_4299":parseInt(response[i].count_4200_to_4299),
+              "count_4300_to_4399":parseInt(response[i].count_4300_to_4399),
+              "count_4400_to_4499":parseInt(response[i].count_4400_to_4499),
+              "count_4500_to_4599":parseInt(response[i].count_4500_to_4599),
+              "count_greater_than_4600":parseInt(response[i].count_greater_than_4600)
+            })
+
+          
+          }
+          res.send(resultValue)
+          console.log(resultValue.length)
+      }
+  })
+  
+})
+//------------------------------------------------  END of api-----------------------------------//
+
+
+
   //-----------------------------------------PeakDeamnd Hourly analysis---------------------------------//
   app.get("/PeakDemand/Analysis/Hourly",async(req,res)=>{
     const resultValue=[]
@@ -3061,6 +3236,40 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
 })
   //--------------------------------------END of api-----------------------------------------------------//
 
+
+  //-----------------------------Peak analysis value rage filter---------------------------------------------------//
+  app.post("/PeakDemand/Analysis/energyRange/Filtered",async(req,res)=>{
+    const resultValue=[]
+    const {date}=req.body
+    const {StartRange}=req.body
+    const {EndRange}=req.body
+  
+    con.query(`SELECT totalApparentPower2, polledTime FROM bmsunprocessed_prodv13.hvacSchneider7230Polling  WHERE DATE(polledTime) = '${date}'  AND totalApparentPower2 BETWEEN ${StartRange} AND ${EndRange};`,function(err,result,feilds){
+     // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+      if(err){
+            console.log(err)
+        }
+        else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            for(let i=0;i<response.length;i++){
+              let date = new Date(response[i].polledTime);
+              let FormatedDtae=date.toLocaleString()
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              // const seconds = date.getSeconds().toString().padStart(2, '0');
+              const timestamp = `${hours}:${minutes}`;
+              resultValue.push({"PolledTime":FormatedDtae,"PeakDemand":response[i].totalApparentPower2})
+              
+
+            }
+            
+            res.send(resultValue)
+            console.log(`PeakRange between ${StartRange} to ${EndRange}  applied and length of the value is ${response.length} `)
+        }
+    })
+    
+})
+  //------------------------------------  END of API---------------------------------------------------//
 
   //---------------------------------peakDemand Sum of energy api---------------------------------------//
   app.get("/PeakDemand/Analysis/SumOfEnergy",async(req,res)=>{
