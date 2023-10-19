@@ -30,9 +30,15 @@ import LTOAnalytics from './pages/LTOAnalytics';
 import HotWaterStorage from './pages/HotWaterStorage';
 import Diesel_Analysis from './pages/Diesel_Analysis';
 
+
+
 function LocationContext(props) {
+
+
   const location = useLocation();
   const isDocumentationRoute = location.pathname === '/Battery';
+
+  
 
   return (
     <>
