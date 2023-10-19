@@ -82,11 +82,11 @@ export const SidebarData = [
         path: '/PeakDemandAnalysis',
         icon: <AnalyticsIcon />,
       },
-      {
-        title: 'HotWter_Storage',
-        path: '/HotWter_Storage',
-        icon: <HotTubIcon />,
-      },
+      // {
+      //   title: 'HotWter_Storage',
+      //   path: '/HotWter_Storage',
+      //   icon: <HotTubIcon />,
+      // },
       {
         title: 'ChillersStatus',
         path: '/Status/chillersStatus',
