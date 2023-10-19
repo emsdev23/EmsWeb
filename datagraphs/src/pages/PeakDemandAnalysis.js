@@ -21,13 +21,18 @@ function PeakDemandAnalysis() {
     const [PeakDemandAnalysis1,setPeakDemandAnalysis1]=useState([])
     const [PeakDemandHourlyAnalysis,setPeakDemandHourlyAnalysis]=useState([])
     const [sunmOfEnergy,setSumOfEnergy]=useState([])
+    const [PeakPercentageHourly,setPeakPercentageHourly]=useState([])
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [singledaydata,setSingledaydata]=useState([])
     const [PeakDemandHourlyAnalysisFiltered,setPeakDemandHourlyAnalysisFiltered]=useState([])
     const [sumOfEnergyFiltered,setSumOfEnergyFiltered]=useState([])
+    const [PeakHourlyPercentageFiltered,setPeakHourlyPercentageFiltered]=useState([])
 
+    const[filterValueRange,setFilterValueRange]=useState([])
+    const [filteredResultAbove,setFilteredResultAbove]=useState(null)
+    const [filteredResultBelow,setFilteredResultBelow]=useState(null)
 
      //---------function to handle change in inputTag----------------//
      const handleDateChange = (selectedDate) => {
@@ -49,10 +54,12 @@ const fetchData = async () => {
     const response = await axios.post(`http://${host}:5000/PeakDemand/Dashboard/Analysis/DateFiltered`, {date: formattedStartDate});
     const PeakDemandHourly_response = await axios.post(`http://${host}:5000/PeakDemand/Analysis/Hourly/DateFiltered`, {date: formattedStartDate});
     const SumOfEnergy = await axios.post(`http://${host}:5000/PeakDemand/Analysis/SumOfEnergy/dateFiltered`, {date: formattedStartDate});
+    const PeakEnergyHourlyGraph = await axios.post(`http://${host}:5000/PeakDemand/Analysis/HourlyPercentage/graph/DateFiltered`, {date: formattedStartDate});
   
     setSingledaydata(response.data);
     setPeakDemandHourlyAnalysisFiltered(PeakDemandHourly_response.data)
     setSumOfEnergyFiltered(SumOfEnergy.data)
+    setPeakHourlyPercentageFiltered(PeakEnergyHourlyGraph.data)
     setLoading(false);
     console.log(formattedStartDate)
   } catch (error) {
@@ -108,135 +115,34 @@ useEffect(() => {
       console.log(err);
     });
 }, []);
+
 //-------------------------end------------------//
-const Time=[]
-const percentageOf_4100_TO_4200=[]
-const percentageOf_4200_TO_4300=[]
-const percentageOf_4300_TO_4400=[]
-const percentageOf_4400_TO_4500=[]
-const percentageOf_4500_TO_4600=[]
-const percentageOf_4600=[]
-
-if(selectedDate==null){
-  let levelWisePercentageGraph = PeakDemandAnalysis1.map((data) => data.LevelWisePercentage);
-let levelWisePercentageGraphEneResult = levelWisePercentageGraph[0];
-
-console.log(levelWisePercentageGraph);
 
 
-if (Array.isArray(levelWisePercentageGraphEneResult)) {
-  levelWisePercentageGraphEneResult.map((value) => {
-    Time.push(value.Time);
-    percentageOf_4100_TO_4200.push(value.CountLevecrossLimit1_4100To4200_Percentage)
-    percentageOf_4200_TO_4300.push(value.CountLevecrossLimit1_4200To4300_Percentage)
-    percentageOf_4300_TO_4400.push(value.CountLevecrossLimit1_4300To4400_Percentage)
-    percentageOf_4400_TO_4500.push(value.CountLevecrossLimit1_4400To4500_Percentage)
-    percentageOf_4500_TO_4600.push(value.CountLevecrossLimit1_4500To4600_Percentage)
-    percentageOf_4600.push(value.CountLevecrossLimit6_4600)
-  });
-} else {
-  console.error("levelWisePercentageGraphEneResult is not an array or is undefined");
-}
-
-}
-else{
-  let levelWisePercentageGraph = singledaydata.map((data) => data.LevelWisePercentage);
-let levelWisePercentageGraphEneResult = levelWisePercentageGraph[0];
-
-console.log(levelWisePercentageGraph);
-if (Array.isArray(levelWisePercentageGraphEneResult)) {
-  levelWisePercentageGraphEneResult.map((value) => {
-    Time.push(value.Time);
-    percentageOf_4100_TO_4200.push(value.CountLevecrossLimit1_4100To4200_Percentage)
-    percentageOf_4200_TO_4300.push(value.CountLevecrossLimit1_4200To4300_Percentage)
-    percentageOf_4300_TO_4400.push(value.CountLevecrossLimit1_4300To4400_Percentage)
-    percentageOf_4400_TO_4500.push(value.CountLevecrossLimit1_4400To4500_Percentage)
-    percentageOf_4500_TO_4600.push(value.CountLevecrossLimit1_4500To4600_Percentage)
-    percentageOf_4600.push(value.CountLevecrossLimit1_4600_Percentage)
-  });
-} else {
-  console.error("levelWisePercentageGraphEneResult is not an array or is undefined");
-}
-}
+//-------------------------Peak Percentage Hourly graph ---------------------//
+useEffect(() => {
+  axios.get(`http://${host}:5000/PeakDemand/Analysis/HourlyPercentage/graph`)
+    .then((res) => {
+      const dataResponse = res.data;
+      setPeakPercentageHourly(dataResponse);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}, []);
+//--------------------------------------  END -------------------------------------//
 
 
 
-console.log(percentageOf_4100_TO_4200)
-//----------Peak graphs--------------//
-const PeakDemandGraph={
-  chart: {
-      type: 'line'
-  },
-  title: {
-      text: 'Percentage Of Apparent Power crossing 4100 kvA'
-  },
-  // subtitle: {
-  //     text: 'Source: WorldClimate.com'
-  // },
-  xAxis: {
-      categories:Time.map((Time)=>Time),
-      crosshair: true
-  },
-  yAxis: {
-      min: 0,
-      title: {
-          text: '% Of Apparent Power crossing 4100 kvA'
-      }
-  },
-  tooltip: {
-      headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-      pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-          '<td style="padding:0"><b>{point.y:.1f}%</b></td></tr>',
-      footerFormat: '</table>',
-      shared: true,
-      useHTML: true
-  },
-  plotOptions: {
-      column: {
-          pointPadding: 0.2,
-          borderWidth: 0
-      }
-  },
-  series: [{
-      name: '%4100-4200',
-      data:percentageOf_4100_TO_4200.map((value)=>(value)),
-      //type: 'column'
 
-  },
-  {
-    name: '%4200-4300',
-    data:percentageOf_4200_TO_4300.map((value)=>(value)),
-    //type: 'column'
 
-},
-{
-  name: '%4300-4400',
-  data:percentageOf_4300_TO_4400.map((value)=>(value)),
-  //type: 'column'
-
-},
-{
-  name: '%4400-4500',
-  data:percentageOf_4400_TO_4500.map((value)=>(value))
-
-},
-{
-  name: '%4500-4600',
-  data:percentageOf_4500_TO_4600.map((value)=>(value))
-
-},
-{
-  name: '%4600',
-  data:percentageOf_4600.map((value)=>(value))
-
-}]
-};
-//-----------------END-----------------------//
+ 
 
 
 
   let maxDemand=0
   let MaxDemandTime=""
+  let TotalLengthOfResponse=0
   let CountLevecrossLimit1_4100To4200=0
   let CountLevecrossLimit2_4200To4300=0
   let CountLevecrossLimit3_4300To4400=0
@@ -259,6 +165,21 @@ const PeakDemandGraph={
   let countLeve4oneFivety_twohundredPercentage=0
   let countLeve5twohundred_twoFiftyPercentage=0
   let countLeve6twoFiftyPercentage=0
+
+  let CountRangeof_4100_Above=0
+  let CountRangeof_4100_Below=0
+  let CountRangeof_4200_Above=0
+  let CountRangeof_4200_Below=0
+  let CountRangeof_4300_Above=0
+  let CountRangeof_4300_Below=0
+  let CountRangeof_4400_Above=0
+  let CountRangeof_4400_Below=0
+  let CountRangeof_4500_Above=0
+  let CountRangeof_4500_Below=0
+
+
+
+
 
 
 
@@ -288,6 +209,17 @@ const PeakDemandGraph={
       countLeve4oneFivety_twohundredPercentage=PeakDemandAnalysis1[i].countLeve4oneFivety_twohundredPercentage
       countLeve5twohundred_twoFiftyPercentage=PeakDemandAnalysis1[i].countLeve5twohundred_twoFiftyPercentage
       countLeve6twoFiftyPercentage=PeakDemandAnalysis1[i].countLeve6twoFiftyPercentage
+      CountRangeof_4100_Above=PeakDemandAnalysis1[i].CountRangeof_4100_Above_Below[0]
+      CountRangeof_4100_Below=PeakDemandAnalysis1[i].CountRangeof_4100_Above_Below[1]
+      CountRangeof_4200_Above=PeakDemandAnalysis1[i].CountRangeof_4200_Above_Below[0]
+      CountRangeof_4200_Below=PeakDemandAnalysis1[i].CountRangeof_4200_Above_Below[1]
+      CountRangeof_4300_Above=PeakDemandAnalysis1[i].CountRangeof_4300_Above_Below[0]
+      CountRangeof_4300_Below=PeakDemandAnalysis1[i].CountRangeof_4300_Above_Below[1]
+      CountRangeof_4400_Above=PeakDemandAnalysis1[i].CountRangeof_4400_Above_Below[0]
+      CountRangeof_4400_Below=PeakDemandAnalysis1[i].CountRangeof_4400_Above_Below[1]
+      CountRangeof_4500_Above=PeakDemandAnalysis1[i].CountRangeof_4500_Above_Below[0]
+      CountRangeof_4500_Below=PeakDemandAnalysis1[i].CountRangeof_4500_Above_Below[1]
+      TotalLengthOfResponse=PeakDemandAnalysis1[i].totalLength
   }
 
   }
@@ -317,11 +249,31 @@ const PeakDemandGraph={
       countLeve4oneFivety_twohundredPercentage=singledaydata[i].countLeve4oneFivety_twohundredPercentage
       countLeve5twohundred_twoFiftyPercentage=singledaydata[i].countLeve5twohundred_twoFiftyPercentage
       countLeve6twoFiftyPercentage=singledaydata[i].countLeve6twoFiftyPercentage
+      CountRangeof_4100_Above=singledaydata[i].CountRangeof_4100_Above_Below[0]
+      CountRangeof_4100_Below=singledaydata[i].CountRangeof_4100_Above_Below[1]
+      CountRangeof_4200_Above=singledaydata[i].CountRangeof_4200_Above_Below[0]
+      CountRangeof_4200_Below=singledaydata[i].CountRangeof_4200_Above_Below[1]
+      CountRangeof_4300_Above=singledaydata[i].CountRangeof_4300_Above_Below[0]
+      CountRangeof_4300_Below=singledaydata[i].CountRangeof_4300_Above_Below[1]
+      CountRangeof_4400_Above=singledaydata[i].CountRangeof_4400_Above_Below[0]
+      CountRangeof_4400_Below=singledaydata[i].CountRangeof_4400_Above_Below[1]
+      CountRangeof_4500_Above=singledaydata[i].CountRangeof_4500_Above_Below[0]
+      CountRangeof_4500_Below=singledaydata[i].CountRangeof_4500_Above_Below[1]
+      TotalLengthOfResponse=singledaydata[i].totalLength
   }
   }
   
 
 
+
+
+   //onchange function for value Range  filter
+   const handleAlertChange = (event) => {
+    setFilterValueRange(event.target.value);
+  };
+
+
+  
 
 
 let HourlyPeakValue=[]
@@ -344,15 +296,166 @@ else{
 }
 
 
-console.log(HourlyPeakValue)
+//console.log(HourlyPeakValue)
+console.log(` count above 4100 ${CountRangeof_4300_Above} and count below 4100 ${CountRangeof_4300_Below}`)
+console.log(filterValueRange)
+console.log(filteredResultAbove,filteredResultBelow)
 
 const now = new Date();
 const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
 const [month, day, year] = local.split("/"); // Split the date by "/"
 const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
 const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
+
+
+//----------Peak graphs--------------//
+const PeakDemandGraph={
+  chart: {
+      type: 'column'
+  },
+  title: {
+      text: 'Percentage Of Apparent Power crossing 4100 kvA'
+  },
+  // subtitle: {
+  //     text: 'Source: WorldClimate.com' 
+  // },
+  xAxis: {
+      categories:PeakPercentageHourly.map((Time)=>Time.Hours),
+      crosshair: true
+  },
+  yAxis: {
+      min: 0,
+      title: {
+          text: '% Of Apparent Power crossing 4100 kvA'
+      }
+  },
+  tooltip: {
+      headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+      pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+          '<td style="padding:0"><b>{point.y:.1f}%</b></td></tr>',
+      footerFormat: '</table>',
+      shared: true,
+      useHTML: true
+  },
+  plotOptions: {
+    column: {
+      borderRadius: '40%',
+      pointWidth: 20,
+      dataLabels: {
+        enabled: false, // Enable data labels for the columns
+      },
+    },
+  },
+  series: [{
+      name: '%4100-4200',
+      data:PeakPercentageHourly.map((value)=>((value.count_4100_to_4199/TotalLengthOfResponse)*100)),
+      //type: 'column'
+
+  },
+  {
+    name: '%4200-4300',
+    data:PeakPercentageHourly.map((value)=>((value.count_4200_to_4299/TotalLengthOfResponse)*100)),
+    //type: 'column'
+
+},
+{
+  name: '%4300-4400',
+  data:PeakPercentageHourly.map((value)=>((value.count_4300_to_4399/TotalLengthOfResponse)*100)),
+  //type: 'column'
+
+},
+{
+  name: '%4400-4500',
+  data:PeakPercentageHourly.map((value)=>((value.count_4400_to_4499/TotalLengthOfResponse)*100))
+
+},
+{
+  name: '%4500-4600',
+  data:PeakPercentageHourly.map((value)=>((value.count_4500_to_4599/TotalLengthOfResponse)*100))
+
+},
+{
+  name: '%4600',
+  data:PeakPercentageHourly.map((value)=>((value.count_greater_than_4600/TotalLengthOfResponse)*100))
+}]
+};
+//-----------------END-----------------------//
+
+
+//---------------------------Peak graph date filter-------------------------------------//
+const PeakDemandGraphDateFilter={
+  chart: {
+      type: 'column'
+  },
+  title: {
+      text: 'Percentage Of Apparent Power crossing 4100 kvA'
+  },
+  // subtitle: {
+  //     text: 'Source: WorldClimate.com' 
+  // },
+  xAxis: {
+      categories:PeakHourlyPercentageFiltered.map((Time)=>Time.Hours),
+      crosshair: true
+  },
+  yAxis: {
+      min: 0,
+      title: {
+          text: '% Of Apparent Power crossing 4100 kvA'
+      }
+  },
+  tooltip: {
+      headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+      pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+          '<td style="padding:0"><b>{point.y:.1f}%</b></td></tr>',
+      footerFormat: '</table>',
+      shared: true,
+      useHTML: true
+  },
+  plotOptions: {
+    column: {
+      borderRadius: '40%',
+      pointWidth: 20,
+      dataLabels: {
+        enabled: false, // Enable data labels for the columns
+      },
+    },
+  },
+  series: [{
+      name: '%4100-4200',
+      data:PeakHourlyPercentageFiltered.map((value)=>((value.count_4100_to_4199/TotalLengthOfResponse)*100)),
+      //type: 'column'
+
+  },
+  {
+    name: '%4200-4300',
+    data:PeakHourlyPercentageFiltered.map((value)=>((value.count_4200_to_4299/TotalLengthOfResponse)*100)),
+    //type: 'column'
+
+},
+{
+  name: '%4300-4400',
+  data:PeakHourlyPercentageFiltered.map((value)=>((value.count_4300_to_4399/TotalLengthOfResponse)*100)),
+  //type: 'column'
+
+},
+{
+  name: '%4400-4500',
+  data:PeakHourlyPercentageFiltered.map((value)=>((value.count_4400_to_4499/TotalLengthOfResponse)*100))
+
+},
+{
+  name: '%4500-4600',
+  data:PeakHourlyPercentageFiltered.map((value)=>((value.count_4500_to_4599/TotalLengthOfResponse)*100))
+
+},
+{
+  name: '%4600',
+  data:PeakHourlyPercentageFiltered.map((value)=>((value.count_greater_than_4600/TotalLengthOfResponse)*100))
+}]
+};
+//-----------------------------------------END--------------------------------------------//
   return (
-    <div> 
+    <div style={{margin:"20px"}}> 
 
 <div> 
         <h2 style={{textAlign:"center",marginTop:"10px"}}><b>Peak Demand Statistics Between 09:00 - 19:00</b> </h2>
@@ -363,13 +466,13 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
+          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange}  placeholderText={dateValue}/>
         </label>
       </div>
      
     </div>
   </div>
-  <div class="col-2"><h3>{dateValue}</h3></div>
+  {/* <div class="col-2"><h3>{dateValue}</h3></div> */}
 
  
 </div>
@@ -411,7 +514,7 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
             <td>4300-4400 (kvA)</td>
             <td>4400-4500 (kvA)</td>
             <td>4500-4600 (kvA)</td>
-            <td>4100-4200 (kvA)</td>
+            <td>4600 (kvA)</td>
         </tr>
     </thead>
     <tbody> 
@@ -507,27 +610,77 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
           
           <div style={{}}> 
         {/* <h6 class="card-title" style={{textAlign:"center"}}><b>Count Of Apperent Power crossing 4100 kvA Between 09:00-19:00hrs</b></h6> */}
-<HighchartsReact highcharts={Highcharts} options={PeakDemandGraph} height="300px" />
+         {
+          selectedDate==null?<HighchartsReact highcharts={Highcharts} options={PeakDemandGraph} height="300px" />:<HighchartsReact highcharts={Highcharts} options={PeakDemandGraphDateFilter} height="300px" />
+         }
+
         </div>
    
         </Grid>
         <Grid item xs>
          
           <div > 
-        <h6 class="card-title" style={{textAlign:"center"}}><b>Peak Demand Count Statistics</b></h6>
-        <table class="table table-dark table-hover">
-    <thead> 
-        <tr> 
-            <td>Count Of Demand Bellow 4100</td>
-            <td>Count Of Demand Above 4100</td>
+        {/* <h6 class="card-title" style={{textAlign:"center"}}><b>Peak Demand Count Statistics</b></h6> */}
+        <select
+        className="form-select"
+        aria-label="Default select example"
+        style={{ width: "100%"}}
+        value={filterValueRange}
+        onChange={handleAlertChange}
+      
+      >
+  <option value="4100" >Peak Demand Count Statistics</option>
+  <option value="4100">4100</option>
+  <option value="4200">4200</option>
+  <option value="4300">4300</option>
+  <option value="4400">4400</option>
+  <option value="4500">4500</option>
+</select>
+<table className="table table-dark table-hover">
+      <thead>
+        <tr>
+          <td>Count Of Demand Below__{filterValueRange==""?4100:filterValueRange}</td>
+          <td>Count Of Demand Above__{filterValueRange==""?4100:filterValueRange}</td>
         </tr>
-    </thead>
-    <tbody> 
-        <tr> 
-            <td style={{textAlign:"center"}}>{CountBellow_4100}</td>
-            <td style={{textAlign:"center"}}>{CountAbove_4100}</td>
+      </thead>
+      <tbody>
+        <tr>
+          <td style={{ textAlign: "center" }}>
+            {/* {filterValueRange == null ? CountBellow_4100 : filteredResultBelow} */}
+            {filterValueRange == ""
+              ? CountBellow_4100
+              : filterValueRange == 4100
+              ? CountRangeof_4100_Below
+              : filterValueRange == 4200
+              ? CountRangeof_4200_Below
+              : filterValueRange == 4300
+              ? CountRangeof_4300_Below
+              : filterValueRange == 4400
+              ? CountRangeof_4400_Below
+              : filterValueRange == 4500
+              ? CountRangeof_4500_Below:null
+             }
+
+          </td>
+          <td style={{ textAlign: "center" }}> 
+          {filterValueRange == ""
+              ? CountAbove_4100
+              : filterValueRange == 4100
+              ? CountRangeof_4100_Above
+              : filterValueRange == 4200
+              ? CountRangeof_4200_Above
+              : filterValueRange == 4300
+              ? CountRangeof_4300_Above
+              : filterValueRange == 4400
+              ? CountRangeof_4400_Above
+              : filterValueRange == 4500
+              ? CountRangeof_4500_Above
+              :null
+              }
+          
+          </td>
         </tr>
-    </tbody>
+      </tbody>
     </table>
         </div>
         <div > 
@@ -543,12 +696,38 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
         <tr> 
             <td style={{textAlign:"center"}}>
             <div class="progress" style={{height:"30px",color:"black",background:"gray"}}>
-              <div class="progress-bar" role="progressbar" style={{ width: `100%`,color:"black",background:"#85BB65"}} aria-valuenow={countBellowPercentage_4100} aria-valuemin="0" aria-valuemax="100"><b>{countBellowPercentage_4100}%</b></div>
+              <div class="progress-bar" role="progressbar" style={{ width: `100%`,color:"black",background:"#85BB65"}} aria-valuemin="0" aria-valuemax="100"><b>   
+              {filterValueRange == ""
+              ? ((CountBellow_4100/TotalLengthOfResponse)*100).toFixed(2)
+              : filterValueRange == 4100
+              ? ((CountRangeof_4100_Below/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4200
+              ? ((CountRangeof_4200_Below/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4300
+              ? ((CountRangeof_4300_Below/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4400
+              ? ((CountRangeof_4400_Below/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4500
+              ? ((CountRangeof_4500_Below/parseInt(TotalLengthOfResponse))*100).toFixed(2):null
+             }%</b></div>
               </div>
             </td>
             <td>
             <div class="progress" style={{height:"30px",color:"black",background:"gray"}}>
-              <div class="progress-bar" role="progressbar" style={{ width: `100%`,color:"black",background:"#85BB65"}} aria-valuenow={CountAbovePercentage_4100} aria-valuemin="0" aria-valuemax="100"><b>{CountAbovePercentage_4100}%</b></div>
+              <div class="progress-bar" role="progressbar" style={{ width: `100%`,color:"black",background:"#85BB65"}} aria-valuemin="0" aria-valuemax="100"><b>
+              {filterValueRange == ""
+              ? ((CountAbove_4100/TotalLengthOfResponse)*100).toFixed(2)
+              : filterValueRange == 4100
+              ? ((CountRangeof_4100_Above/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4200
+              ? ((CountRangeof_4200_Above/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4300
+              ? ((CountRangeof_4300_Above/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4400
+              ? ((CountRangeof_4400_Above/parseInt(TotalLengthOfResponse))*100).toFixed(2)
+              : filterValueRange == 4500
+              ? ((CountRangeof_4500_Above/parseInt(TotalLengthOfResponse))*100).toFixed(2):null
+             }%</b></div>
               </div>
             </td>
         </tr>

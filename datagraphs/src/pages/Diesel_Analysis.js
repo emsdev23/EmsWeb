@@ -222,9 +222,9 @@ const dateValue = filterDate ? new Date(filterDate.getTime() - filterDate.getTim
   <div class="col-9" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b> Date :-</b></h5><DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} />
+          <h5 style={{color:"brown"}}><b> Date :-</b></h5><DatePicker id="date" selected={filterDate} onChange={handleEndDateChange} placeholderText={dateValue} />
           
-          <h3 style={{marginLeft:"135%"}}>{dateValue}</h3>
+          {/* <h3 style={{marginLeft:"135%"}}>{dateValue}</h3> */}
           
         </label>
         
