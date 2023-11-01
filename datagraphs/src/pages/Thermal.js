@@ -219,6 +219,11 @@ const Thermal = () => {
                   },
                   }
                 }
+
+                const now = new Date();
+                const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
+                const [month, day, year] = local.split("/"); // Split the date by "/"
+                const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
   
       return(
         <div>
@@ -228,7 +233,7 @@ const Thermal = () => {
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
+          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} placeholderText={currentdate} />
         </label>
       </div>
      

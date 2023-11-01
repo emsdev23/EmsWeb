@@ -10,8 +10,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 function Diesel_Analysis() {
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
-
-    const Diesel_Api="http://localhost:5000/Deisel/analytics/graph"
+ 
+    const host="43.205.196.66"
+    const Diesel_Api=`http://${host}:5000/Deisel/analytics/graph`
 
     const [DieselData, setDieselData] = useState([]);
 
@@ -46,7 +47,7 @@ function Diesel_Analysis() {
         try {
           const formattedStartDate = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post('http://localhost:5000/Deisel/analytics/graph/DateFilter', {
+          const response = await axios.post(`http://${host}:5000/Deisel/analytics/graph/DateFilter`, {
             date: formattedStartDate,
           });
         

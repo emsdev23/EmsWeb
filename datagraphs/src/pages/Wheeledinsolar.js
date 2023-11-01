@@ -18,7 +18,7 @@ function WheeledInsolar() {
     const [singledaydata,setSingledaydata]=useState([])
     const [wmsMeterdata,setWmsMeterdata]=useState([])
     const [loading, setLoading] = useState(false);
-    const inveterApi=`http://localhost:5000/initial/wheeledinsolr`
+    const inveterApi=`http://${host}:5000/initial/wheeledinsolr`
     const WmsMeterResponse=`http://${host}:5000/initialgraph/wmsMeter`
 
 
@@ -42,7 +42,7 @@ function WheeledInsolar() {
       setLoading(true);
       try {
         const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
-        const response = await axios.post(`http://localhost:5000/singleday/wheeledinsolr`, { date: formattedDate });
+        const response = await axios.post(`http://${host}:5000/singleday/wheeledinsolr`, { date: formattedDate });
         const meterresponse = await axios.post(`http://${host}:5000/wmsMeter/graphs`, { date: formattedDate });
         
         setSingledaydata(response.data);

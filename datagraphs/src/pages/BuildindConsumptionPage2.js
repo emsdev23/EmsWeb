@@ -6,6 +6,7 @@ import Highcharts from 'highcharts';
 import exportingInit from 'highcharts/modules/exporting';
 import exportDataInit from 'highcharts/modules/export-data';
 import DatePicker from 'react-datepicker';
+import Table from 'react-bootstrap/Table';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function BuildindConsumptionPage2() {
@@ -14,9 +15,13 @@ function BuildindConsumptionPage2() {
     exportDataInit(Highcharts);
     const [graph,setGraph]=useState([])
     const graphDataUrl=`http://${host}:5000/BuildingConsumptionPage2`
+    const buildingHighlightsApi="http://localhost:5000/buildingconsumption/Highlights"
+    const [buildingHighlights,setBuildingHighlights]=useState([])
 
 
     const [data, setData] = useState([]);
+    
+    const [buildingHighlightsDateFilter,setBuildingHighlightsDateFilter]=useState([])
     const [systemOverviewfilterDate, setSystemOverviewfilterDate] = useState(null);
     
 
@@ -32,6 +37,20 @@ function BuildindConsumptionPage2() {
       }, []);
 
 
+      //---------function for buildingHighlights---------------// 
+      useEffect(() => {
+        axios.get(buildingHighlightsApi)
+          .then((res) => {
+            const dataResponse = res.data;
+            setBuildingHighlights(dataResponse);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }, []);
+      //-------------------------end------------------------------//
+
+
       const handleDateChange = (date) => {
         setSystemOverviewfilterDate(date);
       };
@@ -42,11 +61,11 @@ function BuildindConsumptionPage2() {
         try {
           const formattedDate = systemOverviewfilterDate ? new Date(systemOverviewfilterDate.getTime() - systemOverviewfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://${host}:5000/filteredGraph/BuildingConsumptionPage2`, {
-            date: formattedDate,
-          });
+          const response = await axios.post(`http://${host}:5000/filteredGraph/BuildingConsumptionPage2`, {date: formattedDate,});
+          const buildingHighlightsResponse= await axios.post("http://localhost:5000/buildingconsumption/Highlights/DateFiltered", {date: formattedDate,});
         
           setData(response.data);
+          setBuildingHighlightsDateFilter(buildingHighlightsResponse.data)
           // setLoading(false);
           console.log(formattedDate)
         } catch (error) {
@@ -336,6 +355,36 @@ function BuildindConsumptionPage2() {
      
     // ...
   };
+  let  gridEnergy=0
+  let  rooftopEnergy=0
+  let  wheeledinEnergy=0
+  let  peakDemand=0
+  let   Diesel=0
+  
+
+  if(systemOverviewfilterDate==null){
+    for(let i=0;i<buildingHighlights.length;i++){
+      gridEnergy=buildingHighlights[i].gridEnergy
+      rooftopEnergy=buildingHighlights[i].rooftopEnergy
+      wheeledinEnergy=buildingHighlights[i].wheeledinEnergy
+      peakDemand=buildingHighlights[i].peakDemand
+      Diesel=buildingHighlights[i].Diesel
+    }
+
+  } 
+  else{
+    for(let i=0;i<buildingHighlightsDateFilter.length;i++){
+      gridEnergy=buildingHighlightsDateFilter[i].gridEnergy
+      rooftopEnergy=buildingHighlightsDateFilter[i].rooftopEnergy
+      wheeledinEnergy=buildingHighlightsDateFilter[i].wheeledinEnergy
+      peakDemand=buildingHighlightsDateFilter[i].peakDemand
+      Diesel=buildingHighlightsDateFilter[i].Diesel
+    }
+
+  }
+
+
+
 
 
   const now = new Date();
@@ -344,7 +393,7 @@ function BuildindConsumptionPage2() {
   const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
   const dateValue = systemOverviewfilterDate ? new Date(systemOverviewfilterDate.getTime() - systemOverviewfilterDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
   return (
-    <div>
+    <div style={{margin:"10px"}}>
  <div> 
       <h4 style={{textAlign:'center',marginTop:"15px",color:"brown"}}><b style={{fontSize:"30px"}}>System Overview</b></h4>
       </div>
@@ -357,6 +406,30 @@ function BuildindConsumptionPage2() {
         
       </div>
   </div>
+  <div style={{marginTop:"15px"}} >
+  <Table striped bordered hover variant="dark" >
+  <thead>
+    <tr style={{textAlign:"center"}}>
+      <th><b>GridEnergy</b></th>
+      <th><b>rooftopEnergy</b></th>
+      <th><b>wheeledinEnergy</b></th>
+      <th><b>peakDemand</b></th>
+      <th><b>Diesel</b></th>
+    </tr>
+  </thead>
+  <tbody>
+        <tr style={{color:"red",textAlign:"center"}}> 
+            <td>{Math.round(gridEnergy)}</td>
+            <td>{Math.round(rooftopEnergy)}</td>
+            <td>{Math.round(wheeledinEnergy)}</td>
+            <td>{Math.round(peakDemand)}</td>
+            <td>{Math.round(Diesel)}</td>
+        </tr>
+</tbody>
+
+</Table>
+</div>
+<br/>
   {/* <div class="col-2"><h3>{dateValue}</h3></div> */}
 </div>
       {/* <hr style={{border:"10px solid black"}}/> */}

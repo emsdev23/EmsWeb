@@ -17,7 +17,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 
 function PeakDemandAnalysis() {
-    const host="localhost"
+    const host="43.205.196.66"
     const [PeakDemandAnalysis1,setPeakDemandAnalysis1]=useState([])
     const [PeakDemandHourlyAnalysis,setPeakDemandHourlyAnalysis]=useState([])
     const [sunmOfEnergy,setSumOfEnergy]=useState([])

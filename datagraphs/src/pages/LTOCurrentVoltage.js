@@ -8,7 +8,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function LTOCurrentVoltage() {
-    const host='localhost'
+    const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const voltage_current=`http://${host}:5000/current_VS_voltage/LTOBattery`

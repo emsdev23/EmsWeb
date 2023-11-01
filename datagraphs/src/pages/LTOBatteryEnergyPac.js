@@ -9,7 +9,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 function LTOBatteryEnergyPac() {
 
-  const host='localhost'
+  const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const energy=`http://${host}:5000/Ltoanalytics/energy_VS_packsoc`

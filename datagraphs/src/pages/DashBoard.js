@@ -32,6 +32,7 @@ import InsertChartIcon from '@mui/icons-material/InsertChart';
 import InfoIcon from '@mui/icons-material/Info';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LTOBatteryHourly from './LTOBatteryHourly';
+import HotWaterStorage from './HotWaterStorage';
 
 
 import InfoTooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
@@ -116,6 +117,10 @@ function DashBoard() {
    const [EvCharger,setEvCharger]=useState([])
 
    const [thermalOverviewData,setThermalOverviewData]=useState([])
+
+
+  
+
   
  
   const linestate  = {
@@ -159,7 +164,7 @@ function DashBoard() {
   const wms=`http://${host}:5000/wms`
   const solarPerformance=`http://${host}:5000/solarPerformance`
   const sensorurl=`http://${host}:5000/sensorreadings`
-  const meterData=`http://localhost:5000/meterdata`
+  const meterData=`http://${host}:5000/meterdata`
   const acmeterenergy=`http://${host}:5000/acmeterenergy`
   const griddata= `http://${host}:5000/grid`
   const temparature=`http://${host}:5000/thermaltemp`
@@ -171,6 +176,7 @@ function DashBoard() {
   const diesel=`http://${host}:5000/dashboard/Deisel`
   const chargerdate=`http://${host}:5000/dashboard/EvCharger`
   const thermalApi=`http://${host}:5000/thermal/summaryCard`
+ 
 
   var totalrooftopgeneration
   const Roof = () => {
@@ -311,7 +317,7 @@ function DashBoard() {
   }
  let gridunprocess='';
   for(let i=0;i<grid.length;i++){
-    gridunprocess=(grid[i].Energy)
+    gridunprocess=(grid[i].cumulative_energy)
 
   }
   console.log(grid)
@@ -1932,7 +1938,7 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
 
 
   
-    <div class="col-sm-12" style={{marginTop:"5%"}}>
+    <div class="col-sm-8" style={{marginTop:"5%"}}>
     <div class="card" style={{height:"100%",background: ' white',color:"white"}}>
       <div class="card-body">
       {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
@@ -1940,6 +1946,24 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
         <hr/>
         <div id="chart2"> 
         <LTOBatteryHourly/>
+  
+   </div>
+   <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 
+          <br/>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-4" style={{marginTop:"5%"}}>
+    <div class="card" style={{height:"100%",background: 'white',color:"white"}}>
+      <div class="card-body">
+      {/* <h5 class="card-title"><b style={{color:"#145369"}}>UPS Battery</b><span style={{color:"black",marginLeft:'100px' }}>Status:</span> {currentupsStatus ?  <BsIcons.BsBatteryFull color="yellow" fontSize="1.5em"/>:<BsIcons.BsBatteryFull color="green" fontSize="1.5em"/> }</h5> */}
+      <h4 class="card-title" style={{textAlign:"center",color:"#145369"}}><b>Hot_Water_Storage</b></h4> 
+        <hr/>
+        <div id="chart2"> 
+        <HotWaterStorage/>
   
    </div>
    <div class="card-text"style={{font:'caption',fontStretch:"extra-expanded",fontFamily:"serif",fontSize:'17px' }}> 

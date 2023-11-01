@@ -53,7 +53,7 @@ const handleSubmit = (event) => {
 
 
 const CurrentGraph=()=>{
-  axios.get(`http://localhost:5000/peak/hvacSchneider7230Polling`).then((res)=>{
+  axios.get(`http://${iphost}:5000/peak/hvacSchneider7230Polling`).then((res)=>{
     const dataresponse=res.data
     setInitialGraph(dataresponse)
    
@@ -119,7 +119,7 @@ const pastSevenDaysGraph=()=>{
     try {
       const formattedStartDate = singledayFilter ? new Date(singledayFilter.getTime() - singledayFilter.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post(`http://localhost:5000/singleDayFilter/hvacSchneider7230Polling`, {
+      const response = await axios.post(`http://${iphost}:5000/singleDayFilter/hvacSchneider7230Polling`, {
         date: formattedStartDate,
       });
     
@@ -208,11 +208,6 @@ console.log(singledayFilterData)
 
 
 // console.log(singlegrahdata)
-
-
-
-    const batteryurl='http://localhost:5000/battery'
-    const acmeterenergy=`http://${host}:5000/acmeterenergy`
 
     // const navigate = useNavigate();
     // const [data, setData] = useState([]);
@@ -1022,6 +1017,12 @@ const PeakValueFilteredGraph= {
 
 
 
+const now = new Date();
+const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
+const [month, day, year] = local.split("/"); // Split the date by "/"
+const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
+//const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
+
   return (
     <div>
       <div> 
@@ -1052,7 +1053,7 @@ const PeakValueFilteredGraph= {
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h6 style={{color:"brown"}}><b>Date :</b></h6> <DatePicker id="date" selected={singledayFilter} onChange={handlesingleDayFilterChange} placeholderText='select date' />  
+        <h6 style={{color:"brown"}}><b>Date :</b></h6> <DatePicker id="date" selected={singledayFilter} onChange={handlesingleDayFilterChange} placeholderText={currentdate} />  
         </label>
       </div>
      
@@ -1097,7 +1098,7 @@ const PeakValueFilteredGraph= {
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h6 style={{color:"brown"}}><b> Start Date :</b></h6> <DatePicker id="date" selected={startDate} onChange={handleStartDateChange} placeholderText='select date' />
+        <h6 style={{color:"brown"}}><b> Start Date :</b></h6> <DatePicker id="date" selected={startDate} onChange={handleStartDateChange} placeholderText={currentdate} />
         </label>
       </div>
      
@@ -1108,7 +1109,7 @@ const PeakValueFilteredGraph= {
     <div className="input-group mb-3" style={{ width: "300px" }}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h6 style={{color:"brown"}}><b>End Date :</b></h6> <DatePicker selected={endDate} onChange={handleEndDateChange} placeholderText='select date' />
+        <h6 style={{color:"brown"}}><b>End Date :</b></h6> <DatePicker selected={endDate} onChange={handleEndDateChange} placeholderText={currentdate}/>
         </label>
       </div>
      

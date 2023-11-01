@@ -11,7 +11,15 @@ function ChillerDashboard() {
     exportDataInit(Highcharts);
      //declaring empty array to fetch data
     const [thermalStoredwaterTemp,setThermalStoredWaterTemp]=useState([])
+    const [chillerLoading,setChillerLoading]=useState([])
+    const [thermal_IN_OUT,setThermal_IN_OUT]=useState([])
+    const [chillerCop,setChillerCop]=useState([])
+
     const thermalTempApi=`http://${host}:5000/thermal/storedWaterTemp`
+    const chillerLoadingApi="http://localhost:5000/chillerDashboard/ChillerLoading"
+    const thermal_IN_OUTApi="http://localhost:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator"
+    const chillerCop_Api="http://localhost:5000/chillerDashboard/Average/chillarCOP"
+    
 
     //defining functions for fetching data(get request)
 
@@ -26,14 +34,76 @@ function ChillerDashboard() {
           });
       }, []);
 
+      
+    //-----------chiller Loading ---------------------------//
+      useEffect(() => {
+        axios.get(chillerLoadingApi)
+          .then((res) => {
+            const dataResponse = res.data;
+            setChillerLoading(dataResponse);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }, []);
+      //---------------------end--------------------------//
+
+      //--------------------------thermal inlet/outlet --------------------------//
+      useEffect(() => {
+        axios.get(thermal_IN_OUTApi)
+          .then((res) => {
+            const dataResponse = res.data;
+            setThermal_IN_OUT(dataResponse);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }, []);
+      //------------------------------end----------------------------------------//
+
+      //----------------------------chiller c1 to c4 cop------------------------------//
+      useEffect(() => {
+        axios.get(chillerCop_Api)
+          .then((res) => {
+            const dataResponse = res.data;
+            setChillerCop(dataResponse);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }, []);
+      //------------------------------------------end--------------------------------------//
 
 
-    console.log(thermalStoredwaterTemp)
+console.log(thermalStoredwaterTemp)
+console.log(chillerLoading)
+
+
+
+const ThermalEvapuratorFlowrate=[]
+const ThermalCondenserFlowrate=[]
+
+for(let i=0;i<thermal_IN_OUT.length;i++){
+ThermalEvapuratorFlowrate.push(thermal_IN_OUT[i].avg_commonHeaderFlowrate)
+ThermalCondenserFlowrate.push(thermal_IN_OUT[i].avg_condenserLineFlowrate)
+
+}
+
+const C1_cop=[]
+const C2_cop=[]
+const C3_cop=[]
+const C4_cop=[]
+
+
+for(let i=0;i<chillerCop.length;i++){
+    C1_cop.push(chillerCop[i].avg_c1cop)
+    C2_cop.push(chillerCop[i].avg_c2cop)
+    C3_cop.push(chillerCop[i].avg_c3cop)
+    C4_cop.push(chillerCop[i].avg_c4cop)
+
+}
 
  const options={
-
-
-
     chart: {
         type: 'column'
     },
@@ -50,7 +120,7 @@ function ChillerDashboard() {
         align: 'left'
     },
     xAxis: {
-        //categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        categories: chillerLoading.map((chiller1)=>chiller1.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -63,7 +133,7 @@ function ChillerDashboard() {
         }
     },
     tooltip: {
-        valueSuffix: ' (1000 MT)'
+        valueSuffix: '(%)'
     },
     plotOptions: {
         column: {
@@ -74,19 +144,19 @@ function ChillerDashboard() {
     series: [
         {
             name: 'C1 Loading',
-            data: [0]
+            data: chillerLoading.map((chiller1)=>chiller1.c1loading)
         },
         {
             name: 'c2 Loading',
-            data: [0]
+            data: chillerLoading.map((chiller2)=>chiller2.c2loading)
         },
         {
             name: 'c3 Loading',
-            data: [0]
+            data: chillerLoading.map((chiller3)=>chiller3.c3loading)
         },
         {
             name: 'c4 Loading',
-            data: [0]
+            data: chillerLoading.map((chiller4)=>chiller4.c4loading)
         }
     ]
 };
@@ -140,6 +210,7 @@ const optionsLine={
 
 
 
+
 const optionsTemparature={
     chart: {
         type: 'line'
@@ -157,36 +228,42 @@ const optionsTemparature={
     //     align: 'left'
     // },
     xAxis: {
-        //categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        categories: thermal_IN_OUT.map((time)=>time.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
         }
     },
     yAxis: {
-        min: 0,
+        min: 10,
+        max: 40,
         title: {
             text: 'Temperature (degrees celsius)'
-        }
+        },
+        //opposite: true, // Display the secondary y-axis on the opposite side of the chart
+            //min: 10, // Set the minimum value for the yAxis
+             // Set the maximum value for the yAxis
     },
     tooltip: {
-        valueSuffix: ' (1000 MT)'
+        valueSuffix: 'Temperature (degrees celsius)'
     },
     plotOptions: {
-        column: {
-            pointPadding: 0.2,
-            borderWidth: 0
+        line: { // Change 'column' to 'line'
+            marker: {
+                enabled: false // Set this to false to remove markers
+            }
         }
+
     },
     series: [
         {
             name: 'Condenser inlet',
-            data: [0],
+            data:thermal_IN_OUT.map((condenserinlet)=>condenserinlet.avg_condenserLineInletTemp),
             color:'#800080'
         },
         {
             name: 'Condenser outlet',
-            data: [0],
+            data:thermal_IN_OUT.map((condenseroutlet)=>condenseroutlet.avg_condenserLineOutletTemp),
             color:"#FB4346"
         },
     ]
@@ -210,7 +287,7 @@ const optionsEvaporatorTemparature={
     //     align: 'left'
     // },
     xAxis: {
-        //categories: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+        categories:thermal_IN_OUT.map((time)=>time.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -223,7 +300,7 @@ const optionsEvaporatorTemparature={
         }
     },
     tooltip: {
-        valueSuffix: ' (1000 MT)'
+        valueSuffix:'Temperature (degrees celsius)'
     },
     plotOptions: {
         line: { // Change 'column' to 'line'
@@ -236,13 +313,13 @@ const optionsEvaporatorTemparature={
     series: [
         {
             name: 'Evaporator inlet',
-            data: [0],
+            data: thermal_IN_OUT.map((evaporatorinlet)=>evaporatorinlet.avg_commonHeaderinletTemp),
             color:'#02ccfe',
 
         },
         {
             name: 'Evaporator outlet',
-            data: [0],
+            data: thermal_IN_OUT.map((evaporatoroutlet)=>evaporatoroutlet.avg_commonHeaderoutletTemp),
             color:" #1c305c"
         },
     ]
@@ -269,22 +346,23 @@ const optionsEvaporatorTemparature={
         </div> */}
         <div class="row" style={{marginLeft:"20px"}}>
   <div class="col-6">
-    <h2><b>__</b></h2>
-    <p style={{color:'gray'}}>Average of C1 COP</p>
+
+    <h2><b>{C1_cop[C1_cop.length-1]}</b></h2>
+    <p style={{color:'gray'}}><b>Average of C1 COP</b></p>
   </div>
   <div class="col-6">
-    <h2><b>__</b></h2>
-    <p style={{color:'gray'}} > Average of C2 COP</p>
+    <h2><b>{C2_cop[C2_cop.length-1]}</b></h2>
+    <p style={{color:'gray'}} ><b>Average of C2 COP</b></p>
   </div>
   <br/>
   <br/>
   <div class="col-6" style={{marginTop:"20px"}}>
-    <h2><b>__</b></h2>
-    <p style={{color:'gray'}}>Average of C3 COP</p>
+    <h2><b>{C3_cop[C3_cop.length-1]}</b></h2>
+    <p style={{color:'gray'}}><b>Average of C3 COP</b></p>
   </div>
   <div class="col-6" style={{marginTop:"20px"}}>
-  <h2><b>__</b></h2>
-<p style={{color:'gray'}}>Average of C3 COP</p>
+  <h2><b>{C4_cop[C4_cop.length-1]}</b></h2>
+<p style={{color:'gray'}}><b>Average of C3 COP</b></p>
 
   </div>
   {/* <div class="col">col</div>
@@ -327,12 +405,14 @@ const optionsEvaporatorTemparature={
     <div class="col-4">
       <div style={{textAlign:"center"}}> 
       <div> 
-      <h2><b>__</b></h2>
-        <p style={{color:"gray"}}>Average of Evaporator Flowrate</p>
+
+
+      <h2><b>{Math.trunc(ThermalEvapuratorFlowrate[ThermalEvapuratorFlowrate.length-1])}</b></h2>
+        <p style={{color:"gray"}}><b>Evaporator Flowrate (m<sup>3</sup>/h)</b></p>
         </div>
         <div>
-        <h2><b>__</b></h2>
-        <p style={{color:"gray"}}>Average of Condenser Flowrate</p> 
+        <h2><b>{Math.trunc(ThermalCondenserFlowrate[ThermalCondenserFlowrate.length-1])}</b></h2>
+        <p style={{color:"gray"}}><b>Condenser Flowrate (m<sup>3</sup>/h)</b></p> 
         </div>
         
       </div>
