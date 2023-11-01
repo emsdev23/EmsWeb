@@ -82,11 +82,11 @@ export const SidebarData = [
         path: '/PeakDemandAnalysis',
         icon: <AnalyticsIcon />,
       },
-      // {
-      //   title: 'HotWter_Storage',
-      //   path: '/HotWter_Storage',
-      //   icon: <HotTubIcon />,
-      // },
+      {
+        title: 'Thermal_Analtics',
+        path: '/Thermal_Analtics',
+        icon: <ThermostatAutoIcon />,
+      },
       {
         title: 'ChillersStatus',
         path: '/Status/chillersStatus',
@@ -168,7 +168,7 @@ export const SidebarData = [
       {
         title: 'Battery control',
         path: '/Control/upsbattery',
-        icon: <BatteryChargingFullIcon />
+        icon: <TbIcons.TbBatteryAutomotive />
       },
       {
         title: 'Thermal control',
@@ -178,7 +178,7 @@ export const SidebarData = [
       {
         title: 'LTO Battery  control',
         path: '/control/ltoBattery',
-        icon: <ThermostatAutoIcon />
+        icon: <BatterySaverIcon/>
       },
      
     ]
