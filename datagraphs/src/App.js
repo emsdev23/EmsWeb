@@ -27,7 +27,8 @@ import SampleFile from './pages/SamplFile';
 import LTObattery from './pages/LTObattery';
 import PeakDemandAnalysis from './pages/PeakDemandAnalysis';
 import LTOAnalytics from './pages/LTOAnalytics';
-import HotWaterStorage from './pages/HotWaterStorage';
+// import HotWaterStorage from './pages/HotWaterStorage';
+import ThermalQuarterly from './pages/ThermalQuaterly';
 import Diesel_Analysis from './pages/Diesel_Analysis';
 
 
@@ -75,7 +76,7 @@ function App() {
             <Route path="/control/ltoBattery" element={<LTObattery/>}/>
             <Route path="/PeakDemandAnalysis" element={<PeakDemandAnalysis/>}/>
             <Route path="/LTOBattery_Analytics" element={<LTOAnalytics/>}/>
-            <Route path="/HotWter_Storage" element={<HotWaterStorage/>}/>
+            <Route path="/Thermal_Analtics" element={<ThermalQuarterly/>}/>
             <Route path="/Diesel_Analysis" element={<Diesel_Analysis/>}/>
             
           </Routes>
