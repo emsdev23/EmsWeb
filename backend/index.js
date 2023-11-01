@@ -606,7 +606,8 @@ emptyArray.forEach(obj => {
 
         })
         //----------------------------- end of api --------------------------------------------//
-        // thermal dashboard api  for date filter api -------------------------------//
+
+        // ------------------thermal dashboard api  for date filter api -------------------------------//
         app.post("/thermal/datefilter", (req,res)=>{
           const {date}=req.body
           console.log(date)
@@ -629,6 +630,67 @@ emptyArray.forEach(obj => {
 
       })
         //-------------------end of api----------------------------------//
+
+        //------------------------Thermal quaterly graph api---------------------------//
+        app.get("/thermalquarter", (req,res)=>{
+          const {date}=req.body
+          console.log(date)
+          const finalValue=[]
+
+          con.query('select polledTime,coolingEnergy from EMS.ThermalQuarter where date(polledTime) = curdate()',function(err,result){
+            if (err){
+              console.log(err)
+            }
+            else{
+
+              const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].polledTime);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestampVal = `${hours}:${minutes}`;
+            finalValue.push({"TimeStamp":timestampVal,"coolingEnergy":parseFloat(response[i].coolingEnergy)})
+           
+          }
+              console.log(finalValue)
+              res.send(finalValue)
+            }
+          })
+
+        })
+        //------------------------------  END of api------------------------------------// 
+
+
+        //-----------------------------Thermal  quaterly Date Filter  garph api------------------------//
+        app.post("/thermalquarter/datefilter", (req,res)=>{
+          const {date}=req.body
+          console.log(date)
+          const finalValue=[]
+
+          con.query(`select polledTime,coolingEnergy from EMS.ThermalQuarter where date(polledTime) = '${date}'`,function(err,result){
+            if (err){
+              console.log(err)
+            }
+            else{
+              const response=(JSON.parse(JSON.stringify(result)))
+              for(let i=0;i<response.length;i++){
+                let date = new Date(response[i].polledTime);
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                // const seconds = date.getSeconds().toString().padStart(2, '0');
+                const timestampVal = `${hours}:${minutes}`;
+                finalValue.push({"TimeStamp":timestampVal,"coolingEnergy":parseFloat(response[i].coolingEnergy)})
+               
+              }
+              console.log(finalValue)
+              res.send(finalValue)
+            }
+
+        })
+
+      })
+        //----------------------------------- END of api -----------------------------------------------//
 
         
         // thermal Temp api
@@ -1959,6 +2021,7 @@ console.log(formattedDate,"line 1680");
 
 
   //--------------------------end of api-----------------------------------//
+  
 
 //----------------------chiller Dashboard api`s ----------------------------------------------//
   //-------------------------------thermal stored water temparature api-----------------------//
@@ -1993,7 +2056,7 @@ console.log(formattedDate,"line 1680");
   //-----------------------------chiller Loading api-------------------------------//
   app.get("/chillerDashboard/ChillerLoading",async(req,res)=>{
     const ChillerLoadingData=[]
-    meterDb.query("SELECT * FROM meterdata.chillarloading order by lastTimestamp desc",function(error,result,feild){
+    meterDb.query("SELECT * FROM meterdata.chillarloading where date(lastTimestamp)=curdate()",function(error,result,feild){
       if(error){
         console.log(error)
       }
@@ -2024,14 +2087,14 @@ console.log(formattedDate,"line 1680");
 
 app.get("/chillerDashboard/thermalinletoutlet/condenser/evaporator",async(req,res)=>{
   const thermalinletoutletData=[]
-  meterDb.query("SELECT * FROM thermalinletoutlet where date(polledTime)=curdate()",function(error,result,feild){
+  meterDb.query("SELECT * FROM thermalinletoutlet where date(Timestamp)=curdate()",function(error,result,feild){
     if(error){
       console.log(error)
     }
     else{
       const response=(JSON.parse(JSON.stringify(result)))
       for(let i=0;i<response.length;i++){
-        let date=new Date(response[i].polledTime)
+        let date=new Date(response[i].Timestamp)
         const hours = date.getHours().toString().padStart(2, '0');
    const minutes = date.getMinutes().toString().padStart(2, '0');
    // const seconds = date.getSeconds().toString().padStart(2, '0');
@@ -2053,7 +2116,7 @@ app.get("/chillerDashboard/thermalinletoutlet/condenser/evaporator",async(req,re
 //---------------------------------Average of C1 cop to C4 cop--------------------------------------//
 app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
   const chillarCOP=[]
-  meterDb.query("SELECT * FROM meterdata.chillarcop;",function(error,result,feild){
+  meterDb.query("SELECT * FROM meterdata.chillarcop where date(timestamp)=curdate();",function(error,result,feild){
     if(error){
       console.log(error)
     }
@@ -2099,6 +2162,7 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
         // Query the second database (chakradb)
         const result2 = await chakradbQuery("SELECT * FROM hvacChillerElectricPolling WHERE DATE(polledTime) = CURDATE() ORDER BY polledTime DESC LIMIT 1");
         const response2 = JSON.parse(JSON.stringify(result2));
+        console.log(response1)
   
         // Process the data from both databases
         thermalWaterTemp.push({
@@ -2121,6 +2185,7 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
       }
   
       res.send(thermalWaterTemp);
+      console.log(thermalWaterTemp)
     } catch (error) {
       console.log(error);
       res.status(500).send("An error occurred");
@@ -3426,45 +3491,189 @@ app.post("/Deisel/analytics/graph/DateFilter",async(req,res)=>{
 
 //-------------------------------- END of api ----------------------------------------------------------//
 
+//--------------------------------------------- Dashboard HOT water Storage api--------------------------//
+app.get("/HOTWterStorage", (req,res)=>{
+  const {date}=req.body
+  console.log(date)
+  const ResponseArray=[]
 
+  EMSDB.query("SELECT * FROM EMS.HotWaterStorage where date(recordtimestamp)=curdate()-18 order by recordtimestamp desc  limit 1;",function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
 
-//--------------------------------Hot Storage api-------------------------------------------------------//
-app.get("/HotWaterStorage",async(req,res)=>{
-  const resultValue=[]
-  EMSDB.query("SELECT *FROM EMS.HotWaterStorage where date(recordtimestamp)=curdate() order by recordtimestamp desc limit 1;",function(err,result,feilds){
-   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
-    if(err){
-          console.log(err)
-      }
-      else{
-          const response=(JSON.parse(JSON.stringify(result)))
-          for(let i=0;i<response.length;i++){
-            let date = new Date(response[i].recordtimestamp);
-            let FormatedDtae=date.toLocaleString()
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            // const seconds = date.getSeconds().toString().padStart(2, '0');
-            const timestamp = `${hours}:${minutes}`
-            resultValue.push({"TimeStamp":FormatedDtae,
-            "recirculationFlowRate":response[i].recirculationFlowRate,
-            "freshWaterFlowRate":response[i].freshWaterFlowRate,
-            "freshWaterTemperature":response[i].freshWaterTemperature,
-            "recirculationTemperature":response[i].recirculationTemperature,
-            "hotWaterDeliveryTemperature":response[i].hotWaterDeliveryTemperature,
-            "tankBottomTemperature":response[i].tankBottomTemperature,
-            "tankTopTemperature":response[i].tankTopTemperature,
-            "hotWaterdeliveryRate":response[i].hotWaterdeliveryRate,
-            "pressure":response[i].pressure
-          })
-        }
-         
-          res.send(resultValue)
-          console.log(resultValue)
-      }
+      const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].recordtimestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+    //Average( Tank Top Temperature, Tank bottom temperature)
+    const Stored_Water_Temperature=(response[i].tankBottomTemperature+response[i].tankTopTemperature)/2
+    const Delivery_Temperature=response[i].hotWaterDeliveryTemperature
+    const Hot_water_delivery_Flow_rate=response[i].hotWaterdeliveryRate
+    const Energy_Delivered=(Hot_water_delivery_Flow_rate*4.2*(Stored_Water_Temperature-Delivery_Temperature))
+    const Mass_of_stored_water=response[i].tankFuildVolume
+    const Refrigerant_temperature=0
+    const Energy_Stored=0
+    ResponseArray.push({
+      "Stored_Water_Temperature":Stored_Water_Temperature,
+      "Delivery_Temperature":Delivery_Temperature,
+      "Hot_water_delivery_Flow_rate":Hot_water_delivery_Flow_rate,
+      "Energy_Delivered":Energy_Delivered,
+      "Mass_of_stored_water":Mass_of_stored_water,
+      "Refrigerant_temperature":Refrigerant_temperature,
+      "Energy_Stored":Energy_Stored,
+      "timestampVal":timestampVal
+    })
+   
+  }
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
   })
-  
+
 })
-//---------------------------------------END of api--------------------------------------------------//
+
+//---------------------------------------END of api-------------------------------------------------------//
+
+
+//-----------------------------------------------building consumption Highlights of the Day-------------------//
+
+app.get("/buildingconsumption/Highlights", (req,res)=>{
+  //console.log(date)
+  const ResponseArray=[]
+
+  con.query("SELECT * FROM EMS.buildingConsumption where date(polledTime)=curdate();",function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{ 
+      let  gridEnergy=0
+      let  rooftopEnergy=0
+      let  wheeledinEnergy=0
+      let  batteryEnergy=0
+      let  thermalDischarge=0
+      let  peakDemand=0
+      let  Diesel=0
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].polledTime);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+
+    if(response[i].gridEnergy!=null){
+      gridEnergy+=response[i].gridEnergy
+    }
+    if(response[i].rooftopEnergy!=null){
+      rooftopEnergy+=response[i].rooftopEnergy
+    }
+    if(response[i].wheeledinEnergy!=null){
+      wheeledinEnergy+=response[i].wheeledinEnergy
+    }
+
+    if(response[i].batteryEnergy!=null){
+      batteryEnergy+=response[i].batteryEnergy
+    }
+
+    if(response[i].thermalDischarge!=null){
+      thermalDischarge+=response[i].thermalDischarge
+    }
+
+    if(response[i].peakDemand!=null){
+      peakDemand+=response[i].peakDemand
+    }
+    if(response[i].Diesel!=null){
+      Diesel+=response[i].Diesel
+    }
+
+
+
+
+   
+   
+  }
+  ResponseArray.push({"gridEnergy":gridEnergy,"rooftopEnergy":rooftopEnergy,"wheeledinEnergy":wheeledinEnergy,"thermalDischarge":thermalDischarge,"peakDemand":peakDemand,"Diesel":Diesel})
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//-------------------------------------------------END of api--------------------------------------------------//
+
+//------------------------------------building consumption highlights of the day------------------------------------//
+app.post("/buildingconsumption/Highlights/DateFiltered", (req,res)=>{
+  const {date}=req.body
+  //console.log(date)
+  const ResponseArray=[]
+
+  con.query(`SELECT * FROM EMS.buildingConsumption where date(polledTime)='${date}'`,function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{ 
+      let  gridEnergy=0
+      let  rooftopEnergy=0
+      let  wheeledinEnergy=0
+      let  batteryEnergy=0
+      let  thermalDischarge=0
+      let  peakDemand=0
+      let  Diesel=0
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].polledTime);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+
+    if(response[i].gridEnergy!=null){
+      gridEnergy+=response[i].gridEnergy
+    }
+    if(response[i].rooftopEnergy!=null){
+      rooftopEnergy+=response[i].rooftopEnergy
+    }
+    if(response[i].wheeledinEnergy!=null){
+      wheeledinEnergy+=response[i].wheeledinEnergy
+    }
+
+    if(response[i].batteryEnergy!=null){
+      batteryEnergy+=response[i].batteryEnergy
+    }
+
+    if(response[i].thermalDischarge!=null){
+      thermalDischarge+=response[i].thermalDischarge
+    }
+
+    if(response[i].peakDemand!=null){
+      peakDemand+=response[i].peakDemand
+    }
+    if(response[i].Diesel!=null){
+      Diesel+=response[i].Diesel
+    }
+
+
+
+
+   
+   
+  }
+  ResponseArray.push({"gridEnergy":gridEnergy,"rooftopEnergy":rooftopEnergy,"wheeledinEnergy":wheeledinEnergy,"thermalDischarge":thermalDischarge,"peakDemand":peakDemand,"Diesel":Diesel})
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+
+//-------------------------------------------  end of api -----------------------------------------------------------//
 
 
 
