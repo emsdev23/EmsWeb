@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
-import { saveAs } from 'file-saver';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function Documentation() {
-  const [selectedFile, setSelectedFile] = useState(null);
-
+  const [file, setFile] = useState(null);
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
+    setFile(e.target.files[0]);
   };
 
-  const handleUpload = () => {
-    // Perform upload logic using selectedFile
-    console.log('Uploading file:', selectedFile);
+  const handleUpload = async () => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:5000/upload', {
+       
+        
+        method: 'POST',
+        body: formData,
+      });
+      console.log(response)
+      // Handle the response as needed
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
   };
 
-  const handleDownload = () => {
-    // Replace 'your_file_url' with the actual URL of the file
-    const fileUrl = 'your_file_url';
-
-    // Download the file
-    saveAs(fileUrl, 'downloaded_file');
-  };
+ 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} />
+       <input type="file" onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
-      <button onClick={handleDownload}>Download</button>
-      
     </div>
   )
 }

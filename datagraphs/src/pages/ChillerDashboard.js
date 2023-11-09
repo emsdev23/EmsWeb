@@ -4,21 +4,42 @@ import exportingInit from 'highcharts/modules/exporting';
 import exportDataInit from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
 
 function ChillerDashboard() {
     const host="43.205.196.66"
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
+
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [singledaydata,setSingledaydata]=useState([])
+
      //declaring empty array to fetch data
     const [thermalStoredwaterTemp,setThermalStoredWaterTemp]=useState([])
     const [chillerLoading,setChillerLoading]=useState([])
     const [thermal_IN_OUT,setThermal_IN_OUT]=useState([])
     const [chillerCop,setChillerCop]=useState([])
 
+
+    //declaring empty array to fetch data according date Filters
+    const [thermalStoredwaterTempDateFilter,setThermalStoredWaterTempDateFilter]=useState([])
+    const [chillerLoadingDateFilter,setChillerLoadingDateFilter]=useState([])
+    const [thermal_IN_OUT_DateFilter,setThermal_IN_OUT_DateFilter]=useState([])
+    const [chillerCopDateFilter,setChillerCopDateFilter]=useState([])
+    
+
     const thermalTempApi=`http://${host}:5000/thermal/storedWaterTemp`
-    const chillerLoadingApi="http://localhost:5000/chillerDashboard/ChillerLoading"
-    const thermal_IN_OUTApi="http://localhost:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator"
-    const chillerCop_Api="http://localhost:5000/chillerDashboard/Average/chillarCOP"
+    const chillerLoadingApi= `http://${host}:5000/chillerDashboard/ChillerLoading `
+    const thermal_IN_OUTApi=`http://${host}:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator`
+    const chillerCop_Api=`http://${host}:5000/chillerDashboard/Average/chillarCOP`
+
+    const thermalTempDateFilter_Api="http://localhost:5000/thermal/storedWaterTemp/dateFiltered"
+    const chillerLoadingDateFilter_Api= `http://localhost:5000/chillerDashboard/ChillerLoading/dateFiltered`
+    const thermal_IN_OUT_DateFilter_Api=`http://localhost:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered`
+    const chillerCop_DateFilter_Api=`http://localhost:5000/chillerDashboard/Average/chillarCOP/dateFiltered`
+
+
     
 
     //defining functions for fetching data(get request)
@@ -74,6 +95,42 @@ function ChillerDashboard() {
       }, []);
       //------------------------------------------end--------------------------------------//
 
+       //---------function to handle change in inputTag----------------//
+     const handleDateChange = (selectedDate) => {
+        setSelectedDate(selectedDate);
+      };
+      //----------------------end----------------------------------------//
+
+
+  //--------------------------filtering date wise data---------------------//
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          const formattedStartDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
+      
+          const Thermalresponse = await axios.post(thermalTempDateFilter_Api, {date: formattedStartDate});
+          const ChillerLoadingresponse = await axios.post(chillerLoadingDateFilter_Api, {date: formattedStartDate});
+          const Thermal_IN_OUTResponse = await axios.post(thermal_IN_OUT_DateFilter_Api, {date: formattedStartDate});
+          const ChillerCopResponse = await axios.post(chillerCop_DateFilter_Api, {date: formattedStartDate});
+        
+          setThermalStoredWaterTempDateFilter(Thermalresponse.data);
+          setChillerLoadingDateFilter(ChillerLoadingresponse.data)
+          setThermal_IN_OUT_DateFilter(Thermal_IN_OUTResponse.data)
+          setChillerCopDateFilter(ChillerCopResponse.data)
+          setLoading(false);
+          console.log(formattedStartDate)
+        } catch (error) {
+          console.error(error);
+          setLoading(false);
+        }
+      };
+      
+      
+      useEffect(() => {
+        fetchData();
+      }, [selectedDate]);
+      //-------------------------END---------------------------------------------//
+
 
 console.log(thermalStoredwaterTemp)
 console.log(chillerLoading)
@@ -83,11 +140,23 @@ console.log(chillerLoading)
 const ThermalEvapuratorFlowrate=[]
 const ThermalCondenserFlowrate=[]
 
-for(let i=0;i<thermal_IN_OUT.length;i++){
-ThermalEvapuratorFlowrate.push(thermal_IN_OUT[i].avg_commonHeaderFlowrate)
-ThermalCondenserFlowrate.push(thermal_IN_OUT[i].avg_condenserLineFlowrate)
+if(selectedDate==null){
+    for(let i=0;i<thermal_IN_OUT.length;i++){
+        ThermalEvapuratorFlowrate.push(thermal_IN_OUT[i].avg_commonHeaderFlowrate)
+        ThermalCondenserFlowrate.push(thermal_IN_OUT[i].avg_condenserLineFlowrate)
+        
+        }
 
 }
+else{
+    for(let i=0;i<thermal_IN_OUT_DateFilter.length;i++){
+        ThermalEvapuratorFlowrate.push(thermal_IN_OUT_DateFilter[i].avg_commonHeaderFlowrate)
+        ThermalCondenserFlowrate.push(thermal_IN_OUT_DateFilter[i].avg_condenserLineFlowrate)
+        
+        }
+
+}
+
 
 const C1_cop=[]
 const C2_cop=[]
@@ -95,13 +164,26 @@ const C3_cop=[]
 const C4_cop=[]
 
 
-for(let i=0;i<chillerCop.length;i++){
-    C1_cop.push(chillerCop[i].avg_c1cop)
-    C2_cop.push(chillerCop[i].avg_c2cop)
-    C3_cop.push(chillerCop[i].avg_c3cop)
-    C4_cop.push(chillerCop[i].avg_c4cop)
+if(selectedDate==null){
+    for(let i=0;i<chillerCop.length;i++){
+        C1_cop.push(chillerCop[i].avg_c1cop)
+        C2_cop.push(chillerCop[i].avg_c2cop)
+        C3_cop.push(chillerCop[i].avg_c3cop)
+        C4_cop.push(chillerCop[i].avg_c4cop)
+    
+    }
+}
+else{
+    for(let i=0;i<chillerCopDateFilter.length;i++){
+        C1_cop.push(chillerCopDateFilter[i].avg_c1cop)
+        C2_cop.push(chillerCopDateFilter[i].avg_c2cop)
+        C3_cop.push(chillerCopDateFilter[i].avg_c3cop)
+        C4_cop.push(chillerCopDateFilter[i].avg_c4cop)
+    
+    }
 
 }
+
 
  const options={
     chart: {
@@ -120,7 +202,7 @@ for(let i=0;i<chillerCop.length;i++){
         align: 'left'
     },
     xAxis: {
-        categories: chillerLoading.map((chiller1)=>chiller1.polledTime),
+        categories: selectedDate==null?chillerLoading.map((chiller1)=>chiller1.polledTime):chillerLoadingDateFilter.map((chiller1)=>chiller1.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -144,19 +226,19 @@ for(let i=0;i<chillerCop.length;i++){
     series: [
         {
             name: 'C1 Loading',
-            data: chillerLoading.map((chiller1)=>chiller1.c1loading)
+            data: selectedDate==null?chillerLoading.map((chiller1)=>chiller1.c1loading):chillerLoadingDateFilter.map((chiller1)=>chiller1.c1loading)
         },
         {
             name: 'c2 Loading',
-            data: chillerLoading.map((chiller2)=>chiller2.c2loading)
+            data: selectedDate==null?chillerLoading.map((chiller2)=>chiller2.c2loading):chillerLoadingDateFilter.map((chiller2)=>chiller2.c2loading)
         },
         {
             name: 'c3 Loading',
-            data: chillerLoading.map((chiller3)=>chiller3.c3loading)
+            data: selectedDate==null?chillerLoading.map((chiller3)=>chiller3.c3loading):chillerLoadingDateFilter.map((chiller3)=>chiller3.c3loading)
         },
         {
             name: 'c4 Loading',
-            data: chillerLoading.map((chiller4)=>chiller4.c4loading)
+            data: selectedDate==null?chillerLoading.map((chiller4)=>chiller4.c4loading):chillerLoadingDateFilter.map((chiller4)=>chiller4.c4loading)
         }
     ]
 };
@@ -179,7 +261,7 @@ const optionsLine={
     //     align: 'left'
     // },
     xAxis: {
-        categories: thermalStoredwaterTemp.map((timeStamp)=>timeStamp.polledTime),
+        categories: selectedDate==null?thermalStoredwaterTemp.map((timeStamp)=>timeStamp.polledTime):thermalStoredwaterTempDateFilter.map((timeStamp)=>timeStamp.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -203,7 +285,7 @@ const optionsLine={
     series: [
         {
             name: 'Ts Water temperarture',
-            data:  thermalStoredwaterTemp.map((value)=>value.storedwatertemperature)
+            data:  selectedDate==null?thermalStoredwaterTemp.map((value)=>value.storedwatertemperature):thermalStoredwaterTempDateFilter.map((value)=>value.storedwatertemperature)
         },
     ]
 };
@@ -228,15 +310,15 @@ const optionsTemparature={
     //     align: 'left'
     // },
     xAxis: {
-        categories: thermal_IN_OUT.map((time)=>time.polledTime),
+        categories: selectedDate==null?thermal_IN_OUT.map((time)=>time.polledTime):thermal_IN_OUT_DateFilter.map((time)=>time.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
         }
     },
     yAxis: {
-        min: 10,
-        max: 40,
+        min: 20,
+        max: 50,
         title: {
             text: 'Temperature (degrees celsius)'
         },
@@ -258,12 +340,12 @@ const optionsTemparature={
     series: [
         {
             name: 'Condenser inlet',
-            data:thermal_IN_OUT.map((condenserinlet)=>condenserinlet.avg_condenserLineInletTemp),
+            data:selectedDate==null?thermal_IN_OUT.map((condenserinlet)=>condenserinlet.avg_condenserLineInletTemp):thermal_IN_OUT_DateFilter.map((condenserinlet)=>condenserinlet.avg_condenserLineInletTemp),
             color:'#800080'
         },
         {
             name: 'Condenser outlet',
-            data:thermal_IN_OUT.map((condenseroutlet)=>condenseroutlet.avg_condenserLineOutletTemp),
+            data:selectedDate==null?thermal_IN_OUT.map((condenseroutlet)=>condenseroutlet.avg_condenserLineOutletTemp):thermal_IN_OUT_DateFilter.map((condenseroutlet)=>condenseroutlet.avg_condenserLineOutletTemp),
             color:"#FB4346"
         },
     ]
@@ -287,7 +369,7 @@ const optionsEvaporatorTemparature={
     //     align: 'left'
     // },
     xAxis: {
-        categories:thermal_IN_OUT.map((time)=>time.polledTime),
+        categories:selectedDate==null?thermal_IN_OUT.map((time)=>time.polledTime):thermal_IN_OUT_DateFilter.map((time)=>time.polledTime),
         crosshair: true,
         accessibility: {
             description: 'Countries'
@@ -313,19 +395,40 @@ const optionsEvaporatorTemparature={
     series: [
         {
             name: 'Evaporator inlet',
-            data: thermal_IN_OUT.map((evaporatorinlet)=>evaporatorinlet.avg_commonHeaderinletTemp),
+            data: selectedDate==null?thermal_IN_OUT.map((evaporatorinlet)=>evaporatorinlet.avg_commonHeaderinletTemp):thermal_IN_OUT_DateFilter.map((evaporatorinlet)=>evaporatorinlet.avg_commonHeaderinletTemp),
             color:'#02ccfe',
 
         },
         {
             name: 'Evaporator outlet',
-            data: thermal_IN_OUT.map((evaporatoroutlet)=>evaporatoroutlet.avg_commonHeaderoutletTemp),
+            data: selectedDate==null?thermal_IN_OUT.map((evaporatoroutlet)=>evaporatoroutlet.avg_commonHeaderoutletTemp):thermal_IN_OUT_DateFilter.map((evaporatoroutlet)=>evaporatoroutlet.avg_commonHeaderoutletTemp),
             color:" #1c305c"
         },
     ]
 };
+
+
+const now = new Date();
+const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
+const [month, day, year] = local.split("/"); // Split the date by "/"
+const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
+const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
+
   return (
     <div>
+             <div className="row" style={{marginLeft:"10px",marginTop:"20px"}}>
+  <div className="col-10">
+    <div className="input-group mb-3" style={{ width: "300px"}}>
+      <div className="input-group-prepend">
+        <label className="input-group-text" htmlFor="inputGroupSelect01">
+          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange}  placeholderText={dateValue}/>
+        </label>
+      </div>
+     
+    </div>
+  </div>
+ </div>
+
         <div> 
         <h3 style={{fontsize:"30px",textAlign:"center"}}><b>Overview of Chiller and its Subsystems</b></h3>
         <br/>
@@ -347,22 +450,22 @@ const optionsEvaporatorTemparature={
         <div class="row" style={{marginLeft:"20px"}}>
   <div class="col-6">
 
-    <h2><b>{C1_cop[C1_cop.length-1]}</b></h2>
-    <p style={{color:'gray'}}><b>Average of C1 COP</b></p>
+    <h2><b>{C1_cop[C1_cop.length-1]==null?0:C1_cop[C1_cop.length-1]}</b></h2>
+    <p style={{color:'gray'}}><b>C1 COP</b></p>
   </div>
   <div class="col-6">
-    <h2><b>{C2_cop[C2_cop.length-1]}</b></h2>
-    <p style={{color:'gray'}} ><b>Average of C2 COP</b></p>
+    <h2><b>{C2_cop[C2_cop.length-1]==null?0:C2_cop[C2_cop.length-1]}</b></h2>
+    <p style={{color:'gray'}} ><b>C2 COP</b></p>
   </div>
   <br/>
   <br/>
   <div class="col-6" style={{marginTop:"20px"}}>
-    <h2><b>{C3_cop[C3_cop.length-1]}</b></h2>
-    <p style={{color:'gray'}}><b>Average of C3 COP</b></p>
+    <h2><b>{C3_cop[C3_cop.length-1]==null?0:C3_cop[C3_cop.length-1]}</b></h2>
+    <p style={{color:'gray'}}><b>C3 COP</b></p>
   </div>
   <div class="col-6" style={{marginTop:"20px"}}>
-  <h2><b>{C4_cop[C4_cop.length-1]}</b></h2>
-<p style={{color:'gray'}}><b>Average of C3 COP</b></p>
+  <h2><b>{C4_cop[C4_cop.length-1]==null?0:C4_cop[C4_cop.length-1]}</b></h2>
+<p style={{color:'gray'}}><b>C4 COP</b></p>
 
   </div>
   {/* <div class="col">col</div>

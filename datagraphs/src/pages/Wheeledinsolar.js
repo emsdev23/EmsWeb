@@ -10,16 +10,22 @@ import CircularProgress from '@mui/material/CircularProgress';
 import swal from 'sweetalert';
 import Grid from '@mui/material/Grid';
 import { Link } from "react-router-dom";
+import HighchartsReact from 'highcharts-react-official';
+import Highcharts from 'highcharts';
+import exportingInit from 'highcharts/modules/exporting';
+import exportDataInit from 'highcharts/modules/export-data';
 
 
 function WheeledInsolar() {
+  exportingInit(Highcharts);
+  exportDataInit(Highcharts);
   const host='43.205.196.66'
     const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
     const [wmsMeterdata,setWmsMeterdata]=useState([])
     const [loading, setLoading] = useState(false);
     const inveterApi=`http://${host}:5000/initial/wheeledinsolr`
-    const WmsMeterResponse=`http://${host}:5000/initialgraph/wmsMeter`
+    const WmsMeterResponse=`http://localhost:5000/initialgraph/wmsMeter`
 
 
     const [inverterInitial,setInverterInitial]=useState([])
@@ -43,7 +49,7 @@ function WheeledInsolar() {
       try {
         const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
         const response = await axios.post(`http://${host}:5000/singleday/wheeledinsolr`, { date: formattedDate });
-        const meterresponse = await axios.post(`http://${host}:5000/wmsMeter/graphs`, { date: formattedDate });
+        const meterresponse = await axios.post(`http://localhost:5000/wmsMeter/graphs`, { date: formattedDate });
         
         setSingledaydata(response.data);
         console.log(singledaydata)
@@ -170,7 +176,7 @@ function WheeledInsolar() {
 
     }
     for(let i=0;i<inverter1.length;i++){
-      const date = new Date(inverter1[i].invertertimestamp);
+      const date = new Date(inverter1[i].polledtime);
       const hours = date.getHours().toString().padStart(2, '0');
       const minutes = date.getMinutes().toString().padStart(2, '0');
       const timestamp = `${hours}:${minutes}`;
@@ -850,6 +856,69 @@ initialgraphdata.push({"inverterTimestamp":roundedTime})
     }
   };
 
+
+  const Actual_ExpectedEnergy={
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: null
+        },
+        xAxis: {
+            categories: selectedDate==null?wmsMeter.map((Time) => Time.TimeStamp):singledaydata.map((Time) =>Time.TimeStamp),
+            crosshair: true
+        },
+        yAxis: [{
+          min: 0,
+          title: {
+              text: 'Energy Generation (kWh)'
+          }
+      }, {
+          title: {
+              text: 'irradiation'
+          },
+          opposite: true // This makes the axis appear on the opposite side
+      }],
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y:.1f}(kWh)</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        
+        series: [{
+            name: 'Actual Energy (kWh)',
+            data: selectedDate==null?wmsMeter.map((value) => (value.instantaniousEnergy)):wmsMeterdata.map((value) =>value.instantaniousEnergy),
+            type: 'column',
+            yAxis: 0, // Use the first y-axis,
+            color:"#81B622"
+
+
+        },
+        {
+            name: 'Expected Energy (kWh)',
+            data:selectedDate==null?wmsMeter.map((value) => (value.expectedEnergy)):wmsMeterdata.map((value) =>value.expectedEnergy),
+            type: 'column',
+            yAxis: 0, // Use the first y-axis
+            //color:"#DBA40E"
+        },
+        {
+            name: 'Wms irradiation',
+            data: selectedDate==null?wmsMeter.map((value) => parseFloat((value.wmsirradiation))):wmsMeterdata.map((value) =>parseFloat((value.wmsirradiation))),
+            type: 'line',
+            yAxis: 1 // Use the first y-axis
+        },
+        ]
+}
+
     
   const now = new Date();
   const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
@@ -884,12 +953,12 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
   <div class="col-10" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h5 style={{color:"brown"}}><b>Date :-</b></h5> <DatePicker id="date" className="form-control" selected={selectedDate} onChange={handleDateChange} style={{ width: "200px" }}   />
+        <h5 style={{color:"brown"}}><b>Date :-</b></h5> <DatePicker id="date" className="form-control" selected={selectedDate} onChange={handleDateChange} style={{ width: "200px" }} placeholderText={dateValue}/>
         </label>
         
       </div>
   </div>
-  <div class="col-2"><h3>{dateValue}</h3></div>
+  {/* <div class="col-2"><h3>{dateValue}</h3></div> */}
 </div>
 
         {/* <div class="input-group mb-3"  style={{width:"300px",marginTop:"50px"}}>
@@ -936,9 +1005,12 @@ selectedDate===null?<ReactApexChart options={CurrentGrapgh.options} series={Curr
     
   
 
-
+<br/>
   
-   
+   <div>
+   <h3 style={{textAlign:"center",color:"brown"}}><b>Expected VS Actual Generation (kwh)</b></h3>
+   <HighchartsReact highcharts={Highcharts} options={Actual_ExpectedEnergy} />
+   </div>
 
     </div>
   )

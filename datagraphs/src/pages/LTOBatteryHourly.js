@@ -96,14 +96,14 @@ function LTOBatteryHourly() {
         series: [
           {
             name: 'charging  Energy',
-            data: LTObattery.map((val) => (val.chargingEnergy/100)),
+            data: LTObattery.map((val) => (val.chargingEnergy)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#528AAE',
           },
           {
             name: 'Discharging  Energy',
-            data: LTObattery.map((val) => (val.dischargingEnergy/100)),
+            data: LTObattery.map((val) => (val.dischargingEnergy)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#00008B',
@@ -167,14 +167,14 @@ function LTOBatteryHourly() {
         series: [
           {
             name: 'charging  Energy',
-            data: singledaydata.map((val) => (val.chargingEnergy/100)),
+            data: singledaydata.map((val) => (val.chargingEnergy)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#528AAE',
           },
           {
             name: 'Discharging  Energy',
-            data: singledaydata.map((val) => (val.dischargingEnergy/100)),
+            data: singledaydata.map((val) => (val.dischargingEnergy)),
             type: 'column',
             yAxis: 0, // Primary y-axis
             color: '#00008B',

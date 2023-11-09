@@ -472,10 +472,7 @@ const PeakDemandGraphDateFilter={
      
     </div>
   </div>
-  {/* <div class="col-2"><h3>{dateValue}</h3></div> */}
-
- 
-</div>
+ </div>
        
     
     <div style={{marginTop:"40px",marginLeft:"10px",marginRight:"10px"}}>

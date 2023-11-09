@@ -11,7 +11,9 @@ function LTObattery() {
   const host='43.205.196.66'
 
   const [ltoBatteryData,setLtoBatteryData]=useState([])
+  const [ltoLogsData,setLtoLogsData]=useState([])
   const LTOApi=`http://${host}:5000/battery/lto`
+  const LTOLogApi="http://localhost:5000/Logs/LTO"
   const ActualPassKey=7230
   const [pinNumber,setPinNumber]=useState("")
 
@@ -33,8 +35,19 @@ function LTObattery() {
     })
   } 
 
+  const LtoLogsData=()=>{
+    axios.get(LTOLogApi).then((res)=>{
+      const dataResponse=res.data
+      setLtoLogsData(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
   useEffect(()=>{
     LTOData()
+    LtoLogsData()
   },[])
 
 console.log(ltoBatteryData)
@@ -131,8 +144,53 @@ else{
 }
 };
 
+
+const thermalLogPopup = () => {
+  Swal.fire({
+    width: "100vw",
+    background: "white",
+    html:
+      '<table class="table table-dark table-hover" style="fontSize:5px">' +
+      '<thead >' +
+      '<tr >' +
+      '<td>Record Date</td>' +
+      '<td>cause</td>' +
+      '<td>Discharge ON</td>' +
+      '<td>charge OFF</td>' +
+      '<td>PeakDemand OFF</td>' +
+      '<td>PeakDemand ON</td>' +
+      '<td>PeakTime</td>' +
+      '<td>ServerTime</td>' +
+      '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+      // Removed extra tbody tag
+      ltoLogsData.map((data) => (
+        '<tr>' +
+        '<td>' + data.TimeStamp + '</td>' +
+        '<td>' + data.cause + '</td>' +
+        '<td>' + data.DischargeOn + '</td>' +
+        '<td>' + data.DischargeOfTime +'</td>' + // Fixed typo here
+        '<td>' + data.PeakDeamndON + '</td>' +
+        '<td>' + data.PeakDeamndOFF + '</td>' +
+        '<td>' + data.peakTime + '</td>' +
+        '<td>' + data.serverTime + '</td>' +
+        '</tr>'
+      )).join('') +
+      '</tbody>' +
+      '</table>',
+    showCancelButton: false,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    // confirmButtonText: 'Yes, delete it!',
+  });
+};
+
   return (
     <div>
+      <div> 
+      <button type="submit" class="btn btn-dark bt-lg" style={{height:"40px",width:"300px"}} onClick={thermalLogPopup}><b>Lto Logs</b></button>
+      </div>
       <div >
         <h2 style={{fontSize:"30px",textAlign:"center"}}><b>LTO Battery Control</b></h2>
       </div>

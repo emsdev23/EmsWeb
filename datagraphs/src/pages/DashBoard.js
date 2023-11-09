@@ -166,7 +166,7 @@ function DashBoard() {
   const sensorurl=`http://${host}:5000/sensorreadings`
   const meterData=`http://${host}:5000/meterdata`
   const acmeterenergy=`http://${host}:5000/acmeterenergy`
-  const griddata= `http://${host}:5000/grid`
+  const griddata= `http://localhost:5000/grid`
   const temparature=`http://${host}:5000/thermaltemp`
   const rooftopac = `http://${host}:5000/rooftop`
   const energysaved = `http://${host}:5000/peaksavings`

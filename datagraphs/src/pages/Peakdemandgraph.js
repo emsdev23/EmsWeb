@@ -9,6 +9,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import ReactApexChart from 'react-apexcharts';
 import BuildindConsumptionPage2 from './BuildindConsumptionPage2';
 import Grid from '@mui/material/Grid';
+import KvaVsKW from './KvaVsKW';
  
 
 const iphost='43.205.196.66'
@@ -1139,6 +1140,16 @@ const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
     )}
     </Grid>
     </Grid>
+
+    <div> 
+
+    </div>
+  </div>
+  <br/>
+  <br/>
+  <div> 
+  <h3 style={{textAlign:"center",color:"brown"}}><b>Building Demand  vs  System Active Power</b></h3>
+  <KvaVsKW/>
   </div>
   
  

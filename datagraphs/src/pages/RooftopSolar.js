@@ -10,6 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import swal from 'sweetalert';
 import Grid from '@mui/material/Grid';
 import { Link } from "react-router-dom";
+import RoofTopExepectedGeneration from './RoofTopExepectedGeneration';
 
 
 function RooftopSolar() {
@@ -374,13 +375,13 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
     <div className="input-group mb-3" style={{ width: "300px"}}>
       <div className="input-group-prepend">
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
+          <h5 style={{color:"brown"}}><b> Date :- </b></h5><DatePicker id="date" selected={selectedDate} onChange={handleDateChange} placeholderText={dateValue} />
         </label>
       </div>
      
     </div>
   </div>
-  <div class="col-2"><h3>{dateValue}</h3></div>
+  {/* <div class="col-2"><h3>{dateValue}</h3></div> */}
 
  
 </div>
@@ -394,6 +395,9 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
  
    </div>
    </form>
+    </div>
+    <div> 
+      <RoofTopExepectedGeneration/>
     </div>
     </div>
   )

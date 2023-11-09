@@ -18,8 +18,10 @@ function Thermalcontrol() {
   });
 
   const [thermalOverviewData,setThermalOverviewData]=useState([])
+  const [thermallog,setThermallog]=useState([])
   const [pinNumber,setPinNumber]=useState("")
   const thermalApi=`http://${host}:5000/thermal/summaryCard`
+  const thermalLogApi="http://localhost:5000/Logs/Thermal"
   const ActualPassKey=7230
 
   // const handlePinPasswordChange = (pin) => {
@@ -42,9 +44,21 @@ function Thermalcontrol() {
     })
   } 
 
+  const ThermalLogsData=()=>{
+    axios.get(thermalLogApi).then((res)=>{
+      const dataResponse=res.data
+      setThermallog(dataResponse)
+  
+    }).catch((err)=>{
+      console.log(err)
+    })
+  } 
+
   useEffect(()=>{
     ThermalData()
+    ThermalLogsData()
   },[])
+
   console.log(thermalOverviewData)
   let  storedWaterTemp=""
   let inletTemparature=""
@@ -180,8 +194,69 @@ function Thermalcontrol() {
     });
   };
 
+  // let TimeStamp=0
+  // let cause=0
+  // let DischargeOn=0
+  // let DischargeOfTime=0
+  // let PeakDeamndONTime=0
+  // let PeakDeamndOFFTime=0
+  // let peakTime=0
+  // for(let i=0;i<thermallog.length;i++){
+
+  // }
+
+
+  const thermalLogPopup = () => {
+    Swal.fire({
+      width: "100vw",
+      background: "white",
+      html:
+        '<table class="table table-dark table-hover" style="fontSize:5px">' +
+        '<thead >' +
+        '<tr >' +
+        '<td>Record Date</td>' +
+        '<td>cause</td>' +
+        '<td>Discharge ON</td>' +
+        '<td>charge OFF</td>' +
+        '<td>PeakDemand OFF</td>' +
+        '<td>PeakDemand ON</td>' +
+        '<td>PeakTime</td>' +
+        '<td>ServerTime</td>' +
+        '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+        // Removed extra tbody tag
+        thermallog.map((data) => (
+          '<tr>' +
+          '<td>' + data.TimeStamp + '</td>' +
+          '<td>' + data.cause + '</td>' +
+          '<td>' + data.DischargeOn + '</td>' +
+          '<td>' + data.DischargeOfTime +'</td>' + // Fixed typo here
+          '<td>' + data.PeakDeamndONTime + '</td>' +
+          '<td>' + data.PeakDeamndOFFTime + '</td>' +
+          '<td>' + data.peakTime + '</td>' +
+          '<td>' + data.serverTime + '</td>' +
+          '</tr>'
+        )).join('') +
+        '</tbody>' +
+        '</table>',
+      showCancelButton: false,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      // confirmButtonText: 'Yes, delete it!',
+    });
+  };
+  
+  
+
+  
+  
+
   return (
     <div>
+      <div> 
+      <button type="submit" class="btn btn-dark bt-lg" style={{height:"40px",width:"300px"}} onClick={thermalLogPopup}><b>Thermal Logs</b></button>
+      </div>
       <div> 
         <h2 style={{fontSize:"30px",textAlign:"center"}}><b>Thermal Control</b></h2>
       </div>
