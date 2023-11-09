@@ -3,6 +3,9 @@ const timeout = require('connect-timeout')
 const {con,chakradb,unprocesseddata,meterDb,EMSDB}=require('./connect')
 const app=express()
 const alert = express()
+const fs = require('fs');
+const multer = require('multer');
+const path = require('path');
 const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
@@ -12,12 +15,20 @@ const email = 'arun.kumar@tenet.res.in'
 const emailto =['ems@respark.iitm.ac.in']
 
 const util = require('util');
-const conQuery = util.promisify(con.query).bind(con);
+const conQuery = util.promisify(EMSDB.query).bind(EMSDB);
 const meterDataQuery=util.promisify(meterDb.query).bind(meterDb)
 const chakradbQuery = util.promisify(chakradb.query).bind(chakradb);
+const uploadDir = path.join(__dirname, 'uploads');
 //faheera@respark.iitm.ac.in
+// Multer configuration for file storage
 
 
+
+
+
+const storage = multer.memoryStorage(); // Store file in memory
+const upload = multer({ storage: storage });
+ 
 alert.use(
     cors({
       origin: "*",
@@ -1547,7 +1558,7 @@ app.get("/peak/initialgraph",async(req,res)=>{
 
 //--------------------current day PeakDemand api ----------------------------------//      
        app.get("/peak/hvacSchneider7230Polling",async(req,res)=>{
-        con.query("SELECT max(totalApparentPower2) as totalApparentPower2 ,polledTime FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)=curdate() GROUP BY DATE_FORMAT(polledTime, '%Y-%m-%d %H:%i');",function(err,result,feilds){
+        chakradb.query("SELECT max(totalApparentPower2) as totalApparentPower2 ,polledTime FROM hvacSchneider7230Polling where date(polledTime)=curdate() GROUP BY DATE_FORMAT(polledTime, '%Y-%m-%d %H:%i');",function(err,result,feilds){
             const viewData=[]
             if(err){
                 console.log(err)
@@ -1579,8 +1590,8 @@ app.get("/peak/initialgraph",async(req,res)=>{
     const { date} = req.body;
     const viewData=[]
    
-    const query = `SELECT max(totalApparentPower2) as totalApparentPower2 ,polledTime FROM bmsunprocessed_prodv13.hvacSchneider7230Polling where date(polledTime)='${date}' GROUP BY DATE_FORMAT(polledTime, '%Y-%m-%d %H:%i') `;
-    con.query(query, (error, results) => {
+    const query = `SELECT max(totalApparentPower2) as totalApparentPower2 ,polledTime FROM hvacSchneider7230Polling where date(polledTime)='${date}' GROUP BY DATE_FORMAT(polledTime, '%Y-%m-%d %H:%i') `;
+    chakradb.query(query, (error, results) => {
       if (error) {
         console.error(error);
         return res.status(500).json({ message: 'An error occurred' });
@@ -1802,23 +1813,8 @@ app.post("/singleday/wheeledinsolr", (req, res) => {
             const minutes = date.getMinutes().toString().padStart(2, '0');
             // const seconds = date.getSeconds().toString().padStart(2, '0');
             const timestamp = `${hours}:${minutes}`;
-
-            // Splitting the time into hours and minutes
-          var [converthours, convertminutes] = timestamp.split(":");
-
-          // Converting the hours and minutes to integers
-           parsehours = parseInt(converthours, 10);
-           parseminutes = parseInt(convertminutes, 10);
-
-       // Rounding off the time
-       if (parseminutes >= 30) {
-        parsehours += 1;
-          }
-
-// Formatting the rounded time
-var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
            
-            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":timestamp})
+            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":timestamp,"expectedEnergy":Math.trunc(response[i].expectedwms)})
 
         }
         console.log(wmsMeterdata)
@@ -1847,23 +1843,7 @@ var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
             const minutes = date.getMinutes().toString().padStart(2, '0');
             // const seconds = date.getSeconds().toString().padStart(2, '0');
             const timestamp = `${hours}:${minutes}`;
-
-            // Splitting the time into hours and minutes
-          var [converthours, convertminutes] = timestamp.split(":");
-
-          // Converting the hours and minutes to integers
-           parsehours = parseInt(converthours, 10);
-           parseminutes = parseInt(convertminutes, 10);
-
-       // Rounding off the time
-       if (parseminutes >= 30) {
-        parsehours += 1;
-          }
-
-// Formatting the rounded time
-var roundedTime = parsehours.toString().padStart(2, "0") + ":00";
-           
-            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":timestamp})
+            wmsMeterdata.push({"cumulativepower":Math.trunc(response[i].cummulativemeterpower),"wmsirradiation":(Number(response[i].wmsirradiation)).toFixed(1),"instantaniousEnergy":Math.trunc(response[i].instantaneousenergy),"timestamp":timestamp,"expectedEnergy":Math.trunc(response[i].expectedwms)})
 
         }
         //console.log(wmsMeterdata)
@@ -1951,7 +1931,7 @@ console.log(formattedDate,"line 1680");
     const { controlStatus, polledTime,functioncode} = req.body;
     console.log(req.body)
     const sql = 'INSERT INTO thermalInstantaneous (controlStatus, polledTime,functionCode) VALUES (?, ?, ?)';
-    con.query(sql, [controlStatus, polledTime,functioncode], function (error, results, fields) {
+      EMSDB.query(sql, [controlStatus, polledTime,functioncode], function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
         }
@@ -2021,7 +2001,7 @@ console.log(formattedDate,"line 1680");
 
 
   //--------------------------end of api-----------------------------------//
-  
+
 
 //----------------------chiller Dashboard api`s ----------------------------------------------//
   //-------------------------------thermal stored water temparature api-----------------------//
@@ -2143,6 +2123,132 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
 //----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
   //----------------------------------------END of chillerDashboard api`s ----------------------------//
 
+
+
+  //----------------------chiller Dashboard api`s for date filters ----------------------------------------------//
+  //-------------------------------thermal stored water temparature api date filter-----------------------//
+  app.post("/thermal/storedWaterTemp/dateFiltered",async(req,res)=>{
+    const {date}=req.body
+    const thermalWaterTemp=[]
+    meterDb.query(`SELECT * FROM meterdata.thermalstoredwaterquaterly where date(timecolumn)='${date}'`,function(error,result,feild){
+      if(error){
+        console.log(error)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          let date=new Date(response[i].timecolumn)
+          const hours = date.getHours().toString().padStart(2, '0');
+     const minutes = date.getMinutes().toString().padStart(2, '0');
+     // const seconds = date.getSeconds().toString().padStart(2, '0');
+     const timestamp = `${hours}:${minutes}`;
+     thermalWaterTemp.push({"polledTime":timestamp,"storedwatertemperature":parseFloat(response[i].storedwatertemperature)})
+
+
+      }
+      console.log(thermalWaterTemp)
+        res.send(thermalWaterTemp)
+
+        
+      }
+    })
+  })
+  //--------------------------------end of api----------------------------//
+
+
+  //-----------------------------chiller Loading api date Filter-------------------------------//
+  app.post("/chillerDashboard/ChillerLoading/dateFiltered",async(req,res)=>{
+    const {date}=req.body
+    const ChillerLoadingData=[]
+    meterDb.query(`SELECT * FROM meterdata.chillarloading where date(lastTimestamp)="${date}"`,function(error,result,feild){
+      if(error){
+        console.log(error)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          let date=new Date(response[i].lastTimestamp)
+          const hours = date.getHours().toString().padStart(2, '0');
+     const minutes = date.getMinutes().toString().padStart(2, '0');
+     // const seconds = date.getSeconds().toString().padStart(2, '0');
+     const timestamp = `${hours}:${minutes}`;
+     ChillerLoadingData.push({"polledTime":timestamp,"c1loading":parseFloat(response[i].c1loading),"c2loading":parseFloat(response[i].c2loading),"c3loading":parseFloat(response[i].c3loading),"c4loading":parseFloat(response[i].c4loading)})
+
+
+      }
+      console.log(ChillerLoadingData.length)
+        res.send(ChillerLoadingData)
+
+        
+      }
+    })
+  })
+
+
+//----------------------------END of chiller Loading api-------------------------------------//
+
+//---------------------------------thermalinletoutlet (condenser and evaporator) date filters-----------------------//
+
+app.post("/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered",async(req,res)=>{
+  const {date}=req.body
+  const thermalinletoutletData=[]
+  meterDb.query(`SELECT * FROM thermalinletoutlet where date(Timestamp)="${date}"`,function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].Timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   thermalinletoutletData.push({"polledTime":timestamp,"avg_commonHeaderinletTemp":parseFloat(response[i].avg_commonHeaderinletTemp),"avg_commonHeaderoutletTemp":parseFloat(response[i].avg_commonHeaderoutletTemp),"avg_condenserLineInletTemp":parseFloat(response[i].avg_condenserLineInletTemp),"avg_condenserLineOutletTemp":parseFloat(response[i].avg_condenserLineOutletTemp),"avg_commonHeaderFlowrate":parseFloat(response[i].avg_commonHeaderFlowrate),"avg_condenserLineFlowrate":parseFloat(response[i].avg_condenserLineFlowrate)})
+
+
+    }
+    console.log(thermalinletoutletData.length)
+      res.send(thermalinletoutletData)
+
+      
+    }
+  })
+})
+
+//-------------------------------END of thermalinletoutlet (condenser and evaporator) api---------------------------------//
+
+//---------------------------------Average of C1 cop to C4 cop--------------------------------------//
+app.post("/chillerDashboard/Average/chillarCOP/dateFiltered",async(req,res)=>{
+  const {date}=req.body
+  const chillarCOP=[]
+  meterDb.query(`SELECT * FROM meterdata.chillarcop where date(timestamp)="${date}";`,function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   chillarCOP.push({"polledTime":timestamp,"avg_c1cop":parseFloat(response[i].c1cop),"avg_c2cop":parseFloat(response[i].c2cop),"avg_c3cop":parseFloat(response[i].c3cop),"avg_c4cop":parseFloat(response[i].c4cop)})
+
+
+    }
+    console.log(chillarCOP.length)
+      res.send(chillarCOP)
+
+      
+    }
+  })
+})
+
+//----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
+  //----------------------------------------END of chillerDashboard api`s  for date Filters----------------------------//
+
   //-------------------------------------tharmalStorage summary card---------------------//
 
   app.get("/thermal/summaryCard", async (req, res) => {
@@ -2152,6 +2258,7 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
       // Query the first database (con)
       const result1 = await conQuery("SELECT * FROM EMSThermalstorage WHERE DATE(received_time) = CURDATE() ORDER BY received_time DESC LIMIT 1;");
       const response1 = JSON.parse(JSON.stringify(result1));
+      console.log(response1)
   
       for (let i = 0; i < response1.length; i++) {
         const date = new Date(response1[i].received_time);
@@ -2365,24 +2472,31 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
 
   //----------------------------LTOLTOBattery instantanious controll-----------------------------------//
   app.post('/LTOBattery/controll', function (req, res) {
-    const date = new Date();
 
-let day = date.getDate();
-let month = date.getMonth() + 1;
-let year = date.getFullYear();
-let hours=date.getHours();
-let minutes=date.getMinutes();
-let seconds=date.getSeconds();
+    const currentTime = new Date();
 
-// This arrangement can be altered based on how we want the date's format to appear.
-let currentDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-console.log(currentDate)
-//var polledTimeStamp=formattedDate
+// Use the toLocaleString method with the timeZone option
+const options = { timeZone: tz };
+const timestamp = currentTime.toLocaleString('en-US', options);
+
+// Parse the timestamp into a Date object
+const timestampDate = new Date(timestamp);
+
+// Format the timestamp in MySQL datetime format
+const year = timestampDate.getFullYear();
+const month = (timestampDate.getMonth() + 1).toString().padStart(2, '0');
+const day = timestampDate.getDate().toString().padStart(2, '0');
+const hours = timestampDate.getHours().toString().padStart(2, '0');
+const minutes = timestampDate.getMinutes().toString().padStart(2, '0');
+const seconds = timestampDate.getSeconds().toString().padStart(2, '0');
+
+const mysqlTimestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+console.log(mysqlTimestamp);
 
     const { functionCode, controlStatus} = req.body;
     console.log(req.body)
     const sql = 'INSERT INTO ltoInstantControl (functionCode, controlStatus,recordTime) VALUES (?, ?, ?)';
-    con.query(sql, [functionCode, controlStatus,currentDate], function (error, results, fields) {
+    EMSDB.query(sql, [functionCode, controlStatus,mysqlTimestamp], function (error, results, fields) {
         if (error) {
             return res.status(500).send(error);
         }
@@ -2390,7 +2504,7 @@ console.log(currentDate)
             console.log(results)
             res.status(200).send('parameter  added successfully!');
         }
-        //return 
+        //return
     });
 });
   //-------------------------------END OF API----------------------------------------------//
@@ -2581,8 +2695,9 @@ console.log(currentDate)
               resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":0.01,"timestamp":timestamp,"batteryStatus":response[i].batteryStatus})
 
             }
+
             if (response[i].batteryStatus==="DCHG") {
-              energy.push((response[i].total_ltodischargingenergy_diff)*-1);
+              energy.push((response[i].dischargingEnergy));
               packsoc.push(response[i].packSOC);
               let date = new Date(response[i].recordTimestamp);
               const hours = date.getHours().toString().padStart(2, '0');
@@ -2590,10 +2705,11 @@ console.log(currentDate)
               // const seconds = date.getSeconds().toString().padStart(2, '0');
               const timestamp = `${hours}:${minutes}`;
               //timestamp.push(date);
-              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat((response[i].dischargingEnergy/100)*-1),"timestamp":timestamp,"batteryStatus":"Discharging"})
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat((response[i].dischargingEnergy))*-1,"timestamp":timestamp,"batteryStatus":"Discharging"})
             }
+
             if (response[i].batteryStatus==="CHG") {
-              energy.push(response[i].total_ltochargingenergy_diff);
+              energy.push(response[i].chargingEnergy);
               packsoc.push(response[i].packSOC);
               let date = new Date(response[i].recordTimestamp);
               const hours = date.getHours().toString().padStart(2, '0');
@@ -2602,7 +2718,7 @@ console.log(currentDate)
               const timestamp = `${hours}:${minutes}`;
               //timestamp.push(date);
 
-              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat(response[i].chargingEnergy/100),"timestamp":timestamp,"batteryStatus":"Charging"})
+              resultData.push({"packsoc":parseInt(response[i].packSOC),"batteryEnergy":parseFloat(response[i].chargingEnergy),"timestamp":timestamp,"batteryStatus":"Charging"})
             }
           }
         }
@@ -2641,7 +2757,7 @@ console.log(currentDate)
               else{
                 idleState=0
               }
-              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy)*-1,"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
+              resultValue.push({"PolledTime":timestamp,"chargingEnergy":parseFloat(response[i].chargingEnergy),"dischargingEnergy":parseFloat(response[i].dischargingEnergy),"idleEnergy":parseFloat(idleState),"Pacsoc":parseInt(response[i].packsoc),"energy_available":response[i].energyAvailable})
 
             }
             res.send(resultValue)
@@ -3673,11 +3789,259 @@ app.post("/buildingconsumption/Highlights/DateFiltered", (req,res)=>{
 
 })
 
+
+
+
 //-------------------------------------------  end of api -----------------------------------------------------------//
 
 
+//----------------------------------------------LOGS API------------------------------------------------------------------//
+
+//---------------------------------------logs API for thermal and LTO------------------------------------------------//
+
+app.get("/Logs/Thermal",async(req,res)=>{
+  const {date}=req.body
+  const resultValue=[]
+  EMSDB.query("SELECT * FROM EMS.ThermalLog;",function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].recordDate).toLocaleString();
+            let DischargeOn=new Date(response[i].dischargeON).toLocaleString();
+            let DischargeOff=response[i].dischargeOFF==null || 0 ? 0 : new Date(response[i].dischargeOFF).toLocaleString();
+            let PeakDeamndON= response[i].peakDemandON==null|| 0 ? 0:response[i].peakDemandON
+            let PeakDeamndOFF=response[i].peakDemandOFF==null||0 ? 0:response[i].peakDemandOFF
+            let peakTime=response[i].peakTime==null||0?0:new Date(response[i].peakTime).toLocaleString();
+            let serverTime=response[i].ServerTime==null||0?0:new Date(response[i].ServerTime).toLocaleString();
+
+
+            let DateValue=date.split(",")[0]
+            let DischargeOnTime=DischargeOn.split(",")[1]
+            let DischargeOfTime=DischargeOff==0?"00:00:00":DischargeOff.split(",")[1]
+            let peakTimeStamp=peakTime==0?"00:00:00":peakTime.split(",")[1]
+            let serverTimeStamp=serverTime==0?"00:00:00":serverTime.split(",")[1]
+
+            
+
+            // const hours = date.getHours().toString().padStart(2, '0');
+            // const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            // const timestamp = `${hours}:${minutes}`
+
+            resultValue.push({"TimeStamp":DateValue,"cause":response[i].cause,"DischargeOn":DischargeOnTime,"DischargeOfTime":DischargeOfTime,"PeakDeamndONTime":PeakDeamndON,"peakTime":peakTimeStamp,"PeakDeamndOFFTime":PeakDeamndOFF,"serverTime":serverTimeStamp})
+        }
+         
+          res.send(resultValue)
+          console.log(resultValue)
+      }
+  })
+  
+})
+
+//-----------------------------------------------end-------------------------------------------------------------------//
+
+//-------------------------------------------LTO logs api--------------------------------------------------------------//
+app.get("/Logs/LTO",async(req,res)=>{
+  const {date}=req.body
+  const resultValue=[]
+  EMSDB.query("SELECT * FROM EMS.ltoLogDchg;",function(err,result,feilds){
+   // DATE_SUB(CURDATE(), INTERVAL 1 DAY)  
+    if(err){
+          console.log(err)
+      }
+      else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          for(let i=0;i<response.length;i++){
+            let date = new Date(response[i].recordDate).toLocaleString();
+            let DischargeOn=new Date(response[i].dischargeON).toLocaleString();
+            let DischargeOff=response[i].dischargeOFF==null || 0 ? 0 : new Date(response[i].dischargeOFF).toLocaleString();
+            let PeakDeamndON= response[i].peakDemandON==null|| 0 ? 0:response[i].peakDemandON
+            let PeakDeamndOFF=response[i].peakDemandOFF==null||0 ? 0:response[i].peakDemandOFF
+            let peakTime=response[i].peakTime==null||0?0:new Date(response[i].peakTime).toLocaleString();
+            let serverTime=response[i].ServerTime==null||0?0:new Date(response[i].ServerTime).toLocaleString();
+
+
+            let DateValue=date.split(",")[0]
+            let DischargeOnTime=DischargeOn.split(",")[1]
+            let DischargeOfTime=DischargeOff==0?"00:00:00":DischargeOff.split(",")[1]
+            let peakTimeStamp=peakTime==0?"00:00:00":peakTime.split(",")[1]
+            let serverTimeStamp=serverTime==0?"00:00:00":serverTime.split(",")[1]
+
+            // const hours = date.getHours().toString().padStart(2, '0');
+            // const minutes = date.getMinutes().toString().padStart(2, '0');
+            // const seconds = date.getSeconds().toString().padStart(2, '0');
+            // const timestamp = `${hours}:${minutes}`
+
+            resultValue.push({"TimeStamp":DateValue,"cause":response[i].cause,"DischargeOn":DischargeOnTime,"DischargeOfTime":DischargeOfTime,"PeakDeamndON":PeakDeamndON,"peakTime":peakTimeStamp,"PeakDeamndOFF":PeakDeamndOFF,"serverTime":serverTimeStamp})
+        }
+         
+          res.send(resultValue)
+          console.log(resultValue)
+      }
+  })
+  
+})
+//----------------------------------------------------end of api--------------------------------------------------------//
+
+//------------------------------------------------------- END OF LOGS -----------------------------------------------------//
+
+//----------------------------------------------expected Rooftop generation api------------------------------------------//
+ 
+
+app.get("/Rooftop/ExpectedGeneration", (req,res)=>{
+  //console.log(date)
+  const ResponseArray=[]
+
+  con.query("SELECT * FROM meterdata.expectedrooftop_generationhourly  where date(timestamp)=curdate();",function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":timestampVal,"Ph1ActualEnergy":parseFloat(response[i].Ph1ActualEnergy),"Ph2ActualEnergy":parseFloat(response[i].Ph2ActualEnergy),"Irradiation":parseFloat(response[i].Irradiation),"Ph1ExpectedEnergy":parseFloat(response[i].Ph1ExpectedEnergy),"Ph2ExpectedEnergy":parseFloat(response[i].Ph2ExpectedEnergy)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+ 
+//---------------------------------------------------------end of api ------------------------------------------------------//
+
+//----------------------------expected Rooftop generation date filter api------------------------------------------------//
+app.post("/Rooftop/ExpectedGeneration/datefiltered", (req,res)=>{
+  //console.log(date)
+  const {date}=req.body
+  const ResponseArray=[]
+
+  con.query(`SELECT * FROM meterdata.expectedrooftop_generationhourly  where date(timestamp)="${date}";`,function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":timestampVal,"Ph1ActualEnergy":parseFloat(response[i].Ph1ActualEnergy),"Ph2ActualEnergy":parseFloat(response[i].Ph2ActualEnergy),"Irradiation":parseFloat(response[i].Irradiation),"Ph1ExpectedEnergy":parseFloat(response[i].Ph1ExpectedEnergy),"Ph2ExpectedEnergy":parseFloat(response[i].Ph2ExpectedEnergy)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//----------------------------------------end of api---------------------------------------------------------------------//
+
+//-----------------------------------------------KVA vs KW graph api --------------------------------------------------------------//
+app.get ("/KVA_vs_KW", (req,res)=>{
+  //console.log(date)
+  const {date}=req.body
+  const ResponseArray=[]
+
+  meterDb.query("SELECT * FROM meterdata.kv_vs_kwh where date(timestamp)=curdate() ;",function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":timestampVal,"peakmax":parseFloat(response[i].peakmax),"wheeledmax":parseFloat(response[i].wheeledmax),"rooftopphase1":parseFloat(response[i].rooftopphase1)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//---------------------------------------------------end of api ---------------------------------------------------------------------//
+
+//-------------------------------------------------KVA VS KW date filter api ---------------------------------------------------------------//
+app.post("/KVA_vs_KW", (req,res)=>{
+  //console.log(date)
+  const {date}=req.body
+  const ResponseArray=[]
+
+  meterDb.query(`SELECT * FROM meterdata.kv_vs_kwh where date(timestamp)='${date}'`,function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":timestampVal,"peakmax":parseFloat(response[i].peakmax),"wheeledmax":parseFloat(response[i].wheeledmax),"rooftopphase1":parseFloat(response[i].rooftopphase1)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//-----------------------------------------------------------end of api ---------------------------------------------------------------------//
 
     
+// File upload endpoint
+app.post('/upload', upload.single('file'), (req, res) => {
+  const fileData = req.file.buffer;
+
+  // Dynamically set the file path based on the request body
+  const filePath = req.body.filePath;
+
+  const insertQuery = 'INSERT INTO filesHandle (file_data, file_path) VALUES (?, ?)';
+  const insertStream = EMSDB.query(insertQuery, [fileData, filePath]);
+
+  res.status(200).send('File upload initiated');
+
+  const fileStream = fs.createReadStream(filePath);
+
+  fileStream.on('data', (chunk) => {
+    insertStream.write([chunk]);
+  });
+
+  fileStream.on('end', () => {
+    insertStream.end((error) => {
+      if (error) {
+        console.error('Error inserting file into database:', error);
+        // Handle error response if needed
+      } else {
+        console.log('File inserted successfully');
+        // Handle success response if needed
+      }
+    });
+  });
+});
 
 
 app.listen(5000,(err)=>{
