@@ -5,6 +5,7 @@ import exportDataInit from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
+import { ipAddress } from '../ipAdress';
 
 function ChillerDashboard() {
     const host="43.205.196.66"
@@ -14,12 +15,15 @@ function ChillerDashboard() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [singledaydata,setSingledaydata]=useState([])
+    console.log(ipAddress)
+    //console.log(ipAdress)
 
      //declaring empty array to fetch data
     const [thermalStoredwaterTemp,setThermalStoredWaterTemp]=useState([])
     const [chillerLoading,setChillerLoading]=useState([])
     const [thermal_IN_OUT,setThermal_IN_OUT]=useState([])
     const [chillerCop,setChillerCop]=useState([])
+    const [chillerTotalCoolingEnergy,setChillerTotalCoolingEnergy]=useState([])
 
 
     //declaring empty array to fetch data according date Filters
@@ -27,17 +31,22 @@ function ChillerDashboard() {
     const [chillerLoadingDateFilter,setChillerLoadingDateFilter]=useState([])
     const [thermal_IN_OUT_DateFilter,setThermal_IN_OUT_DateFilter]=useState([])
     const [chillerCopDateFilter,setChillerCopDateFilter]=useState([])
+    const [thermal_IN_OUT_DateFilter_DataPoints,setThermal_IN_OUT_DateFilter_DataPoints]=useState([])
+    const [chillerTotalCoolingEnergyDateFilter,setChillerTotalCoolingEnergyDateFilter]=useState([])
     
 
-    const thermalTempApi=`http://${host}:5000/thermal/storedWaterTemp`
-    const chillerLoadingApi= `http://${host}:5000/chillerDashboard/ChillerLoading `
-    const thermal_IN_OUTApi=`http://${host}:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator`
-    const chillerCop_Api=`http://${host}:5000/chillerDashboard/Average/chillarCOP`
+    const thermalTempApi=`http://${ipAddress}:5000/thermal/storedWaterTemp`
+    const chillerLoadingApi= `http://${ipAddress}:5000/chillerDashboard/ChillerLoading `
+    const thermal_IN_OUTApi=`http://${ipAddress}:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator`
+    const chillerCop_Api=`http://${ipAddress}:5000/chillerDashboard/Average/chillarCOP`
+    const ChillerTotalCooling_Api=`http:///${ipAddress}:5000/chillerDashboard/TotalCoolingEnergy`
 
-    const thermalTempDateFilter_Api="http://localhost:5000/thermal/storedWaterTemp/dateFiltered"
-    const chillerLoadingDateFilter_Api= `http://localhost:5000/chillerDashboard/ChillerLoading/dateFiltered`
-    const thermal_IN_OUT_DateFilter_Api=`http://localhost:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered`
-    const chillerCop_DateFilter_Api=`http://localhost:5000/chillerDashboard/Average/chillarCOP/dateFiltered`
+    const thermalTempDateFilter_Api=`http://${ipAddress}:5000/thermal/storedWaterTemp/dateFiltered`
+    const chillerLoadingDateFilter_Api= `http:///${ipAddress}:5000/chillerDashboard/ChillerLoading/dateFiltered`
+    const thermal_IN_OUT_DateFilter_Api=`http://${ipAddress}:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered`
+    const chillerCop_DateFilter_Api=`http:///${ipAddress}:5000/chillerDashboard/Average/chillarCOP/dateFiltered`
+    const thermal_IN_OUT_DateFilter_DataPoints_Api=`http:///${ipAddress}:5000/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered/datapoints`
+    const ChillerTOtalCoolingDateFilter_Api=`http:///${ipAddress}:5000/chillerDashboard/TotalCoolingEnergy/dateFilter`
 
 
     
@@ -95,6 +104,19 @@ function ChillerDashboard() {
       }, []);
       //------------------------------------------end--------------------------------------//
 
+      //-----------------------------Chiller Total Cooling --------------------------------//
+      useEffect(()=>{
+        axios.get(ChillerTotalCooling_Api)
+        .then((response)=>{
+            const dataresponse=response.data
+            setChillerTotalCoolingEnergy(dataresponse)
+        })
+        .catch((err)=>{
+            console.log(err);
+        })
+      },[])
+      //-------------------------------end-----------------------------------------------------//
+
        //---------function to handle change in inputTag----------------//
      const handleDateChange = (selectedDate) => {
         setSelectedDate(selectedDate);
@@ -112,11 +134,15 @@ function ChillerDashboard() {
           const ChillerLoadingresponse = await axios.post(chillerLoadingDateFilter_Api, {date: formattedStartDate});
           const Thermal_IN_OUTResponse = await axios.post(thermal_IN_OUT_DateFilter_Api, {date: formattedStartDate});
           const ChillerCopResponse = await axios.post(chillerCop_DateFilter_Api, {date: formattedStartDate});
+          const thermal_IN_OUT_DateFilter_DataPoints_Response=await axios.post(thermal_IN_OUT_DateFilter_DataPoints_Api,{date: formattedStartDate})
+          const ChillerTotalCoolingEnergy_response=await axios.post(ChillerTOtalCoolingDateFilter_Api,{date:formattedStartDate})
         
           setThermalStoredWaterTempDateFilter(Thermalresponse.data);
           setChillerLoadingDateFilter(ChillerLoadingresponse.data)
           setThermal_IN_OUT_DateFilter(Thermal_IN_OUTResponse.data)
           setChillerCopDateFilter(ChillerCopResponse.data)
+          setThermal_IN_OUT_DateFilter_DataPoints(thermal_IN_OUT_DateFilter_DataPoints_Response.data)
+          setChillerTotalCoolingEnergyDateFilter(ChillerTotalCoolingEnergy_response.data)
           setLoading(false);
           console.log(formattedStartDate)
         } catch (error) {
@@ -133,6 +159,7 @@ function ChillerDashboard() {
 
 
 console.log(thermalStoredwaterTemp)
+
 console.log(chillerLoading)
 
 
@@ -146,15 +173,17 @@ if(selectedDate==null){
         ThermalCondenserFlowrate.push(thermal_IN_OUT[i].avg_condenserLineFlowrate)
         
         }
+        console.log(ThermalEvapuratorFlowrate,ThermalCondenserFlowrate)
 
 }
 else{
-    for(let i=0;i<thermal_IN_OUT_DateFilter.length;i++){
-        ThermalEvapuratorFlowrate.push(thermal_IN_OUT_DateFilter[i].avg_commonHeaderFlowrate)
-        ThermalCondenserFlowrate.push(thermal_IN_OUT_DateFilter[i].avg_condenserLineFlowrate)
+
+    for(let i=0;i<thermal_IN_OUT_DateFilter_DataPoints.length;i++){
+        ThermalEvapuratorFlowrate.push(thermal_IN_OUT_DateFilter_DataPoints[i].avg_commonHeaderFlowrate)
+        ThermalCondenserFlowrate.push(thermal_IN_OUT_DateFilter_DataPoints[i].avg_condenserLineFlowrate)
         
         }
-
+    console.log(ThermalEvapuratorFlowrate,ThermalCondenserFlowrate)
 }
 
 
@@ -183,6 +212,24 @@ else{
     }
 
 }
+
+console.log(chillerCopDateFilter)
+
+
+let ChillerTotalCoolingEnergyDay=0
+
+if(selectedDate==null){
+    for(let i=0;i<chillerTotalCoolingEnergy.length;i++){
+        ChillerTotalCoolingEnergyDay=chillerTotalCoolingEnergy[i].TotalCoolingEnergy
+    }
+}
+else{
+    for(let i=0;i<chillerTotalCoolingEnergyDateFilter.length;i++){
+        ChillerTotalCoolingEnergyDay=chillerTotalCoolingEnergyDateFilter[i].TotalCoolingEnergy
+    }
+    
+}
+
 
 
  const options={
@@ -242,6 +289,67 @@ else{
         }
     ]
 };
+
+
+
+const ChillerLoadingChart= {
+// Data retrieved from https://en.wikipedia.org/wiki/Winter_Olympic_Games
+// Highcharts.chart('container', {
+
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Chiller Loading',
+        align: 'center',
+        style: {
+            color: '#cc0000	' // You can replace 'red' with any desired color value
+        }
+    },
+
+    xAxis: {
+        categories: selectedDate==null?chillerLoading.map((chiller1)=>chiller1.polledTime):chillerLoadingDateFilter.map((chiller1)=>chiller1.polledTime),
+    },
+
+    yAxis: {
+        min: 0,
+        //max:200,
+        title: {
+            text: 'Percentage (%)'
+        }
+    },
+    tooltip: {
+        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+        shared: true
+    },
+    plotOptions: {
+        column: {
+            stacking: 'normal'
+        }
+    },
+
+   series: [
+        {
+            name: 'C1 Loading',
+            data: selectedDate==null?chillerLoading.map((chiller1)=>chiller1.c1loading):chillerLoadingDateFilter.map((chiller1)=>chiller1.c1loading)
+        },
+        {
+            name: 'c2 Loading',
+            data: selectedDate==null?chillerLoading.map((chiller2)=>chiller2.c2loading):chillerLoadingDateFilter.map((chiller2)=>chiller2.c2loading)
+        },
+        {
+            name: 'c3 Loading',
+            data: selectedDate==null?chillerLoading.map((chiller3)=>chiller3.c3loading):chillerLoadingDateFilter.map((chiller3)=>chiller3.c3loading)
+        },
+        {
+            name: 'c4 Loading',
+            data: selectedDate==null?chillerLoading.map((chiller4)=>chiller4.c4loading):chillerLoadingDateFilter.map((chiller4)=>chiller4.c4loading)
+        }
+    ]
+// });
+
+};
+
 
 
 const optionsLine={
@@ -437,7 +545,7 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
   <div class="row">
     <div class="col-4">
        <div > 
-       <HighchartsReact highcharts={Highcharts} options={options} />
+       <HighchartsReact highcharts={Highcharts} options={ChillerLoadingChart} />
        </div>
     </div>
     <div class="col-4">
@@ -468,11 +576,11 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
 <p style={{color:'gray'}}><b>C4 COP</b></p>
 
   </div>
-  {/* <div class="col">col</div>
-  <div class="col">col</div>
-  <div class="col">col</div> */}
+  <div>
+    <p style={{color:'gray',marginTop:"40px",fontSize:"18px"}}><b>Total Cooling of the day (TR):  <b style={{color:"black"}}>{ChillerTotalCoolingEnergyDay}</b></b></p>
   </div>
-  <br/>
+  </div>
+ <br/>
   <div> 
      <h2 style={{textAlign:'center'}}><b>CT Performance</b></h2>
      <div style={{marginLeft:"30px",marginTop:"20px"}}> 
@@ -485,6 +593,7 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
     
 
   </div>
+
    
     </div>
     <div class="col-4">
@@ -510,7 +619,7 @@ const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.
       <div> 
 
 
-      <h2><b>{Math.trunc(ThermalEvapuratorFlowrate[ThermalEvapuratorFlowrate.length-1])}</b></h2>
+      <h2><b>{selectedDate==null?Math.trunc(ThermalEvapuratorFlowrate[ThermalEvapuratorFlowrate.length-1]):Math.trunc(ThermalEvapuratorFlowrate[0])}</b></h2>
         <p style={{color:"gray"}}><b>Evaporator Flowrate (m<sup>3</sup>/h)</b></p>
         </div>
         <div>

@@ -910,12 +910,12 @@ initialgraphdata.push({"inverterTimestamp":roundedTime})
             yAxis: 0, // Use the first y-axis
             //color:"#DBA40E"
         },
-        {
-            name: 'Wms irradiation',
-            data: selectedDate==null?wmsMeter.map((value) => parseFloat((value.wmsirradiation))):wmsMeterdata.map((value) =>parseFloat((value.wmsirradiation))),
-            type: 'line',
-            yAxis: 1 // Use the first y-axis
-        },
+        // {
+        //     name: 'Wms irradiation',
+        //     data: selectedDate==null?wmsMeter.map((value) => parseFloat((value.wmsirradiation))):wmsMeterdata.map((value) =>parseFloat((value.wmsirradiation))),
+        //     type: 'line',
+        //     yAxis: 1 // Use the first y-axis
+        // },
         ]
 }
 

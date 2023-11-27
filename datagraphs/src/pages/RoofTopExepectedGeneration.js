@@ -13,7 +13,7 @@ function RoofTopExepectedGeneration() {
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const host = '43.205.196.66';
-    const PhaseWiseActualEnergy_api = "http://localhost:5000/Rooftop/ExpectedGeneration";
+    const PhaseWiseActualEnergy_api = `http://${host}:5000/Rooftop/ExpectedGeneration`;
     const [phaseWiseActualEnergy, setPhaseWiseActualEnergy] = useState([]);
     const [filterValueRange, setFilterValueRange] = useState("overView");
 
@@ -45,7 +45,7 @@ const fetchData = async () => {
     try {
       const formattedStartDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post(`http://localhost:5000/Rooftop/ExpectedGeneration/datefiltered`, {date: formattedStartDate});
+      const response = await axios.post(`http://${host}:5000/Rooftop/ExpectedGeneration/datefiltered`, {date: formattedStartDate});
     
       setSingledaydata(response.data);
       setLoading(false);
@@ -210,13 +210,13 @@ const fetchData = async () => {
                 type: 'column',
                 yAxis: 0
             },
-            {
-                name: 'irradiation',
-                data: Irradiation.map((value) => (value)),
-                type: 'line',
-                yAxis: 1,
-                color:"red"
-            },
+            // {
+            //     name: 'irradiation',
+            //     data: Irradiation.map((value) => (value)),
+            //     type: 'line',
+            //     yAxis: 1,
+            //     color:"red"
+            // },
             ]
         };
     }
@@ -270,13 +270,13 @@ const fetchData = async () => {
                 type: 'column',
                 yAxis: 0
             },
-            {
-                name: 'Phase 1 irradiation',
-                data: selectedDate==null?phaseWiseActualEnergy.map((value) => (value.Irradiation)):singledaydata.map((value) =>value.Irradiation),
-                type: 'line',
-                yAxis: 1,
-                color:"red"
-            },
+            // {
+            //     name: 'Phase 1 irradiation',
+            //     data: selectedDate==null?phaseWiseActualEnergy.map((value) => (value.Irradiation)):singledaydata.map((value) =>value.Irradiation),
+            //     type: 'line',
+            //     yAxis: 1,
+            //     color:"red"
+            // },
             ]
         };
     }
@@ -330,13 +330,13 @@ const fetchData = async () => {
                 type: 'column',
                 yAxis: 0 // Use the first y-axis
             },
-            {
-                name: 'Phase 2 irradiation',
-                data: selectedDate==null?phaseWiseActualEnergy.map((value) => (value.Irradiation)):singledaydata.map((value) =>value.Irradiation),
-                type: 'line',
-                yAxis: 1, // Use the first y-axis
-                color:"red"
-            },
+            // {
+            //     name: 'Phase 2 irradiation',
+            //     data: selectedDate==null?phaseWiseActualEnergy.map((value) => (value.Irradiation)):singledaydata.map((value) =>value.Irradiation),
+            //     type: 'line',
+            //     yAxis: 1, // Use the first y-axis
+            //     color:"red"
+            // },
             ]
         };
     }

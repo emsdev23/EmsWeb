@@ -79,7 +79,7 @@ console.log(singledaydata)
 
   //------------peak raw details-----------------//
   useEffect(() => {
-    axios.get(`http://${host}:5000/PeakDemand/Dashboard/Analysis`)
+    axios.get(`http://localhost:5000/PeakDemand/Dashboard/Analysis`)
       .then((res) => {
         const dataResponse = res.data;
         setPeakDemandAnalysis1(dataResponse);

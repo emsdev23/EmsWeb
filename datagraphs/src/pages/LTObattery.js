@@ -14,7 +14,7 @@ function LTObattery() {
   const [ltoLogsData,setLtoLogsData]=useState([])
   const LTOApi=`http://${host}:5000/battery/lto`
   const LTOLogApi="http://localhost:5000/Logs/LTO"
-  const ActualPassKey=7230
+  const ActualPassKey=31419
   const [pinNumber,setPinNumber]=useState("")
 
 

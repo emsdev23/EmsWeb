@@ -94,8 +94,8 @@ const chillersStatus = {
         }
     },
     tooltip: {
-        headerFormat: '<b>{point.x}</b><br/>',
-        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
+        shared: true
     },
 
     plotOptions: {
@@ -152,6 +152,7 @@ const chillersStatus = {
 };
 
 
+
 const chillersStatusFiltered = {
 
     chart: {
@@ -180,8 +181,8 @@ const chillersStatusFiltered = {
         }
     },
     tooltip: {
-        headerFormat: '<b>{point.x}</b><br/>',
-        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
+        shared: true
     },
 
     plotOptions: {
@@ -233,6 +234,44 @@ const chillersStatusFiltered = {
 };
 
 
+// thernmal Staus bar graphs bellow Chiller Status//
+const thermalGraphFilter= {
+    chart: {
+        type: 'column',
+        style:{
+          with:"100px"
+        }
+    },
+    title: {
+        text: null,
+        align: 'center',
+        style: {
+            color: '#cc0000	', // You can replace 'red' with any desired color value
+            fontSize:"30px"
+        }
+    },
+    xAxis: {
+        categories:chillerfilterDate===null?chillerData.map((time)=>time.polledTime):data.map((time)=>time.polledTime)
+    },
+    credits: {
+        enabled: false
+    },
+    plotOptions: {
+      column: {
+        borderRadius: '25%',
+        pointWidth: 40 // Adjust this value to increase/decrease column width
+      }
+    },
+    series: [   {
+        name: 'TS Discharge',
+        data: chillerfilterDate===null?chillerData.map((chiller1)=>chiller1.thermalDCHGStatus):data.map((chiller1)=>chiller1.thermalDCHGStatus),
+        //color:"green"
+        //stack: 'Europe'
+    },]
+  };
+  //               end of thermal Status                   //
+
+
 
 const now = new Date();
 const local = now.toLocaleDateString(); // Use toLocaleDateString() instead of toLocaleString()
@@ -251,12 +290,12 @@ const dateValue = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chi
   <div class="col-10" > 
   <div className="input-group-prepend" style={{width:"270px",marginLeft:"30px"}}>
         <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h5 style={{color:"brown"}}><b>Date :-</b></h5> <DatePicker id="date" className="form-control" selected={chillerfilterDate} onChange={handleEndDateChange} style={{ width: "200px" }}   />
+        <h5 style={{color:"brown"}}><b>Date :-</b></h5> <DatePicker id="date" className="form-control" selected={chillerfilterDate} onChange={handleEndDateChange} style={{ width: "200px" }} placeholderText={dateValue}   />
         </label>
         
       </div>
   </div>
-  <div class="col-2"><h3>{dateValue}</h3></div>
+  {/* <div class="col-2"><h3>{dateValue}</h3></div> */}
 </div>
     
 {
@@ -266,7 +305,8 @@ const dateValue = chillerfilterDate ? new Date(chillerfilterDate.getTime() - chi
 <hr style={{border:"10px solid black"}}/>
 
 <div> 
-<ThermalStatus/>
+
+<HighchartsReact highcharts={Highcharts} options={thermalGraphFilter} />
 </div>
 
     </div>
