@@ -10,7 +10,6 @@ const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
-const password = "Arun@1807"
 const email = 'arun.kumar@tenet.res.in'
 const emailto =['ems@respark.iitm.ac.in']
 
