@@ -40,6 +40,12 @@ alert.use(express.json());
 
 alert.use(timeout('40s'))
 
+
+// Serve files from the specified directory (adjust this based on your server setup)
+const fileDirectory = 'C:/Users/TeNet/';
+app.use('/files', express.static(fileDirectory));
+
+
 app.use(
     cors({
       origin: "*",
@@ -2121,6 +2127,36 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
 })
 
 //----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
+
+//-------------------------------total Cooling of the day api--------------------------------------------//
+app.get("/chillerDashboard/TotalCoolingEnergy",async(req,res)=>{
+  const ChillerTotalCooling=[]
+  meterDb.query("SELECT * FROM meterdata.phase2tR where date(timestamp)=curdate();",function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   ChillerTotalCooling.push({"polledTime":timestamp,"TotalCoolingEnergy":Math.trunc(response[i].totalenergy)})
+
+
+    }
+    console.log(ChillerTotalCooling.length)
+      res.send(ChillerTotalCooling)
+
+      
+    }
+  })
+})
+//---------------------------------end of total Cooling of the day ---------------------------------------//
+
+
   //----------------------------------------END of chillerDashboard api`s ----------------------------//
 
 
@@ -2187,6 +2223,11 @@ app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
 
 //----------------------------END of chiller Loading api-------------------------------------//
 
+
+
+
+
+
 //---------------------------------thermalinletoutlet (condenser and evaporator) date filters-----------------------//
 
 app.post("/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered",async(req,res)=>{
@@ -2222,7 +2263,7 @@ app.post("/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered
 app.post("/chillerDashboard/Average/chillarCOP/dateFiltered",async(req,res)=>{
   const {date}=req.body
   const chillarCOP=[]
-  meterDb.query(`SELECT * FROM meterdata.chillarcop where date(timestamp)="${date}";`,function(error,result,feild){
+  meterDb.query(`SELECT * FROM meterdata.chillarcopdaywise where date(timestamp)="${date}";`,function(error,result,feild){
     if(error){
       console.log(error)
     }
@@ -2247,6 +2288,65 @@ app.post("/chillerDashboard/Average/chillarCOP/dateFiltered",async(req,res)=>{
 })
 
 //----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
+
+//------------------------------------- evaporator and condensor flow rate dayWise value ----------------------//
+app.post("/chillerDashboard/thermalinletoutlet/condenser/evaporator/dateFiltered/datapoints",async(req,res)=>{
+  const {date}=req.body
+  const thermalinletoutletData=[]
+  meterDb.query(`SELECT * FROM thermalinletoutletdaywise where date(timestamp)="${date}"`,function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   thermalinletoutletData.push({"polledTime":timestamp,"avg_commonHeaderFlowrate":parseFloat(response[i].avg_evaporator_instant_flow),"avg_condenserLineFlowrate":parseFloat(response[i].avg_condenser_instant_flow)})
+
+
+    }
+    console.log(thermalinletoutletData.length)
+      res.send(thermalinletoutletData)
+
+      
+    }
+  })
+})
+//-----------------------------------------end of evaporator and condensor flow rate dayWise value --------------//
+
+
+//-------------------------------total Cooling of the day api--------------------------------------------//
+app.post("/chillerDashboard/TotalCoolingEnergy/dateFilter",async(req,res)=>{
+  const {date}=req.body
+  const ChillerTotalCooling=[]
+  meterDb.query(`SELECT * FROM meterdata.phase2tR where date(timestamp)="${date}";`,function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   ChillerTotalCooling.push({"polledTime":timestamp,"TotalCoolingEnergy":Math.trunc(response[i].totalenergy)})
+
+
+    }
+    console.log(ChillerTotalCooling.length)
+      res.send(ChillerTotalCooling)
+
+      
+    }
+  })
+})
+//---------------------------------end of total Cooling of the day ---------------------------------------//
   //----------------------------------------END of chillerDashboard api`s  for date Filters----------------------------//
 
   //-------------------------------------tharmalStorage summary card---------------------//
@@ -2989,20 +3089,20 @@ console.log(mysqlTimestamp);
                 "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
                 "CountAbove_4100":CountAboveLimit,
                 "CountBellow_4100":CountBellowLimit,
-                "CountAbovePercentage_4100":parseFloat((CountAboveLimitPercentage).toFixed(2)),
-                "countBellowPercentage_4100":parseFloat((CountBellowLimitPercentage).toFixed(2)),
+                "CountAbovePercentage_4100":CountAboveLimitPercentage == null || 0 ? 0: parseFloat((CountAboveLimitPercentage).toFixed(2)),
+                "countBellowPercentage_4100":CountBellowLimitPercentage == null || 0? 0: parseFloat((CountBellowLimitPercentage).toFixed(2)),
                 "countLevelZero_Fivety":countLevelZero_Fivety,
                 "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
                 "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
                 "countLeve4oneFivety_twohundred":countLeve4oneFivety_twohundred,
                 "countLeve5twohundred_twoFifty":countLeve5twohundred_twoFifty,
                 "countLeve6twoFifty":countLeve6twoFifty,
-                "countLevelZero_FivetyPercentage":parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
-                "countLevel2Fivety_HundredPercentage":parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
-                "countLevel3Hundred_oneFivetyPercentage":parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
-                "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
-                "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
-                "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
+                "countLevelZero_FivetyPercentage":countLevelZero_FivetyPercentage == null || 0 ? 0:parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
+                "countLevel2Fivety_HundredPercentage":countLevel2Fivety_HundredPercentage == null || 0 ? 0:parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
+                "countLevel3Hundred_oneFivetyPercentage":countLevel3Hundred_oneFivetyPercentage == null || 0 ? 0:parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
+                "countLeve4oneFivety_twohundredPercentage":countLeve4oneFivety_twohundredPercentage == null || 0 ? 0:parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
+                "countLeve5twohundred_twoFiftyPercentage":countLeve5twohundred_twoFiftyPercentage == null || 0 ?0:parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
+                "countLeve6twoFiftyPercentage":countLeve6twoFiftyPercentage == null || 0 ? 0:parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
                 "LevelWisePercentage":LevelWisePercentage,
                 "CountRangeof_4100_Above_Below":CountRangeof_4100_Above_Below,
                 "CountRangeof_4200_Above_Below":CountRangeof_4200_Above_Below,
@@ -3250,20 +3350,20 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
               "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
               "CountAbove_4100":CountAboveLimit,
               "CountBellow_4100":CountBellowLimit,
-              "CountAbovePercentage_4100":parseFloat((CountAboveLimitPercentage).toFixed(2)),
-              "countBellowPercentage_4100":parseFloat((CountBellowLimitPercentage).toFixed(2)),
+              "CountAbovePercentage_4100":CountAboveLimitPercentage == null || 0 ? 0: parseFloat((CountAboveLimitPercentage).toFixed(2)),
+              "countBellowPercentage_4100":CountBellowLimitPercentage == null || 0? 0: parseFloat((CountBellowLimitPercentage).toFixed(2)),
               "countLevelZero_Fivety":countLevelZero_Fivety,
               "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
               "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
               "countLeve4oneFivety_twohundred":countLeve4oneFivety_twohundred,
               "countLeve5twohundred_twoFifty":countLeve5twohundred_twoFifty,
               "countLeve6twoFifty":countLeve6twoFifty,
-              "countLevelZero_FivetyPercentage":parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
-              "countLevel2Fivety_HundredPercentage":parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
-              "countLevel3Hundred_oneFivetyPercentage":parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
-              "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
-              "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
-              "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
+              "countLevelZero_FivetyPercentage":countLevelZero_FivetyPercentage == null || 0 ? 0:parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
+              "countLevel2Fivety_HundredPercentage":countLevel2Fivety_HundredPercentage == null || 0 ? 0:parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
+              "countLevel3Hundred_oneFivetyPercentage":countLevel3Hundred_oneFivetyPercentage == null || 0 ? 0:parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
+              "countLeve4oneFivety_twohundredPercentage":countLeve4oneFivety_twohundredPercentage == null || 0 ? 0:parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
+              "countLeve5twohundred_twoFiftyPercentage":countLeve5twohundred_twoFiftyPercentage == null || 0 ?0:parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
+              "countLeve6twoFiftyPercentage":countLeve6twoFiftyPercentage == null || 0 ? 0:parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
               "LevelWisePercentage":LevelWisePercentage,
               "CountRangeof_4100_Above_Below":CountRangeof_4100_Above_Below,
               "CountRangeof_4200_Above_Below":CountRangeof_4200_Above_Below,
@@ -3662,18 +3762,12 @@ app.get("/buildingconsumption/Highlights", (req,res)=>{
   //console.log(date)
   const ResponseArray=[]
 
-  con.query("SELECT * FROM EMS.buildingConsumption where date(polledTime)=curdate();",function(err,result){
+  con.query("SELECT sum(gridEnergy)as gridEnergy,sum(rooftopEnergy) as rooftopEnergy,sum(wheeledinEnergy) as wheeledinEnergy,max(peakDemand) as peakDemand FROM EMS.buildingConsumption where date(polledTime)=curdate();",function(err,result){
     if (err){
       console.log(err)
     }
     else{ 
-      let  gridEnergy=0
-      let  rooftopEnergy=0
-      let  wheeledinEnergy=0
-      let  batteryEnergy=0
-      let  thermalDischarge=0
-      let  peakDemand=0
-      let  Diesel=0
+
 
     const response=(JSON.parse(JSON.stringify(result)))
   for(let i=0;i<response.length;i++){
@@ -3682,39 +3776,9 @@ app.get("/buildingconsumption/Highlights", (req,res)=>{
     const minutes = date.getMinutes().toString().padStart(2, '0');
     // const seconds = date.getSeconds().toString().padStart(2, '0');
     const timestampVal = `${hours}:${minutes}`;
-
-    if(response[i].gridEnergy!=null){
-      gridEnergy+=response[i].gridEnergy
-    }
-    if(response[i].rooftopEnergy!=null){
-      rooftopEnergy+=response[i].rooftopEnergy
-    }
-    if(response[i].wheeledinEnergy!=null){
-      wheeledinEnergy+=response[i].wheeledinEnergy
-    }
-
-    if(response[i].batteryEnergy!=null){
-      batteryEnergy+=response[i].batteryEnergy
-    }
-
-    if(response[i].thermalDischarge!=null){
-      thermalDischarge+=response[i].thermalDischarge
-    }
-
-    if(response[i].peakDemand!=null){
-      peakDemand+=response[i].peakDemand
-    }
-    if(response[i].Diesel!=null){
-      Diesel+=response[i].Diesel
-    }
-
-
-
-
-   
-   
+    ResponseArray.push({"gridEnergy":Math.trunc(response[i].gridEnergy),"rooftopEnergy":Math.trunc(response[i].rooftopEnergy),"wheeledinEnergy":Math.trunc(response[i].wheeledinEnergy),"peakDemand":Math.trunc(response[i].peakDemand),"Diesel":0})
   }
-  ResponseArray.push({"gridEnergy":gridEnergy,"rooftopEnergy":rooftopEnergy,"wheeledinEnergy":wheeledinEnergy,"thermalDischarge":thermalDischarge,"peakDemand":peakDemand,"Diesel":Diesel})
+ 
       console.log(ResponseArray)
       res.send(ResponseArray)
     }
@@ -3729,18 +3793,12 @@ app.post("/buildingconsumption/Highlights/DateFiltered", (req,res)=>{
   //console.log(date)
   const ResponseArray=[]
 
-  con.query(`SELECT * FROM EMS.buildingConsumption where date(polledTime)='${date}'`,function(err,result){
+  con.query(`SELECT sum(gridEnergy)as gridEnergy,sum(rooftopEnergy) as rooftopEnergy,sum(wheeledinEnergy) as wheeledinEnergy,max(peakDemand) as peakDemand FROM EMS.buildingConsumption where date(polledTime)='${date}'`,function(err,result){
     if (err){
       console.log(err)
     }
     else{ 
-      let  gridEnergy=0
-      let  rooftopEnergy=0
-      let  wheeledinEnergy=0
-      let  batteryEnergy=0
-      let  thermalDischarge=0
-      let  peakDemand=0
-      let  Diesel=0
+
 
     const response=(JSON.parse(JSON.stringify(result)))
   for(let i=0;i<response.length;i++){
@@ -3749,39 +3807,9 @@ app.post("/buildingconsumption/Highlights/DateFiltered", (req,res)=>{
     const minutes = date.getMinutes().toString().padStart(2, '0');
     // const seconds = date.getSeconds().toString().padStart(2, '0');
     const timestampVal = `${hours}:${minutes}`;
-
-    if(response[i].gridEnergy!=null){
-      gridEnergy+=response[i].gridEnergy
-    }
-    if(response[i].rooftopEnergy!=null){
-      rooftopEnergy+=response[i].rooftopEnergy
-    }
-    if(response[i].wheeledinEnergy!=null){
-      wheeledinEnergy+=response[i].wheeledinEnergy
-    }
-
-    if(response[i].batteryEnergy!=null){
-      batteryEnergy+=response[i].batteryEnergy
-    }
-
-    if(response[i].thermalDischarge!=null){
-      thermalDischarge+=response[i].thermalDischarge
-    }
-
-    if(response[i].peakDemand!=null){
-      peakDemand+=response[i].peakDemand
-    }
-    if(response[i].Diesel!=null){
-      Diesel+=response[i].Diesel
-    }
-
-
-
-
-   
-   
+    ResponseArray.push({"gridEnergy":Math.trunc(response[i].gridEnergy),"rooftopEnergy":Math.trunc(response[i].rooftopEnergy),"wheeledinEnergy":Math.trunc(response[i].wheeledinEnergy),"peakDemand":Math.trunc(response[i].peakDemand),"Diesel":0})
   }
-  ResponseArray.push({"gridEnergy":gridEnergy,"rooftopEnergy":rooftopEnergy,"wheeledinEnergy":wheeledinEnergy,"thermalDischarge":thermalDischarge,"peakDemand":peakDemand,"Diesel":Diesel})
+
       console.log(ResponseArray)
       res.send(ResponseArray)
     }
@@ -3811,6 +3839,7 @@ app.get("/Logs/Thermal",async(req,res)=>{
           const response=(JSON.parse(JSON.stringify(result)))
           for(let i=0;i<response.length;i++){
             let date = new Date(response[i].recordDate).toLocaleString();
+           
             let DischargeOn=new Date(response[i].dischargeON).toLocaleString();
             let DischargeOff=response[i].dischargeOFF==null || 0 ? 0 : new Date(response[i].dischargeOFF).toLocaleString();
             let PeakDeamndON= response[i].peakDemandON==null|| 0 ? 0:response[i].peakDemandON
@@ -3836,7 +3865,7 @@ app.get("/Logs/Thermal",async(req,res)=>{
         }
          
           res.send(resultValue)
-          console.log(resultValue)
+          //console.log(resultValue)
       }
   })
   
@@ -3844,7 +3873,7 @@ app.get("/Logs/Thermal",async(req,res)=>{
 
 //-----------------------------------------------end-------------------------------------------------------------------//
 
-//-------------------------------------------LTO logs api--------------------------------------------------------------//
+//-------------------------------------------LTO logs api--logs------------------------------------------------------------//
 app.get("/Logs/LTO",async(req,res)=>{
   const {date}=req.body
   const resultValue=[]
@@ -3857,6 +3886,7 @@ app.get("/Logs/LTO",async(req,res)=>{
           const response=(JSON.parse(JSON.stringify(result)))
           for(let i=0;i<response.length;i++){
             let date = new Date(response[i].recordDate).toLocaleString();
+            console.log(response[i].dischargeON,response[i].ServerTime)
             let DischargeOn=new Date(response[i].dischargeON).toLocaleString();
             let DischargeOff=response[i].dischargeOFF==null || 0 ? 0 : new Date(response[i].dischargeOFF).toLocaleString();
             let PeakDeamndON= response[i].peakDemandON==null|| 0 ? 0:response[i].peakDemandON
@@ -4043,6 +4073,27 @@ app.post('/upload', upload.single('file'), (req, res) => {
   });
 });
 
+
+// Download endpoint
+app.get('/download/:fileName', (req, res) => {
+  // Decode the file name to handle special characters
+  const fileName = decodeURIComponent(req.params.fileName);
+  const filePath = path.join(fileDirectory, fileName);
+
+  // Check if the file exists before attempting to download
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, fileName, (err) => {
+      if (err) {
+        console.error('Error downloading file:', err);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+  } else {
+    // File not found
+    console.error('File not found:', filePath);
+    res.status(404).send('File not found');
+  }
+});
 
 app.listen(5000,(err)=>{
     if(err){
