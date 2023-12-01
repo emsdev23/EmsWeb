@@ -10,6 +10,7 @@ const cors = require("cors");
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
 const tz = 'Asia/Kolkata'
+const password = "Arun@1807"
 const email = 'arun.kumar@tenet.res.in'
 const emailto =['ems@respark.iitm.ac.in']
 
@@ -40,9 +41,6 @@ alert.use(express.json());
 alert.use(timeout('40s'))
 
 
-// Serve files from the specified directory (adjust this based on your server setup)
-const fileDirectory = 'C:/Users/TeNet/';
-app.use('/files', express.static(fileDirectory));
 
 
 app.use(
@@ -3089,18 +3087,18 @@ console.log(mysqlTimestamp);
                 "CountAbove_4100":CountAboveLimit,
                 "CountBellow_4100":CountBellowLimit,
                 "CountAbovePercentage_4100":CountAboveLimitPercentage == null || 0 ? 0: parseFloat((CountAboveLimitPercentage).toFixed(2)),
-                "countBellowPercentage_4100":CountBellowLimitPercentage == null || 0? 0: parseFloat((CountBellowLimitPercentage).toFixed(2)),
+                "countBellowPercentage_4100":CountBellowLimitPercentage == null || 0 ? 0: parseFloat((CountBellowLimitPercentage).toFixed(2)),
                 "countLevelZero_Fivety":countLevelZero_Fivety,
                 "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
                 "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
                 "countLeve4oneFivety_twohundred":countLeve4oneFivety_twohundred,
                 "countLeve5twohundred_twoFifty":countLeve5twohundred_twoFifty,
                 "countLeve6twoFifty":countLeve6twoFifty,
-                "countLevelZero_FivetyPercentage":countLevelZero_FivetyPercentage == null || 0 ? 0:parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
-                "countLevel2Fivety_HundredPercentage":countLevel2Fivety_HundredPercentage == null || 0 ? 0:parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
+                "countLevelZero_FivetyPercentage":countLevelZero_FivetyPercentage == null || 0 ? 0: parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
+                "countLevel2Fivety_HundredPercentage":countLevel2Fivety_HundredPercentage == null || 0? 0: parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
                 "countLevel3Hundred_oneFivetyPercentage":countLevel3Hundred_oneFivetyPercentage == null || 0 ? 0:parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
                 "countLeve4oneFivety_twohundredPercentage":countLeve4oneFivety_twohundredPercentage == null || 0 ? 0:parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
-                "countLeve5twohundred_twoFiftyPercentage":countLeve5twohundred_twoFiftyPercentage == null || 0 ?0:parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
+                "countLeve5twohundred_twoFiftyPercentage":countLeve5twohundred_twoFiftyPercentage ==  null || 0 ? 0:parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
                 "countLeve6twoFiftyPercentage":countLeve6twoFiftyPercentage == null || 0 ? 0:parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
                 "LevelWisePercentage":LevelWisePercentage,
                 "CountRangeof_4100_Above_Below":CountRangeof_4100_Above_Below,
@@ -3110,6 +3108,7 @@ console.log(mysqlTimestamp);
                 "CountRangeof_4500_Above_Below":CountRangeof_4500_Above_Below
               })
               console.log(LevelWisePercentage.length)
+              console.log(CountAboveLimitPercentage,CountBellowLimitPercentage),
               res.send(PeakDemandDetails)
 
            }
@@ -3349,20 +3348,20 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
               "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
               "CountAbove_4100":CountAboveLimit,
               "CountBellow_4100":CountBellowLimit,
-              "CountAbovePercentage_4100":CountAboveLimitPercentage == null || 0 ? 0: parseFloat((CountAboveLimitPercentage).toFixed(2)),
-              "countBellowPercentage_4100":CountBellowLimitPercentage == null || 0? 0: parseFloat((CountBellowLimitPercentage).toFixed(2)),
+              "CountAbovePercentage_4100":CountAboveLimitPercentage?parseFloat((CountAboveLimitPercentage).toFixed(2)):0,
+              "countBellowPercentage_4100":CountBellowLimitPercentage?parseFloat((CountBellowLimitPercentage).toFixed(2)):0,
               "countLevelZero_Fivety":countLevelZero_Fivety,
               "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
               "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
               "countLeve4oneFivety_twohundred":countLeve4oneFivety_twohundred,
               "countLeve5twohundred_twoFifty":countLeve5twohundred_twoFifty,
               "countLeve6twoFifty":countLeve6twoFifty,
-              "countLevelZero_FivetyPercentage":countLevelZero_FivetyPercentage == null || 0 ? 0:parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
-              "countLevel2Fivety_HundredPercentage":countLevel2Fivety_HundredPercentage == null || 0 ? 0:parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
-              "countLevel3Hundred_oneFivetyPercentage":countLevel3Hundred_oneFivetyPercentage == null || 0 ? 0:parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
-              "countLeve4oneFivety_twohundredPercentage":countLeve4oneFivety_twohundredPercentage == null || 0 ? 0:parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
-              "countLeve5twohundred_twoFiftyPercentage":countLeve5twohundred_twoFiftyPercentage == null || 0 ?0:parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
-              "countLeve6twoFiftyPercentage":countLeve6twoFiftyPercentage == null || 0 ? 0:parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
+              "countLevelZero_FivetyPercentage":parseFloat((countLevelZero_FivetyPercentage).toFixed(2)),
+              "countLevel2Fivety_HundredPercentage":parseFloat((countLevel2Fivety_HundredPercentage).toFixed(2)),
+              "countLevel3Hundred_oneFivetyPercentage":parseFloat((countLevel3Hundred_oneFivetyPercentage).toFixed(2)),
+              "countLeve4oneFivety_twohundredPercentage":parseFloat((countLeve4oneFivety_twohundredPercentage).toFixed(2)),
+              "countLeve5twohundred_twoFiftyPercentage":parseFloat((countLeve5twohundred_twoFiftyPercentage).toFixed(2)),
+              "countLeve6twoFiftyPercentage":parseFloat((countLeve6twoFiftyPercentage).toFixed(2)),
               "LevelWisePercentage":LevelWisePercentage,
               "CountRangeof_4100_Above_Below":CountRangeof_4100_Above_Below,
               "CountRangeof_4200_Above_Below":CountRangeof_4200_Above_Below,
