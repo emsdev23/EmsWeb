@@ -248,7 +248,7 @@ emptyArray.forEach(obj => {
 
   app.get("/Batterydata",async(req,res)=>{
     const finalresultValue=[]
-    con.query("select * from EMSUPSbattery where date(received_time)=curdate();",function(err,result,feilds){
+    EMSDB.query("select * from EMSUPSbattery where date(received_time)=curdate()-1;",function(err,result,feilds){
       if(err){
         console.log(err)
       }
@@ -401,12 +401,20 @@ emptyArray.forEach(obj => {
     })
 
     app.get("/grid",async(req,res)=>{
-      meterDb.query("select cumulative_energy,polled_timestamp from gridenergytoday where date(polled_timestamp)=curdate() order by polled_timestamp desc limit 1;",function(err,result,feilds){
+      let Value=[]
+      meterDb.query("select sum(Energy) as cumulative_energy, polledTime as polled_timestamp from EMS.Gridhourly where date(polledTime) = curdate();",function(err,result,feilds){
              if(err){
                  console.log(err)
              }
              else{
                  const response=(JSON.parse(JSON.stringify(result)))
+
+                 
+                  for(let i=0;i<response.length;i++){
+                    const TimeStamp=new Date(response[i].polled_timestamp)
+                   const TimeResult=TimeStamp.toLocaleString()
+                  }
+                 
                  res.send(response)
                  console.log(response.length)
              }
@@ -2567,6 +2575,37 @@ app.post("/chillerDashboard/TotalCoolingEnergy/dateFilter",async(req,res)=>{
   })
   //------------------------------  END OF API---------------------------------------------------//
 
+  //-------------------------------------IOE battery  summary api ----------------------------------//
+  app.get("/battery/IOE",async(req,res)=>{
+    const BatteryValue=[]
+    EMSDB.query("SELECT * FROM EMS.ioeBatteryData where date(recordTimestamp)=curdate() order by  recordTimestamp desc limit 1;",function(err,result,feilds){
+           if(err){
+               console.log(err)
+           }
+           else{
+               const response=(JSON.parse(JSON.stringify(result)))
+               for(let i=0;i<response.length;i++){
+                let date = new Date(response[i].recordTimestamp);
+                //const timeVal=date.toLocaleDateString()
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            const timestampVal = `${hours}:${minutes}:${seconds}`;
+            let status="IDLE"
+            response[i].batteryStatus==="CHG"?status="CHARGING":status="DISCHARGING"
+            BatteryValue.push({"polledTime":timestampVal,"batteryVoltage":response[i].batteryVoltage,"batteryCurrent":response[i].batteryCurrent,"mainContactorStatus":response[i].mainContactorStatus,"prechargeContactorStatus":response[i].prechargeContactorStatus,"batteryStatus":status,"packSOC":response[i].packSOC,"packUsableSOC":response[i].packUsableSOC})
+
+               }
+               res.send(BatteryValue)
+               console.log(BatteryValue)
+           }
+       })
+
+
+      
+  })
+  //----------------------------------------end of api------------------------------------------------//
+
   //----------------------------LTOLTOBattery instantanious controll-----------------------------------//
   app.post('/LTOBattery/controll', function (req, res) {
 
@@ -3711,7 +3750,7 @@ app.get("/HOTWterStorage", (req,res)=>{
   console.log(date)
   const ResponseArray=[]
 
-  EMSDB.query("SELECT * FROM EMS.HotWaterStorage where date(recordtimestamp)=curdate()-18 order by recordtimestamp desc  limit 1;",function(err,result){
+  EMSDB.query("SELECT * FROM EMS.HotWaterStorage where date(recordtimestamp)=curdate() order by recordtimestamp desc limit 1;",function(err,result){
     if (err){
       console.log(err)
     }
@@ -3846,6 +3885,21 @@ app.get("/Logs/Thermal",async(req,res)=>{
             let serverTime=response[i].ServerTime==null||0?0:new Date(response[i].ServerTime).toLocaleString();
 
 
+            const Server_TO_Peak = response[i].ServerTime!= null && response[i].peakTime!=null?new Date(response[i].ServerTime) - new Date(response[i].peakTime):0;
+              const Server_TO_DischargeON=response[i].dischargeON!= null && response[i].ServerTime!=null?new Date(response[i].dischargeON) - new Date(response[i].ServerTime):0;
+
+            const TimeStampSubtraction=(TimeStamp)=>{
+              const hours = Math.floor(TimeStamp / (1000 * 60 * 60));
+              const minutes = Math.floor((TimeStamp % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((TimeStamp % (1000 * 60)) / 1000);
+              const timeDifferenceFormatted = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+              //console.log(timeDifferenceFormatted)
+              return(timeDifferenceFormatted)
+            }
+
+           console.log(TimeStampSubtraction(Server_TO_Peak), TimeStampSubtraction(Server_TO_DischargeON)) 
+
+
             let DateValue=date.split(",")[0]
             let DischargeOnTime=DischargeOn.split(",")[1]
             let DischargeOfTime=DischargeOff==0?"00:00:00":DischargeOff.split(",")[1]
@@ -3859,11 +3913,12 @@ app.get("/Logs/Thermal",async(req,res)=>{
             // const seconds = date.getSeconds().toString().padStart(2, '0');
             // const timestamp = `${hours}:${minutes}`
 
-            resultValue.push({"TimeStamp":DateValue,"cause":response[i].cause,"DischargeOn":DischargeOnTime,"DischargeOfTime":DischargeOfTime,"PeakDeamndONTime":PeakDeamndON,"peakTime":peakTimeStamp,"PeakDeamndOFFTime":PeakDeamndOFF,"serverTime":serverTimeStamp})
+            resultValue.push({"TimeStamp":DateValue,"cause":response[i].cause,"DischargeOn":DischargeOnTime,"DischargeOfTime":DischargeOfTime,"PeakDeamndONTime":PeakDeamndON,"peakTime":peakTimeStamp,"PeakDeamndOFFTime":PeakDeamndOFF,"serverTime":serverTimeStamp,"Server_TO_Peak":TimeStampSubtraction(Server_TO_Peak),"Server_TO_DischargeON":TimeStampSubtraction(Server_TO_DischargeON),"Energy":response[i].Energy,"Cost":response[i].Cost,"recordID":response[i].recordid})
+            
         }
          
           res.send(resultValue)
-          //console.log(resultValue)
+          console.log(resultValue)
       }
   })
   
@@ -3884,13 +3939,33 @@ app.get("/Logs/LTO",async(req,res)=>{
           const response=(JSON.parse(JSON.stringify(result)))
           for(let i=0;i<response.length;i++){
             let date = new Date(response[i].recordDate).toLocaleString();
-            console.log(response[i].dischargeON,response[i].ServerTime)
+            console.log(response[i].recordDate,"line 3918")
+     
             let DischargeOn=new Date(response[i].dischargeON).toLocaleString();
             let DischargeOff=response[i].dischargeOFF==null || 0 ? 0 : new Date(response[i].dischargeOFF).toLocaleString();
             let PeakDeamndON= response[i].peakDemandON==null|| 0 ? 0:response[i].peakDemandON
             let PeakDeamndOFF=response[i].peakDemandOFF==null||0 ? 0:response[i].peakDemandOFF
             let peakTime=response[i].peakTime==null||0?0:new Date(response[i].peakTime).toLocaleString();
             let serverTime=response[i].ServerTime==null||0?0:new Date(response[i].ServerTime).toLocaleString();
+
+             
+              const Server_TO_Peak = response[i].ServerTime!= null && response[i].peakTime!=null?new Date(response[i].ServerTime) - new Date(response[i].peakTime):0;
+              const Server_TO_DischargeON=response[i].dischargeON!= null && response[i].ServerTime!=null?new Date(response[i].dischargeON) - new Date(response[i].ServerTime):0;
+
+            const TimeStampSubtraction=(TimeStamp)=>{
+              const hours = Math.floor(TimeStamp / (1000 * 60 * 60));
+              const minutes = Math.floor((TimeStamp % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((TimeStamp % (1000 * 60)) / 1000);
+              const timeDifferenceFormatted = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+              //console.log(timeDifferenceFormatted)
+              return(timeDifferenceFormatted)
+            }
+
+           console.log(TimeStampSubtraction(Server_TO_Peak), TimeStampSubtraction(Server_TO_DischargeON)) 
+           
+
+             
+            
 
 
             let DateValue=date.split(",")[0]
@@ -3904,11 +3979,11 @@ app.get("/Logs/LTO",async(req,res)=>{
             // const seconds = date.getSeconds().toString().padStart(2, '0');
             // const timestamp = `${hours}:${minutes}`
 
-            resultValue.push({"TimeStamp":DateValue,"cause":response[i].cause,"DischargeOn":DischargeOnTime,"DischargeOfTime":DischargeOfTime,"PeakDeamndON":PeakDeamndON,"peakTime":peakTimeStamp,"PeakDeamndOFF":PeakDeamndOFF,"serverTime":serverTimeStamp})
+            resultValue.push({"TimeStamp":response[i].recordDate,"cause":response[i].cause,"DischargeOn":DischargeOnTime,"DischargeOfTime":DischargeOfTime,"PeakDeamndON":PeakDeamndON,"peakTime":peakTimeStamp,"PeakDeamndOFF":PeakDeamndOFF,"serverTime":serverTimeStamp,"Server_TO_Peak":TimeStampSubtraction(Server_TO_Peak),"Server_TO_DischargeON":TimeStampSubtraction(Server_TO_DischargeON),"Energy":response[i].Energy,"Cost":response[i].Cost,"recordID":response[i].recordid})
         }
          
           res.send(resultValue)
-          console.log(resultValue)
+          //console.log(resultValue)
       }
   })
   
@@ -3985,7 +4060,7 @@ app.get ("/KVA_vs_KW", (req,res)=>{
   const {date}=req.body
   const ResponseArray=[]
 
-  meterDb.query("SELECT * FROM meterdata.kv_vs_kwh where date(timestamp)=curdate() ;",function(err,result){
+  meterDb.query("SELECT DATE_FORMAT(kv_vs_kwh.timestamp, '%Y-%m-%d %H:%i:00') AS minute_interval, kv_vs_kwh.peakmax, kv_vs_kwh.mvp1, kv_vs_kwh.mvp2, kv_vs_kwh.mvp3, kv_vs_kwh.mvp4, SUM(kv_vs_kwh.peakmax + kv_vs_kwh.TOTALMVP) AS combined_values FROM kv_vs_kwh WHERE DATE(kv_vs_kwh.timestamp) = CURDATE() GROUP BY minute_interval, kv_vs_kwh.peakmax, kv_vs_kwh.mvp1, kv_vs_kwh.mvp2, kv_vs_kwh.mvp3, kv_vs_kwh.mvp4 ORDER BY minute_interval;",function(err,result){
     if (err){
       console.log(err)
     }
@@ -3993,12 +4068,12 @@ app.get ("/KVA_vs_KW", (req,res)=>{
 
     const response=(JSON.parse(JSON.stringify(result)))
   for(let i=0;i<response.length;i++){
-    let date = new Date(response[i].timestamp);
+    let date = new Date(response[i].minute_interval);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     // const seconds = date.getSeconds().toString().padStart(2, '0');
     const timestampVal = `${hours}:${minutes}`;
-    ResponseArray.push({"TimeStamp":timestampVal,"peakmax":parseFloat(response[i].peakmax),"wheeledmax":parseFloat(response[i].wheeledmax),"rooftopphase1":parseFloat(response[i].rooftopphase1)})
+    ResponseArray.push({"TimeStamp":timestampVal,"peakmax":parseFloat(response[i].peakmax),"TOTALMVP":Math.trunc(response[i].combined_values),"mvp1":Math.trunc(response[i].mvp1),"mvp2":Math.trunc(response[i].mvp2),"mvp3":Math.trunc(response[i].mvp3),"mvp4":Math.trunc(response[i].mvp4),"LimitLine1":parseInt(4000),"LimitLine2":parseInt(4500)})
   }
 
       console.log(ResponseArray)
@@ -4010,12 +4085,12 @@ app.get ("/KVA_vs_KW", (req,res)=>{
 //---------------------------------------------------end of api ---------------------------------------------------------------------//
 
 //-------------------------------------------------KVA VS KW date filter api ---------------------------------------------------------------//
-app.post("/KVA_vs_KW", (req,res)=>{
+app.post("/KVA_vs_KW/DateFiltered", (req,res)=>{
   //console.log(date)
   const {date}=req.body
   const ResponseArray=[]
 
-  meterDb.query(`SELECT * FROM meterdata.kv_vs_kwh where date(timestamp)='${date}'`,function(err,result){
+  meterDb.query(`SELECT DATE_FORMAT(kv_vs_kwh.timestamp, '%Y-%m-%d %H:%i:00') AS minute_interval, kv_vs_kwh.peakmax, kv_vs_kwh.mvp1, kv_vs_kwh.mvp2, kv_vs_kwh.mvp3, kv_vs_kwh.mvp4, SUM(kv_vs_kwh.peakmax + kv_vs_kwh.TOTALMVP) AS combined_values FROM kv_vs_kwh WHERE DATE(kv_vs_kwh.timestamp) = '${date}' GROUP BY minute_interval, kv_vs_kwh.peakmax, kv_vs_kwh.mvp1, kv_vs_kwh.mvp2, kv_vs_kwh.mvp3, kv_vs_kwh.mvp4 ORDER BY minute_interval;`,function(err,result){
     if (err){
       console.log(err)
     }
@@ -4023,12 +4098,12 @@ app.post("/KVA_vs_KW", (req,res)=>{
 
     const response=(JSON.parse(JSON.stringify(result)))
   for(let i=0;i<response.length;i++){
-    let date = new Date(response[i].timestamp);
+    let date = new Date(response[i].minute_interval);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     // const seconds = date.getSeconds().toString().padStart(2, '0');
     const timestampVal = `${hours}:${minutes}`;
-    ResponseArray.push({"TimeStamp":timestampVal,"peakmax":parseFloat(response[i].peakmax),"wheeledmax":parseFloat(response[i].wheeledmax),"rooftopphase1":parseFloat(response[i].rooftopphase1)})
+    ResponseArray.push({"TimeStamp":timestampVal,"peakmax":parseFloat(response[i].peakmax),"TOTALMVP":Math.trunc(response[i].combined_values),"mvp1":Math.trunc(response[i].mvp1),"mvp2":Math.trunc(response[i].mvp2),"mvp3":Math.trunc(response[i].mvp3),"mvp4":Math.trunc(response[i].mvp4)})
   }
 
       console.log(ResponseArray)
@@ -4039,59 +4114,139 @@ app.post("/KVA_vs_KW", (req,res)=>{
 })
 //-----------------------------------------------------------end of api ---------------------------------------------------------------------//
 
-    
-// File upload endpoint
-app.post('/upload', upload.single('file'), (req, res) => {
-  const fileData = req.file.buffer;
 
-  // Dynamically set the file path based on the request body
-  const filePath = req.body.filePath;
+//------------------------------------------BLOCK WISE DATA  graph api  ------------------------------------------------------------------------//
+app.get("/BlockWise/data", (req,res)=>{
+  //console.log(date)
+  const ResponseArray=[]
 
-  const insertQuery = 'INSERT INTO filesHandle (file_data, file_path) VALUES (?, ?)';
-  const insertStream = EMSDB.query(insertQuery, [fileData, filePath]);
+  meterDb.query("SELECT * FROM meterdata.BlockwiseDaywise where date(timestamp) = curdate();",function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
 
-  res.status(200).send('File upload initiated');
-
-  const fileStream = fs.createReadStream(filePath);
-
-  fileStream.on('data', (chunk) => {
-    insertStream.write([chunk]);
-  });
-
-  fileStream.on('end', () => {
-    insertStream.end((error) => {
-      if (error) {
-        console.error('Error inserting file into database:', error);
-        // Handle error response if needed
-      } else {
-        console.log('File inserted successfully');
-        // Handle success response if needed
-      }
-    });
-  });
-});
-
-
-// Download endpoint
-app.get('/download/:fileName', (req, res) => {
-  // Decode the file name to handle special characters
-  const fileName = decodeURIComponent(req.params.fileName);
-  const filePath = path.join(fileDirectory, fileName);
-
-  // Check if the file exists before attempting to download
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, fileName, (err) => {
-      if (err) {
-        console.error('Error downloading file:', err);
-        res.status(500).send('Internal Server Error');
-      }
-    });
-  } else {
-    // File not found
-    console.error('File not found:', filePath);
-    res.status(404).send('File not found');
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    let DATEFORMAT=date.toLocaleString().split(",")
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+  const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":DATEFORMAT[0],"ABLOCK":Math.trunc(response[i].ABLOCK),"BBlock":Math.trunc(response[i].BBlock),"CBLOCK":Math.trunc(response[i].CBLOCK),"DBLOCK":Math.trunc(response[i].DBLOCK),"EBLOCK":Math.trunc(response[i].EBLOCK),"MLCP":Math.trunc(response[i].MLCP),"Utility":Math.trunc(response[i].Utility),"auditorium":Math.trunc(response[i].auditorium)})
   }
-});
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//-------------------------------------------------end of api --------------------------------------------------------------------------------------//
+
+
+//-------------------------------------------------                               --------------------------------------------------------------------------//
+app.post("/BlockWise/data/DateFiltered", (req,res)=>{
+  //console.log(date)
+  const {date}=req.body
+  const ResponseArray=[]
+
+  meterDb.query(`SELECT * FROM meterdata.BlockwiseDaywise where date(timestamp) = '${date}';`,function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    let DATEFORMAT=date.toLocaleString().split(",")
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    //const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":DATEFORMAT[0],"ABLOCK":Math.trunc(response[i].ABLOCK),"BBlock":Math.trunc(response[i].BBlock),"CBLOCK":Math.trunc(response[i].CBLOCK),"DBLOCK":Math.trunc(response[i].DBLOCK),"EBLOCK":Math.trunc(response[i].EBLOCK),"MLCP":Math.trunc(response[i].MLCP),"Utility":Math.trunc(response[i].Utility),"auditorium":Math.trunc(response[i].auditorium)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//---------------------------------------------------------end of api ----------------------------------------------------------------------------------------//
+
+
+
+//----------------------------------------------------------Top Ten Clients get api ----------------------------------------------------------------------------------//
+app.get("/TopTenClients/data", (req,res)=>{
+  //console.log(date)
+  const ResponseArray=[]
+
+  meterDb.query("SELECT * FROM meterdata.toptenclientsdaywise where date(timestamp)=curdate()",function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    let DATEFORMAT=date.toLocaleString().split(",")
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    //const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":DATEFORMAT[0],"ACRI":Math.trunc(response[i].ACRI),"pfizer":Math.trunc(response[i].pfizer),"SGRI":Math.trunc(response[i].SGRI),"tatacommunications":Math.trunc(response[i].tatacommunications),"ginger":Math.trunc(response[i].ginger),"axxlent":Math.trunc(response[i].axxlent),"caterpillar":Math.trunc(response[i].caterpillar),"IFMR":Math.trunc(response[i].IFMR),"NMS":Math.trunc(response[i].NMS),"TCS":Math.trunc(response[i].TCS)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+//-------------------------------------------------------------end of top ten clients api-------------------------------------------------------------------------------//
+
+
+//----------------------------------------------------------Top Ten Clients post api ----------------------------------------------------------------------------------//
+app.post("/TopTenClients/data/DateFilter", (req,res)=>{
+  //console.log(date)
+  const {date}=req.body
+  const ResponseArray=[]
+
+  meterDb.query(`SELECT * FROM meterdata.toptenclientsdaywise where date(timestamp)='${date}'`,function(err,result){
+    if (err){
+      console.log(err)
+    }
+    else{
+
+    const response=(JSON.parse(JSON.stringify(result)))
+  for(let i=0;i<response.length;i++){
+    let date = new Date(response[i].timestamp);
+    let DATEFORMAT=date.toLocaleString().split(",")
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+    //const timestampVal = `${hours}:${minutes}`;
+    ResponseArray.push({"TimeStamp":DATEFORMAT[0],"ACRI":Math.trunc(response[i].ACRI),"pfizer":Math.trunc(response[i].pfizer),"SGRI":Math.trunc(response[i].SGRI),"tatacommunications":Math.trunc(response[i].tatacommunications),"ginger":Math.trunc(response[i].ginger),"axxlent":Math.trunc(response[i].axxlent),"caterpillar":Math.trunc(response[i].caterpillar),"IFMR":Math.trunc(response[i].IFMR),"NMS":Math.trunc(response[i].NMS),"TCS":Math.trunc(response[i].TCS)})
+  }
+
+      console.log(ResponseArray)
+      res.send(ResponseArray)
+    }
+  })
+
+})
+
+//-------------------------------------------------------------end of top ten clients api-------------------------------------------------------------------------------//
+
+    
+
+
+
+
 
 app.listen(5000,(err)=>{
     if(err){
@@ -4373,3 +4528,7 @@ app.listen(5000,(err)=>{
 //             //console.log(output)
             
 //         // })
+
+
+
+
