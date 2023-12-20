@@ -3,7 +3,8 @@ import DateTime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import axios from 'axios';
 import swal from 'sweetalert';
-import Swal from "sweetalert2"
+import Swal from "sweetalert2";
+import { DataGrid } from '@mui/x-data-grid';
 import * as GiIcons from  'react-icons/gi'
 
 
@@ -194,6 +195,94 @@ function Thermalcontrol() {
     });
   };
 
+
+  const columns = [
+    { field: 'recordID', headerName: 'ID', width: 70 },
+    {
+      field: 'TimeStamp',
+      headerName: 'TimeStamp',
+      width: 200,
+      type: 'date',
+      valueFormatter: (params) => {
+        // Format the timestamp value as a date (excluding time)
+        const date = new Date(params.value);
+        return date.toLocaleDateString(); // Use toLocaleDateString() to display only the date
+      },
+    },
+    { field: 'cause', headerName: 'cause', width: 130 },
+    { field: 'DischargeOn', headerName: 'DischargeOn', width: 150 },
+    { field: 'DischargeOfTime', headerName: 'DischargeOf', width: 150 },
+    {
+      field: 'PeakDeamndOFF',
+      headerName: 'PeakDeamndOFF',
+      type: 'number',
+      width: 130,
+    },
+    {
+      field: 'PeakDeamndON',
+      headerName: 'PeakDeamndON',
+      type: 'number',
+      width: 130,
+    },
+    {
+      field: 'peakTime',
+      headerName: 'peakTime',
+      //type: 'number',
+      width: 110,
+    },
+    {
+      field: 'serverTime',
+      headerName: 'serverTime',
+      //description: 'This column has a value getter and is not sortable.',
+      sortable: true,
+      width: 120,
+    },
+    {
+      field: 'Server_TO_Peak',
+      headerName: 'Server_TO_Peak',
+      //type: 'number',
+      width: 170,
+    },
+    {
+      field: 'Server_TO_DischargeON',
+      headerName: 'Server_TO_DischargeON',
+      //type: 'number',
+      width: 170,
+    },
+    {
+      field: 'Energy',
+      headerName: 'Energy',
+      type: 'number',
+      width: 90,
+    },
+    {
+      field: 'Cost',
+      headerName: 'Cost (₹)',
+      type: 'number',
+      width: 90,
+    },
+  ];
+
+
+
+  const rows = thermallog.map((log) => ({
+    id: log.recordID, // Use recordID as the unique identifier
+    recordID: log.recordID,
+    TimeStamp:  new Date(log.TimeStamp), // Convert TimeStamp to Date object
+    cause: log.cause,
+    DischargeOn: log.DischargeOn,
+    PeakDeamndON: log.PeakDeamndON,
+    serverTime: log.serverTime,
+    DischargeOfTime:log.DischargeOfTime,
+    PeakDeamndOFF:log.PeakDeamndOFF,
+    peakTime:log.peakTime,
+    Server_TO_Peak:log.Server_TO_Peak,
+    Server_TO_DischargeON:log.Server_TO_DischargeON,
+    Energy:log.Energy,
+    Cost:log.Cost
+  
+  }));
+
   // let TimeStamp=0
   // let cause=0
   // let DischargeOn=0
@@ -207,44 +296,9 @@ function Thermalcontrol() {
 
 
   const thermalLogPopup = () => {
-    Swal.fire({
-      width: "100vw",
-      background: "white",
-      html:
-        '<table class="table table-dark table-hover" style="fontSize:5px">' +
-        '<thead >' +
-        '<tr >' +
-        '<td>Record Date</td>' +
-        '<td>cause</td>' +
-        '<td>Discharge ON</td>' +
-        '<td>charge OFF</td>' +
-        '<td>PeakDemand OFF</td>' +
-        '<td>PeakDemand ON</td>' +
-        '<td>PeakTime</td>' +
-        '<td>ServerTime</td>' +
-        '</tr>' +
-        '</thead>' +
-        '<tbody>' +
-        // Removed extra tbody tag
-        thermallog.map((data) => (
-          '<tr>' +
-          '<td>' + data.TimeStamp + '</td>' +
-          '<td>' + data.cause + '</td>' +
-          '<td>' + data.DischargeOn + '</td>' +
-          '<td>' + data.DischargeOfTime +'</td>' + // Fixed typo here
-          '<td>' + data.PeakDeamndONTime + '</td>' +
-          '<td>' + data.PeakDeamndOFFTime + '</td>' +
-          '<td>' + data.peakTime + '</td>' +
-          '<td>' + data.serverTime + '</td>' +
-          '</tr>'
-        )).join('') +
-        '</tbody>' +
-        '</table>',
-      showCancelButton: false,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      // confirmButtonText: 'Yes, delete it!',
-    });
+    const tableFilteElement = document.getElementById('tableFilte'); // Replace 'tableFilte' with the actual ID of the TableFilte component
+    tableFilteElement.scrollIntoView({ behavior: 'smooth' });
+  
   };
   
   
@@ -388,7 +442,7 @@ function Thermalcontrol() {
       ADPvalveStatus==="ON"?<GiIcons.GiValve color='green' size="70px"/>: <GiIcons.GiValve color='gray' size="70px"/>
     }
     </div>
-    <div class="col">
+    <div class="col"> 
     <p>BDP Valve</p>
     {
       BDPvalveStatus==="ON"?<GiIcons.GiValve color='green' size="70px"/>: <GiIcons.GiValve color='gray' size="70px"/>
@@ -422,6 +476,20 @@ function Thermalcontrol() {
     </div>
     </div>
   </div>
+  <div style={{ height:'500px', width: '100%',marginTop:"50px"}} id="tableFilte">
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        pageSizeOptions={[3, 10]}
+        checkboxSelection
+        classes={{
+          row: 'custom-row-class', // Add a custom class for rows
+          cell: 'custom-cell-class', // Add a custom class for cells
+        }}
+        // style={darkTheme} // Apply the dark theme styles
+      />
+    </div>
   </div>
     
   )

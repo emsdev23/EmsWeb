@@ -10,6 +10,9 @@ import ReactApexChart from 'react-apexcharts';
 import BuildindConsumptionPage2 from './BuildindConsumptionPage2';
 import Grid from '@mui/material/Grid';
 import KvaVsKW from './KvaVsKW';
+import {Link} from 'react-router-dom';
+import TopTenClients from './TopTenClients'
+import BlockWiseData from './BlockWiseData';
  
 
 const iphost='43.205.196.66'
@@ -17,6 +20,12 @@ const host = `http://${iphost}:5000/peak/hvacSchneider7230Polling`
 const pastdata=`http://${iphost}:5000/peak/initialgraph`
 
 function Peakdemandgraphs() {
+  const scrollToTopTenClients = () => {
+    const topTenClientsElement = document.getElementById('topTenClients');
+    if (topTenClientsElement) {
+      topTenClientsElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
  
   const [startDate, setStartDate] = useState(null);
@@ -1024,8 +1033,15 @@ const [month, day, year] = local.split("/"); // Split the date by "/"
 const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
 //const dateValue = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toLocaleDateString('en-GB') : currentdate;
 
+
+
+ 
+  
+
   return (
-    <div>
+    <div >
+{/* style={{background:"#252440"}} */}
+
       <div> 
         <h3 style={{textAlign:"center"}}><b>Building Consumption</b></h3>
       </div>
@@ -1148,9 +1164,33 @@ const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
   <br/>
   <br/>
   <div> 
-  <h3 style={{textAlign:"center",color:"brown"}}><b>Building Demand  vs  System Active Power</b></h3>
   <KvaVsKW/>
   </div>
+
+  <Grid sx={{ flexGrow: 1 }} container spacing={2} >
+  
+  <Grid item xs={12} sm={6} >
+  {/* <Link to="section1" smooth={true} duration={500}>  </Link> */}
+      <div id="topTenClients"> 
+    <TopTenClients/>
+  </div>
+
+  
+
+      </Grid>
+
+      
+ 
+      <Grid item xs={12} sm={6} >
+      <div id="topTenClients"> 
+    <BlockWiseData/>
+  </div>
+  
+
+      </Grid>
+      </Grid>
+
+
   
  
 

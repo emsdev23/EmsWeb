@@ -5,6 +5,7 @@ import axios from 'axios';
 import swal from 'sweetalert';
 import Swal from "sweetalert2"
 import * as GiIcons from  'react-icons/gi'
+import TableFilte from './TableFilte';
 
 function LTObattery() {
 
@@ -145,51 +146,16 @@ else{
 };
 
 
-const thermalLogPopup = () => {
-  Swal.fire({
-    width: "100vw",
-    background: "white",
-    html:
-      '<table class="table table-dark table-hover" style="fontSize:5px">' +
-      '<thead >' +
-      '<tr >' +
-      '<td>Record Date</td>' +
-      '<td>cause</td>' +
-      '<td>Discharge ON</td>' +
-      '<td>charge OFF</td>' +
-      '<td>PeakDemand OFF</td>' +
-      '<td>PeakDemand ON</td>' +
-      '<td>PeakTime</td>' +
-      '<td>ServerTime</td>' +
-      '</tr>' +
-      '</thead>' +
-      '<tbody>' +
-      // Removed extra tbody tag
-      ltoLogsData.map((data) => (
-        '<tr>' +
-        '<td>' + data.TimeStamp + '</td>' +
-        '<td>' + data.cause + '</td>' +
-        '<td>' + data.DischargeOn + '</td>' +
-        '<td>' + data.DischargeOfTime +'</td>' + // Fixed typo here
-        '<td>' + data.PeakDeamndON + '</td>' +
-        '<td>' + data.PeakDeamndOFF + '</td>' +
-        '<td>' + data.peakTime + '</td>' +
-        '<td>' + data.serverTime + '</td>' +
-        '</tr>'
-      )).join('') +
-      '</tbody>' +
-      '</table>',
-    showCancelButton: false,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    // confirmButtonText: 'Yes, delete it!',
-  });
+const LtoLogsLogPopup = () => {
+  const tableFilteElement = document.getElementById('tableFilte'); // Replace 'tableFilte' with the actual ID of the TableFilte component
+  tableFilteElement.scrollIntoView({ behavior: 'smooth' });
 };
+
 
   return (
     <div>
       <div> 
-      <button type="submit" class="btn btn-dark bt-lg" style={{height:"40px",width:"300px"}} onClick={thermalLogPopup}><b>Lto Logs</b></button>
+      <button type="submit" class="btn btn-dark bt-lg" style={{height:"40px",width:"300px"}} onClick={LtoLogsLogPopup}><b>Lto Logs</b></button>
       </div>
       <div >
         <h2 style={{fontSize:"30px",textAlign:"center"}}><b>LTO Battery Control</b></h2>
@@ -354,6 +320,10 @@ const thermalLogPopup = () => {
 
 
   
+</div>
+
+<div id="tableFilte" style={{marginTop:"50px"}}>
+  <TableFilte/>
 </div>
     </div>
   )

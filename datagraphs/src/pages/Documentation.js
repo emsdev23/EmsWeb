@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Table from 'react-bootstrap/Table';
 import { MdDownload, MdDelete } from 'react-icons/md';
-import UploadImg from '../images/Upload.png'
+//import UploadImg from '../images/Upload.png'
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { Button, Upload, message,Card} from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
@@ -82,21 +82,39 @@ function Documentation() {
 
 
 
-  const handleDownloadFile =(filename) => {
-    console.log(filename)
+  // const handleDownloadFile =(filename) => {
+  //   console.log(filename)
+  //   try {
+  //     axios.get(`http://43.205.196.66:8002/downloadfile/${filename}`)
+  //     .then((res)=>{
+  //       const dataresponse=res.data
+  //       const urlResponse=dataresponse.presigned_url
+  //       console.log(dataresponse.presigned_url)
+  //       setDownloadFile(urlResponse)
+  //     });
+      
+  //     // Update the state after successful deletion
+  //     //setFileReceive((prevFileReceive) => prevFileReceive.filter((file) => file[2] !== filename));
+  //   } catch (error) {
+  //     console.error('Error deleting file:', error);
+  //   }
+  // };
+
+
+  const handleDownloadFile = (filename) => {
     try {
       axios.get(`http://43.205.196.66:8002/downloadfile/${filename}`)
-      .then((res)=>{
-        const dataresponse=res.data
-        const urlResponse=dataresponse.presigned_url
-        console.log(dataresponse.presigned_url)
-        setDownloadFile(urlResponse)
-      });
-      
-      // Update the state after successful deletion
-      //setFileReceive((prevFileReceive) => prevFileReceive.filter((file) => file[2] !== filename));
+        .then((res) => {
+          const dataresponse = res.data;
+          const urlResponse = dataresponse.presigned_url;
+  
+          // Open the download link in a new tab
+          window.open(urlResponse, '_blank');
+        });
+  
+      // No need to update state here
     } catch (error) {
-      console.error('Error deleting file:', error);
+      console.error('Error downloading file:', error);
     }
   };
 
@@ -311,13 +329,11 @@ function Documentation() {
             </Typography> */}
           </CardContent>
           <br/>
-          <Button variant="success" size="sm" style={{ marginRight: '50%' }}  onClick={()=>handleDownloadFile(file[2])}> 
+        
 
-  <a href={downloadFile} download>
-    {/* The "download" attribute triggers a download when the link is clicked */}
-    <MdDownload size="25" color="#54f542" />
-  </a>
-          </Button>
+          <Button variant="success" size="sm" style={{ marginRight: '50%' }} onClick={() => handleDownloadFile(file[2])}>
+  <MdDownload size="25" color="#54f542" />
+</Button>
 
           <Button variant="danger" size="sm" onClick={() => handleDelete(file[2])} >
             <MdDelete size="25" color="#FF0000"  />
