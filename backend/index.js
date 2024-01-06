@@ -53,6 +53,218 @@ app.use(
   app.use(express.json());
 // function handleRequest() { }
 
+//-------------------------------------------API`S for dashBoard-------------------------------------------------//
+
+     //--------------------------------WheeledInSolar  Card api---------------------------------------------// 
+     app.get("/WheeledInSolarCard",async(req,res)=>{
+      meterDb.query("SELECT * FROM meterdata.metergeneration where date(metertimestamp)=curdate();",function(err,result,feilds){
+        if(err){
+          console.log(err)
+          res.status(500).send("Internal Server Error");
+
+        }
+        else{
+          const response=(JSON.parse(JSON.stringify(result)))
+          res.status(200).send(response);
+        }
+      })
+
+    })
+   //-----------------------------------------end of api--------------------------------------------------//
+
+
+      //--------------------------------RoofTopSolar  Card api---------------------------------------------// 
+      app.get("/RoofTopSolarCard",async(req,res)=>{
+        meterDb.query("SELECT * FROM meterdata.rooftopreadingtoday where date(polled_timestamp)=curdate();",function(err,result,feilds){
+          if(err){
+            console.log(err)
+            res.status(500).send("Internal Server Error");
+  
+          }
+          else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            res.status(200).send(response);
+          }
+        })
+  
+      })
+     //-----------------------------------------end of api--------------------------------------------------//
+
+   //--------------------------------CO2REDUCTION  Card api---------------------------------------------// 
+      app.get("/CO2REDUCTIONCard",async(req,res)=>{
+        meterDb.query("SELECT * FROM meterdata.CO2REDUCTION where date(timestamps)=curdate() order by CO2REDUCTION desc limit 1;",function(err,result,feilds){
+          if(err){
+            console.log(err)
+            res.status(500).send("Internal Server Error");
+
+          }
+          else{
+            const response=(JSON.parse(JSON.stringify(result)))
+            res.status(200).send(response);
+          }
+        })
+
+      })
+     //-----------------------------------------end of api--------------------------------------------------//
+
+
+     //----------------------------------------------------------------------------------------------------//
+     //----------------------chiller Dashboard phase2(1,2,3,4) api`s ----------------------------------------------//
+  //-------------------------------thermal stored water temparature api-----------------------//
+  app.get("/thermal/storedWaterTemp",async(req,res)=>{
+    const thermalWaterTemp=[]
+    meterDb.query("SELECT * FROM meterdata.thermalstoredwaterquaterly where date(timecolumn)=curdate()",function(error,result,feild){
+      if(error){
+        console.log(error)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          let date=new Date(response[i].timecolumn)
+          const hours = date.getHours().toString().padStart(2, '0');
+     const minutes = date.getMinutes().toString().padStart(2, '0');
+     // const seconds = date.getSeconds().toString().padStart(2, '0');
+     const timestamp = `${hours}:${minutes}`;
+     thermalWaterTemp.push({"polledTime":timestamp,"storedwatertemperature":parseFloat(response[i].storedwatertemperature)})
+
+
+      }
+      console.log(thermalWaterTemp)
+        res.send(thermalWaterTemp)
+
+        
+      }
+    })
+  })
+  //--------------------------------end of api----------------------------//
+
+
+  //-----------------------------chiller Loading api-------------------------------//
+  app.get("/chillerDashboard/ChillerLoading",async(req,res)=>{
+    const ChillerLoadingData=[]
+    meterDb.query("SELECT * FROM meterdata.chillarloading where date(lastTimestamp)=curdate()",function(error,result,feild){
+      if(error){
+        console.log(error)
+      }
+      else{
+        const response=(JSON.parse(JSON.stringify(result)))
+        for(let i=0;i<response.length;i++){
+          let date=new Date(response[i].lastTimestamp)
+          const hours = date.getHours().toString().padStart(2, '0');
+     const minutes = date.getMinutes().toString().padStart(2, '0');
+     // const seconds = date.getSeconds().toString().padStart(2, '0');
+     const timestamp = `${hours}:${minutes}`;
+     ChillerLoadingData.push({"polledTime":timestamp,"c1loading":parseFloat(response[i].c1loading),"c2loading":parseFloat(response[i].c2loading),"c3loading":parseFloat(response[i].c3loading),"c4loading":parseFloat(response[i].c4loading)})
+
+
+      }
+      console.log(ChillerLoadingData.length)
+        res.send(ChillerLoadingData)
+
+        
+      }
+    })
+  })
+
+
+//----------------------------END of chiller Loading api-------------------------------------//
+
+//---------------------------------thermalinletoutlet (condenser and evaporator)-----------------------//
+
+app.get("/chillerDashboard/thermalinletoutlet/condenser/evaporator",async(req,res)=>{
+  const thermalinletoutletData=[]
+  meterDb.query("SELECT * FROM thermalinletoutlet where date(Timestamp)=curdate()",function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].Timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   thermalinletoutletData.push({"polledTime":timestamp,"avg_commonHeaderinletTemp":parseFloat(response[i].avg_commonHeaderinletTemp),"avg_commonHeaderoutletTemp":parseFloat(response[i].avg_commonHeaderoutletTemp),"avg_condenserLineInletTemp":parseFloat(response[i].avg_condenserLineInletTemp),"avg_condenserLineOutletTemp":parseFloat(response[i].avg_condenserLineOutletTemp),"avg_commonHeaderFlowrate":parseFloat(response[i].avg_commonHeaderFlowrate),"avg_condenserLineFlowrate":parseFloat(response[i].avg_condenserLineFlowrate)})
+
+
+    }
+    console.log(thermalinletoutletData.length)
+      res.send(thermalinletoutletData)
+
+      
+    }
+  })
+})
+
+//-------------------------------END of thermalinletoutlet (condenser and evaporator) api---------------------------------//
+
+//---------------------------------Average of C1 cop to C4 cop--------------------------------------//
+app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
+  const chillarCOP=[]
+  meterDb.query("SELECT * FROM meterdata.chillarcop where date(timestamp)=curdate();",function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   chillarCOP.push({"polledTime":timestamp,"avg_c1cop":parseFloat(response[i].c1cop),"avg_c2cop":parseFloat(response[i].c2cop),"avg_c3cop":parseFloat(response[i].c3cop),"avg_c4cop":parseFloat(response[i].c4cop)})
+
+
+    }
+    console.log(chillarCOP.length)
+      res.send(chillarCOP)
+
+      
+    }
+  })
+})
+
+//----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
+
+//-------------------------------total Cooling of the day api--------------------------------------------//
+app.get("/chillerDashboard/TotalCoolingEnergy",async(req,res)=>{
+  const ChillerTotalCooling=[]
+  meterDb.query("SELECT * FROM meterdata.phase2tR where date(timestamp)=curdate();",function(error,result,feild){
+    if(error){
+      console.log(error)
+    }
+    else{
+      const response=(JSON.parse(JSON.stringify(result)))
+      for(let i=0;i<response.length;i++){
+        let date=new Date(response[i].timestamp)
+        const hours = date.getHours().toString().padStart(2, '0');
+   const minutes = date.getMinutes().toString().padStart(2, '0');
+   // const seconds = date.getSeconds().toString().padStart(2, '0');
+   const timestamp = `${hours}:${minutes}`;
+   ChillerTotalCooling.push({"polledTime":timestamp,"TotalCoolingEnergy":Math.trunc(response[i].totalenergy)})
+
+
+    }
+    console.log(ChillerTotalCooling.length)
+      res.send(ChillerTotalCooling)
+
+      
+    }
+  })
+})
+//---------------------------------end of total Cooling of the day ---------------------------------------//
+
+
+  //----------------------------------------END of chillerDashboard api`s ----------------------------//
+
+     //------------------------------------------------end of phase 2(1,2,3,4)-----------------------------------------------------//
+          
+
+
+//----------------------------------end of API`S-------------------------------------------------------------------//
+
     app.get("/inverter",async(req,res)=>{
         con.query("SELECT * FROM EMSInverterData WHERE invertertimestamp >= CURDATE() AND invertertimestamp < DATE_ADD(CURDATE(), INTERVAL 1 DAY)",function(err,result,feilds){
             if(err){
@@ -248,7 +460,7 @@ emptyArray.forEach(obj => {
 
   app.get("/Batterydata",async(req,res)=>{
     const finalresultValue=[]
-    EMSDB.query("select * from EMSUPSbattery where date(received_time)=curdate()-1;",function(err,result,feilds){
+    EMSDB.query("select * from EMSUPSbattery where date(received_time)=curdate();",function(err,result,feilds){
       if(err){
         console.log(err)
       }
@@ -1073,7 +1285,7 @@ const TotalSessions=(LEV1_1.LEV1_1TotalSession+LEV4_1.LEV4_1TotalSession+CP11_1.
 const totalUsageTimeHours =(totalUsageTime / 3600000);
 
                                
-finalresult.push({"totalEnergy":totalEnergy.toFixed(1),"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"totalTimeusage":totalUsageTimeHours,"LEV1_1Status":LEV1_1Status,"LEV4_1Status":LEV4_1Status,"CP11_1Status":CP11_1Status,"CP12_1Status":CP12_1Status,"CP13_1Status":CP13_1Status,"CP14_1Status":CP14_1Status})
+finalresult.push({"totalEnergy":totalEnergy.toFixed(1),"totalSessions":TotalSessions,"NoOfChargersUsed":NoOfChargers,"totalTimeusage":totalUsageTimeHours,"LEV1_1Status":LEV1_1Status,"LEV4_1Status":LEV4_1Status,"CP11_1Status":CP11_1Status,"CP12_1Status":CP12_1Status,"CP13_1Status":CP13_1Status,"CP14_1Status":CP14_1Status,"CP12_1Location":" pond area","CP13_1Location":"pond area","CP14_1Location":"pond area","CP11_1Location":"mlcp 3 Rd floor","LEV1_1Location":"mlcp 4 th floor","LEV4_1Location":"mlcp 4 th floor"})
 //console.log(LEV1_1.LEV1_1Energy+LEV4_1.LEV4_1Energy+CP12_1.CP12_1Energy+CP13_1.CP13_11Energy+ CP13_1.CP13_11Energy+CP13_1.CP14_1Energy)
           //res.status(200).send( result );
           res.status(200).send( finalresult );
@@ -1152,7 +1364,7 @@ app.get("/analytics/battery", async (req, res) => {
 
 //--------------------------------battery voltage vs current graph-------------------------------//
 app.get("/analytics/battery/voltage&current", async (req, res) => {
-  meterDb.query("select * from batteryoneminute where date(received_time)=curdate() order by received_time asc", function (error, result) {
+  EMSDB.query("SELECT * FROM EMS.EMSUPSbattery where date(received_time)=curdate() GROUP BY DATE_FORMAT(received_time, '%Y-%m-%d %H:%i');", function (error, result) {
     const resultData=[]
 
     if (error) {
@@ -2014,155 +2226,6 @@ console.log(formattedDate,"line 1680");
   //--------------------------end of api-----------------------------------//
 
 
-//----------------------chiller Dashboard api`s ----------------------------------------------//
-  //-------------------------------thermal stored water temparature api-----------------------//
-  app.get("/thermal/storedWaterTemp",async(req,res)=>{
-    const thermalWaterTemp=[]
-    meterDb.query("SELECT * FROM meterdata.thermalstoredwaterquaterly where date(timecolumn)=curdate()",function(error,result,feild){
-      if(error){
-        console.log(error)
-      }
-      else{
-        const response=(JSON.parse(JSON.stringify(result)))
-        for(let i=0;i<response.length;i++){
-          let date=new Date(response[i].timecolumn)
-          const hours = date.getHours().toString().padStart(2, '0');
-     const minutes = date.getMinutes().toString().padStart(2, '0');
-     // const seconds = date.getSeconds().toString().padStart(2, '0');
-     const timestamp = `${hours}:${minutes}`;
-     thermalWaterTemp.push({"polledTime":timestamp,"storedwatertemperature":parseFloat(response[i].storedwatertemperature)})
-
-
-      }
-      console.log(thermalWaterTemp)
-        res.send(thermalWaterTemp)
-
-        
-      }
-    })
-  })
-  //--------------------------------end of api----------------------------//
-
-
-  //-----------------------------chiller Loading api-------------------------------//
-  app.get("/chillerDashboard/ChillerLoading",async(req,res)=>{
-    const ChillerLoadingData=[]
-    meterDb.query("SELECT * FROM meterdata.chillarloading where date(lastTimestamp)=curdate()",function(error,result,feild){
-      if(error){
-        console.log(error)
-      }
-      else{
-        const response=(JSON.parse(JSON.stringify(result)))
-        for(let i=0;i<response.length;i++){
-          let date=new Date(response[i].lastTimestamp)
-          const hours = date.getHours().toString().padStart(2, '0');
-     const minutes = date.getMinutes().toString().padStart(2, '0');
-     // const seconds = date.getSeconds().toString().padStart(2, '0');
-     const timestamp = `${hours}:${minutes}`;
-     ChillerLoadingData.push({"polledTime":timestamp,"c1loading":parseFloat(response[i].c1loading),"c2loading":parseFloat(response[i].c2loading),"c3loading":parseFloat(response[i].c3loading),"c4loading":parseFloat(response[i].c4loading)})
-
-
-      }
-      console.log(ChillerLoadingData.length)
-        res.send(ChillerLoadingData)
-
-        
-      }
-    })
-  })
-
-
-//----------------------------END of chiller Loading api-------------------------------------//
-
-//---------------------------------thermalinletoutlet (condenser and evaporator)-----------------------//
-
-app.get("/chillerDashboard/thermalinletoutlet/condenser/evaporator",async(req,res)=>{
-  const thermalinletoutletData=[]
-  meterDb.query("SELECT * FROM thermalinletoutlet where date(Timestamp)=curdate()",function(error,result,feild){
-    if(error){
-      console.log(error)
-    }
-    else{
-      const response=(JSON.parse(JSON.stringify(result)))
-      for(let i=0;i<response.length;i++){
-        let date=new Date(response[i].Timestamp)
-        const hours = date.getHours().toString().padStart(2, '0');
-   const minutes = date.getMinutes().toString().padStart(2, '0');
-   // const seconds = date.getSeconds().toString().padStart(2, '0');
-   const timestamp = `${hours}:${minutes}`;
-   thermalinletoutletData.push({"polledTime":timestamp,"avg_commonHeaderinletTemp":parseFloat(response[i].avg_commonHeaderinletTemp),"avg_commonHeaderoutletTemp":parseFloat(response[i].avg_commonHeaderoutletTemp),"avg_condenserLineInletTemp":parseFloat(response[i].avg_condenserLineInletTemp),"avg_condenserLineOutletTemp":parseFloat(response[i].avg_condenserLineOutletTemp),"avg_commonHeaderFlowrate":parseFloat(response[i].avg_commonHeaderFlowrate),"avg_condenserLineFlowrate":parseFloat(response[i].avg_condenserLineFlowrate)})
-
-
-    }
-    console.log(thermalinletoutletData.length)
-      res.send(thermalinletoutletData)
-
-      
-    }
-  })
-})
-
-//-------------------------------END of thermalinletoutlet (condenser and evaporator) api---------------------------------//
-
-//---------------------------------Average of C1 cop to C4 cop--------------------------------------//
-app.get("/chillerDashboard/Average/chillarCOP",async(req,res)=>{
-  const chillarCOP=[]
-  meterDb.query("SELECT * FROM meterdata.chillarcop where date(timestamp)=curdate();",function(error,result,feild){
-    if(error){
-      console.log(error)
-    }
-    else{
-      const response=(JSON.parse(JSON.stringify(result)))
-      for(let i=0;i<response.length;i++){
-        let date=new Date(response[i].timestamp)
-        const hours = date.getHours().toString().padStart(2, '0');
-   const minutes = date.getMinutes().toString().padStart(2, '0');
-   // const seconds = date.getSeconds().toString().padStart(2, '0');
-   const timestamp = `${hours}:${minutes}`;
-   chillarCOP.push({"polledTime":timestamp,"avg_c1cop":parseFloat(response[i].c1cop),"avg_c2cop":parseFloat(response[i].c2cop),"avg_c3cop":parseFloat(response[i].c3cop),"avg_c4cop":parseFloat(response[i].c4cop)})
-
-
-    }
-    console.log(chillarCOP.length)
-      res.send(chillarCOP)
-
-      
-    }
-  })
-})
-
-//----------------------------END of Average of C1 cop to C4 cop---------------------------------------//
-
-//-------------------------------total Cooling of the day api--------------------------------------------//
-app.get("/chillerDashboard/TotalCoolingEnergy",async(req,res)=>{
-  const ChillerTotalCooling=[]
-  meterDb.query("SELECT * FROM meterdata.phase2tR where date(timestamp)=curdate();",function(error,result,feild){
-    if(error){
-      console.log(error)
-    }
-    else{
-      const response=(JSON.parse(JSON.stringify(result)))
-      for(let i=0;i<response.length;i++){
-        let date=new Date(response[i].timestamp)
-        const hours = date.getHours().toString().padStart(2, '0');
-   const minutes = date.getMinutes().toString().padStart(2, '0');
-   // const seconds = date.getSeconds().toString().padStart(2, '0');
-   const timestamp = `${hours}:${minutes}`;
-   ChillerTotalCooling.push({"polledTime":timestamp,"TotalCoolingEnergy":Math.trunc(response[i].totalenergy)})
-
-
-    }
-    console.log(ChillerTotalCooling.length)
-      res.send(ChillerTotalCooling)
-
-      
-    }
-  })
-})
-//---------------------------------end of total Cooling of the day ---------------------------------------//
-
-
-  //----------------------------------------END of chillerDashboard api`s ----------------------------//
 
 
 
@@ -2907,33 +2970,39 @@ console.log(mysqlTimestamp);
 
   //-------------------------------PeakDemand analysis dashboard api---------------------------------//
   app.get("/PeakDemand/Dashboard/Analysis",async(req,res)=>{
-    const PeakDemandDetails=[]
-    const MaxPeakDemand=[]
-    let MaxDemand=0
-    let Time=""
-    let CountLevel1=0
-    let CountLevel2=0
-    let CountLevel3=0
-    let CountLevel4=0
-    let CountLevel5=0
-    let CountLevel6=0
-    let CountAboveLimit=0
-    let CountBellowLimit=0
-    let SumOfEnergy=0
-    let Percentage=0
+    const PeakDemandDetails = [];
+    const MaxPeakDemand = [];
+    let MaxDemand = 0;
+    let Time = "";
+    let CountLevel1 = 0;
+    let CountLevel2 = 0;
+    let CountLevel3 = 0;
+    let CountLevel4 = 0;
+    let CountLevel5 = 0;
+    let CountLevel6 = 0;
+    let CountAboveLimit = 0;
+    let CountBellowLimit = 0;
+    let SumOfEnergy = 0;
+    let Percentage = 0;
     const differences = [];
-    let LevelWisePercentage=[]
-    let CountLevecrossLimit1_4100To4200_Percentage=0
-    let CountLevecrossLimit1_4200To4300_Percentage=0
-    let CountLevecrossLimit1_4300To4400_Percentage=0
-    let CountLevecrossLimit1_4400To4500_Percentage=0
-    let CountLevecrossLimit1_4500To4600_Percentage=0
-    let CountLevecrossLimit1_4600_Percentage=0
-    let CountRangeof_4100_Above_Below=[0,0]
-    let CountRangeof_4200_Above_Below=[0,0]
-    let CountRangeof_4300_Above_Below=[0,0]
-    let CountRangeof_4400_Above_Below=[0,0]
-    let CountRangeof_4500_Above_Below=[0,0]
+    let LevelWisePercentage = [];
+    let CountLevecrossLimit1_4100To4200_Percentage = 0;
+    let CountLevecrossLimit1_4200To4300_Percentage = 0;
+    let CountLevecrossLimit1_4300To4400_Percentage = 0;
+    let CountLevecrossLimit1_4400To4500_Percentage = 0;
+    let CountLevecrossLimit1_4500To4600_Percentage = 0;
+    let CountLevecrossLimit1_4600_Percentage = 0;
+    let CountRangeof_4100_Above_Below = [0, 0];
+    let CountRangeof_4200_Above_Below = [0, 0];
+    let CountRangeof_4300_Above_Below = [0, 0];
+    let CountRangeof_4400_Above_Below = [0, 0];
+    let CountRangeof_4500_Above_Below = [0, 0];
+    let CountBellowLimitPercentage = 0;
+    let CountAboveLimitPercentage = 0;
+  
+    // Initialize the variables here
+    CountBellowLimitPercentage = 0;
+    CountAboveLimitPercentage = 0;
     chakradb.query("SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'",function(err,result,feilds){
     //chakradb.query(`SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)='${date}'  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00'`
       //SELECT * FROM bmsmgmt_olap_prod_v13.hvacSchneider7230Polling where date(polledTime)=curdate()  AND  TIME(polledTime) BETWEEN '09:00:00' AND '19:00:00' order by polledTime desc 
@@ -2942,6 +3011,10 @@ console.log(mysqlTimestamp);
            }
            else{
                const response=(JSON.parse(JSON.stringify(result)))
+                           // Initialize the variables here
+            CountBellowLimitPercentage = 0;
+            CountAboveLimitPercentage = 0;
+
                for(let i=0;i<response.length;i++){
                 let date = new Date(response[i].polledTime);
                 //const timeVal=date.toLocaleDateString()
@@ -3022,6 +3095,8 @@ console.log(mysqlTimestamp);
             CountLevecrossLimit1_4400To4500_Percentage=(CountLevel4/response.length)*100
             CountLevecrossLimit1_4500To4600_Percentage=(CountLevel5/response.length)*100
             CountLevecrossLimit1_4600_Percentage=(CountLevel6/response.length)*100
+            CountBellowLimitPercentage=(CountBellowLimit/response.length)*100
+            CountAboveLimitPercentage=(CountAboveLimit/response.length)*100
 
             LevelWisePercentage.push({
               "Time":timestampVal,
@@ -3045,8 +3120,7 @@ console.log(mysqlTimestamp);
               Time=timestampVal
             }
             
-            CountBellowLimitPercentage=(CountBellowLimit/response.length)*100
-            CountAboveLimitPercentage=(CountAboveLimit/response.length)*100
+         
 
          
 
@@ -3125,7 +3199,7 @@ console.log(mysqlTimestamp);
                 "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
                 "CountAbove_4100":CountAboveLimit,
                 "CountBellow_4100":CountBellowLimit,
-                "CountAbovePercentage_4100":CountAboveLimitPercentage == null || 0 ? 0: parseFloat((CountAboveLimitPercentage).toFixed(2)),
+                "CountAbovePercentage_4100": CountAboveLimitPercentage !== null && CountAboveLimitPercentage !== undefined ? parseFloat((CountAboveLimitPercentage).toFixed(2)) : 0,
                 "countBellowPercentage_4100":CountBellowLimitPercentage == null || 0 ? 0: parseFloat((CountBellowLimitPercentage).toFixed(2)),
                 "countLevelZero_Fivety":countLevelZero_Fivety,
                 "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
@@ -3190,6 +3264,12 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
   let CountRangeof_4300_Above_Below=[0,0]
   let CountRangeof_4400_Above_Below=[0,0]
   let CountRangeof_4500_Above_Below=[0,0] 
+  let CountBellowLimitPercentage = 0;
+    let CountAboveLimitPercentage = 0;
+  
+    // Initialize the variables here
+    CountBellowLimitPercentage = 0;
+    CountAboveLimitPercentage = 0;
   
   // let CountBellowLimitPercentage=0
   // let CountAboveLimitPercentage=0
@@ -3387,8 +3467,9 @@ app.post("/PeakDemand/Dashboard/Analysis/DateFiltered",async(req,res)=>{
               "CountLevecrossLimit1_4100To4200_Percentage":CountLevecrossLimit1_4100To4200_Percentage,
               "CountAbove_4100":CountAboveLimit,
               "CountBellow_4100":CountBellowLimit,
-              "CountAbovePercentage_4100":CountAboveLimitPercentage?parseFloat((CountAboveLimitPercentage).toFixed(2)):0,
-              "countBellowPercentage_4100":CountBellowLimitPercentage?parseFloat((CountBellowLimitPercentage).toFixed(2)):0,
+              "CountAbovePercentage_4100": CountAboveLimitPercentage !== null && CountAboveLimitPercentage !== undefined ? parseFloat((CountAboveLimitPercentage).toFixed(2)) : 0,
+              "countBellowPercentage_4100": CountBellowLimitPercentage !== null && CountBellowLimitPercentage !== undefined ? parseFloat((CountBellowLimitPercentage).toFixed(2)) : 0,
+             
               "countLevelZero_Fivety":countLevelZero_Fivety,
               "countLeve2Fivety_Hundred":countLeve2Fivety_Hundred,
               "countLeve3Hundred_oneFivety":countLeve3Hundred_oneFivety,
@@ -3769,7 +3850,7 @@ app.get("/HOTWterStorage", (req,res)=>{
     const Hot_water_delivery_Flow_rate=response[i].hotWaterdeliveryRate
     const Energy_Delivered=(Hot_water_delivery_Flow_rate*4.2*(Stored_Water_Temperature-Delivery_Temperature))
     const Mass_of_stored_water=response[i].tankFuildVolume
-    const Refrigerant_temperature=0
+    const Refrigerant_temperature=55
     const Energy_Stored=0
     ResponseArray.push({
       "Stored_Water_Temperature":Stored_Water_Temperature,
