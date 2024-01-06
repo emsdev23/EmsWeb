@@ -7,6 +7,7 @@ import axios from 'axios';
 import HighchartsReact from 'highcharts-react-official';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 function BatteryCurrentvolt() {
   const host='43.205.196.66'
@@ -14,7 +15,7 @@ function BatteryCurrentvolt() {
   const [data, setData] = useState([]);
   const [voltcurrentfilterDate, setVoltcurrentfilterDate] = useState(null);
   const [loading, setLoading] = useState(false);
-  const voltage=`http://${host}:5000/analytics/battery/voltage&current`
+  const voltage=`http://${ipAddress}:5000/analytics/battery/voltage&current`
   const [voltcurrent,setVoltcurrent]=useState([])
   console.log(voltcurrent)
 
@@ -46,7 +47,7 @@ exportDataInit(Highcharts);
         try {
           const formattedStartDate = voltcurrentfilterDate ? new Date(voltcurrentfilterDate.getTime() - voltcurrentfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://${host}:5000/analytics/onemingraph`, {
+          const response = await axios.post(`http://${ipAddress}:5000/analytics/onemingraph`, {
             date: formattedStartDate,
           });
         

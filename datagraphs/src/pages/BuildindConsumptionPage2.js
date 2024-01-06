@@ -8,14 +8,16 @@ import exportDataInit from 'highcharts/modules/export-data';
 import DatePicker from 'react-datepicker';
 import Table from 'react-bootstrap/Table';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
+import {Link} from 'react-router-dom';
 
 function BuildindConsumptionPage2() {
   const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const [graph,setGraph]=useState([])
-    const graphDataUrl=`http://${host}:5000/BuildingConsumptionPage2`
-    const buildingHighlightsApi="http://localhost:5000/buildingconsumption/Highlights"
+    const graphDataUrl=`http://${ipAddress}:5000/BuildingConsumptionPage2`
+    const buildingHighlightsApi=`http://${ipAddress}:5000/buildingconsumption/Highlights`
     const [buildingHighlights,setBuildingHighlights]=useState([])
 
 
@@ -61,8 +63,8 @@ function BuildindConsumptionPage2() {
         try {
           const formattedDate = systemOverviewfilterDate ? new Date(systemOverviewfilterDate.getTime() - systemOverviewfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://${host}:5000/filteredGraph/BuildingConsumptionPage2`, {date: formattedDate,});
-          const buildingHighlightsResponse= await axios.post("http://localhost:5000/buildingconsumption/Highlights/DateFiltered", {date: formattedDate,});
+          const response = await axios.post(`http://${ipAddress}:5000/filteredGraph/BuildingConsumptionPage2`, {date: formattedDate,});
+          const buildingHighlightsResponse= await axios.post(`http://${ipAddress}:5000/buildingconsumption/Highlights/DateFiltered`, {date: formattedDate,});
         
           setData(response.data);
           setBuildingHighlightsDateFilter(buildingHighlightsResponse.data)
@@ -405,7 +407,10 @@ function BuildindConsumptionPage2() {
         </label>
         
       </div>
+      
   </div>
+  <div class="col-2">
+</div>
   <div style={{marginTop:"15px"}} >
   <Table striped bordered hover variant="dark" >
   <thead>

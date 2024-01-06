@@ -6,13 +6,14 @@ import axios from 'axios';
 import HighchartsReact from 'highcharts-react-official';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 function BatteryEnergyPac() {
 
   const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
-    const energy=`http://${host}:5000/analytics/battery`
+    const energy=`http://${ipAddress}:5000/analytics/battery`
     const [graphData, setGraphData] = useState([]);
     const [data, setData] = useState([]);
     const [filterDate, setFilterDate] = useState(null);
@@ -44,7 +45,7 @@ function BatteryEnergyPac() {
         try {
           const formattedStartDate = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post(`http://${host}:5000/analytics/fivemingraphs`, {
+          const response = await axios.post(`http://${ipAddress}:5000/analytics/fivemingraphs`, {
             date: formattedStartDate,
           });
         

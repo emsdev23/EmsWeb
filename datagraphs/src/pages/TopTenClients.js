@@ -7,6 +7,7 @@ import exportingInit from 'highcharts/modules/exporting';
 import exportDataInit from 'highcharts/modules/export-data';
 import HighchartsReact from 'highcharts-react-official';
 import DatePicker from 'react-datepicker';
+import { ipAddress } from '../ipAdress';
 
 
 
@@ -16,8 +17,8 @@ function TopTenClients() {
 
 
 
-const ClientDataApi="http://localhost:5000/TopTenClients/data"
-const ClientDataDateFilteredApi="http://localhost:5000/TopTenClients/data/DateFilter"
+const ClientDataApi=`http://${ipAddress}:5000/TopTenClients/data`
+const ClientDataDateFilteredApi=`http://${ipAddress}:5000/TopTenClients/data/DateFilter`
 const [clientData,setClientData]=useState("")
 const [clientDataDateFiltered,setClientDataDateFiltered]=useState("") 
 const [selectedDate, setSelectedDate] = useState(null);

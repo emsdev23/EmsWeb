@@ -7,6 +7,7 @@ import HighchartsReact from 'highcharts-react-official';
 import {Link} from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 function LTOBatteryHourly() {
     const host='43.205.196.66'
@@ -24,7 +25,7 @@ function LTOBatteryHourly() {
       };
 
     useEffect(() => {
-        axios.get(`http://${host}:5000/dashboard/LTOBattery`)
+        axios.get(`http://${ipAddress}:5000/dashboard/LTOBattery`)
           .then((res) => {
             const dataResponse = res.data;
             setLTObattery(dataResponse);
@@ -51,7 +52,7 @@ function LTOBatteryHourly() {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post(`http://${host}:5000/dashboard/dateFilter/LTOBattery`, { date: formattedDate });
+          const response = await axios.post(`http://${ipAddress}:5000/dashboard/dateFilter/LTOBattery`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);

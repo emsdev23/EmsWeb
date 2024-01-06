@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import swal from 'sweetalert';
 import Swal from "sweetalert2";
+import { ipAddress } from '../ipAdress';
 
 function BatteryShedule() {
 
@@ -148,7 +149,7 @@ function BatteryShedule() {
         dangerMode: false,
       }).then((willContinue) => {
         if (willContinue) {
-          axios.post(`http://${host}:5000/Shedulecontroll/UPSBattery`, finalSelectedDays)
+          axios.post(`http://${ipAddress}:5000/Shedulecontroll/UPSBattery`, finalSelectedDays)
             .then((response) => {
               const result = response.data;
               swal({

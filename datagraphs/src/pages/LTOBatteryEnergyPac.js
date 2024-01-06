@@ -6,13 +6,14 @@ import axios from 'axios';
 import HighchartsReact from 'highcharts-react-official';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 function LTOBatteryEnergyPac() {
 
   const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
-    const energy=`http://${host}:5000/Ltoanalytics/energy_VS_packsoc`
+    const energy=`http://${ipAddress}:5000/Ltoanalytics/energy_VS_packsoc`
     const [graphData, setGraphData] = useState([]);
     const [data, setData] = useState([]);
     const [filterDate, setFilterDate] = useState(null);
@@ -44,7 +45,7 @@ function LTOBatteryEnergyPac() {
         try {
           const formattedStartDate = filterDate ? new Date(filterDate.getTime() - filterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       
-          const response = await axios.post("http://localhost:5000/Ltoanalytics/energy_VS_packsoc/DateFilter", {
+          const response = await axios.post(`http://${ipAddress}:5000/Ltoanalytics/energy_VS_packsoc/DateFilter`, {
             date: formattedStartDate,
           });
         

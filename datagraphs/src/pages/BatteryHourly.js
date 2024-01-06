@@ -7,13 +7,14 @@ import HighchartsReact from 'highcharts-react-official';
 import {Link} from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 function BatteryHourly() {
   const host='43.205.196.66'
     exportingInit(Highcharts);
     exportDataInit(Highcharts);
     const [battery,setBattery]=useState([])
-    const BatteryData=`http://${host}:5000/dashboard/Battery`
+    const BatteryData=`http://${ipAddress}:5000/dashboard/Battery`
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [singledaydata,setSingledaydata]=useState([])
@@ -41,7 +42,7 @@ function BatteryHourly() {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post(`http://${host}:5000/dashboard/filtered/Battery`, { date: formattedDate });
+          const response = await axios.post(`http://${ipAddress}:5000/dashboard/filtered/Battery`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);

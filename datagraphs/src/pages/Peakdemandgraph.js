@@ -13,11 +13,12 @@ import KvaVsKW from './KvaVsKW';
 import {Link} from 'react-router-dom';
 import TopTenClients from './TopTenClients'
 import BlockWiseData from './BlockWiseData';
+import { ipAddress } from '../ipAdress';
  
 
 const iphost='43.205.196.66'
-const host = `http://${iphost}:5000/peak/hvacSchneider7230Polling`
-const pastdata=`http://${iphost}:5000/peak/initialgraph`
+const host = `http://${ipAddress}:5000/peak/hvacSchneider7230Polling`
+const pastdata=`http://${ipAddress}:5000/peak/initialgraph`
 
 function Peakdemandgraphs() {
   const scrollToTopTenClients = () => {
@@ -63,7 +64,7 @@ const handleSubmit = (event) => {
 
 
 const CurrentGraph=()=>{
-  axios.get(`http://${iphost}:5000/peak/hvacSchneider7230Polling`).then((res)=>{
+  axios.get(`http://${ipAddress}:5000/peak/hvacSchneider7230Polling`).then((res)=>{
     const dataresponse=res.data
     setInitialGraph(dataresponse)
    
@@ -109,7 +110,7 @@ const pastSevenDaysGraph=()=>{
       const formattedStartDate = startDate ? new Date(startDate.getTime() - startDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
       const formattedEndDate = endDate ? new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post(`http://${iphost}:5000/filter/hvacSchneider7230Polling`, {
+      const response = await axios.post(`http://${ipAddress}:5000/filter/hvacSchneider7230Polling`, {
         date: formattedStartDate,
         endDate: formattedEndDate
       });
@@ -129,7 +130,7 @@ const pastSevenDaysGraph=()=>{
     try {
       const formattedStartDate = singledayFilter ? new Date(singledayFilter.getTime() - singledayFilter.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
   
-      const response = await axios.post(`http://${iphost}:5000/singleDayFilter/hvacSchneider7230Polling`, {
+      const response = await axios.post(`http://${ipAddress}:5000/singleDayFilter/hvacSchneider7230Polling`, {
         date: formattedStartDate,
       });
     
@@ -1077,16 +1078,7 @@ const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
     </div>
   </div>
 
-  {/* <div className="col-3">
-    <div className="input-group mb-3" style={{ width: "300px" }}>
-      <div className="input-group-prepend">
-        <label className="input-group-text" htmlFor="inputGroupSelect01">
-        <h6 style={{color:"brown"}}><b>End Date :</b></h6> <DatePicker selected={endDate} onChange={handleEndDateChange} placeholderText='select date' />
-        </label>
-      </div>
-     
-    </div>
-  </div> */}
+
 </div>
 
     </form>
@@ -1163,14 +1155,16 @@ const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
   </div>
   <br/>
   <br/>
-  <div> 
-  <KvaVsKW/>
-  </div>
+  {/* <KvaVsKW/> */}
 
-  <Grid sx={{ flexGrow: 1 }} container spacing={2} >
+  {/* <TopTenClients/> */}
+  {/* <div> 
+  <KvaVsKW/>
+  </div> */}
+
+  {/* <Grid sx={{ flexGrow: 1 }} container spacing={2} >
   
   <Grid item xs={12} sm={6} >
-  {/* <Link to="section1" smooth={true} duration={500}>  </Link> */}
       <div id="topTenClients"> 
     <TopTenClients/>
   </div>
@@ -1188,7 +1182,7 @@ const currentdate = `${day}/${month}/${year}`; // Rearrange the day and month
   
 
       </Grid>
-      </Grid>
+      </Grid> */}
 
 
   

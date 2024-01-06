@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Hotwaterimage from '../images/water-heater.jpg';
+import { ipAddress } from '../ipAdress';
 
 function HotWaterStorage() {
   const [hotWaterStorage, setHotWaterStorage] = useState([]);
-  const hotWaterStorageApi = "http://localhost:5000/HOTWterStorage";
+  const hotWaterStorageApi = `http://${ipAddress}:5000/HOTWterStorage`;
 
   useEffect(() => {
     axios.get(hotWaterStorageApi)
@@ -49,7 +50,7 @@ function HotWaterStorage() {
         <td><span style={{ color: "black" }}>{Stored_Water_Temperature}</span></td>
       </tr> */}
       <span style={{color:"black"}}><b>StoredWater<br/>Temperature</b></span>
-      <p style={{color:"black"}} ><b>(deg C ): <p style={{color:"blue"}}><b>{Stored_Water_Temperature}</b></p></b></p>
+      <p style={{color:"black"}} ><b>(deg C ): <p style={{color:"blue"}}><b>{Math.trunc(Stored_Water_Temperature)}</b></p></b></p>
       
     </div>
   
@@ -67,7 +68,7 @@ function HotWaterStorage() {
       <tr>
         <td><b style={{ color: "black" }}>Mass_of_stored_water</b></td>
         <td style={{ color: "black" }}>:</td>
-        <td><span style={{ color: "red" }}><b>{Mass_of_stored_water}</b></span></td>
+        <td><span style={{ color: "red" }}><b>{Math.trunc(Mass_of_stored_water)}</b></span></td>
       </tr>
   
     </div>
@@ -86,7 +87,7 @@ function HotWaterStorage() {
       <div>
       <span style={{color:"black"}}><b>HotWaterDelivery/</b></span>
       <br/>
-      <span style={{color:"black"}}><b>Flow_rate(m3/h):<span style={{color:"red"}}>{Hot_water_delivery_Flow_rate}</span></b></span>
+      <span style={{color:"black"}}><b>Flow_rate(m3/h):<span style={{color:"red"}}>{Math.trunc(Hot_water_delivery_Flow_rate)}</span></b></span>
       </div>
     </div>
 
@@ -127,7 +128,7 @@ function HotWaterStorage() {
       </tr> */}
       <span style={{color:"black"}}><b>Energy</b></span>
       <br/>
-      <span style={{color:"black"}}><b>Delivered(kWh):<span style={{color:"red"}}>{Energy_Delivered}</span></b></span>
+      <span style={{color:"black"}}><b>Delivered(kWh):<span style={{color:"red"}}>{Math.trunc(Energy_Delivered)}</span></b></span>
   
     </div>
 
@@ -145,7 +146,7 @@ function HotWaterStorage() {
       <div style={{color:"black"}}>
       <span><b>Refrigerant_temperature</b></span>
       <br/>
-      <span><b>(kWh):<span style={{color:"red"}}>{Energy_Stored}</span></b></span>
+      <span><b>(kWh):<span style={{color:"red"}}>{Math.trunc(Energy_Stored)}</span></b></span>
       </div>
       
   
@@ -164,7 +165,7 @@ function HotWaterStorage() {
       <div style={{color:"black"}}>
       <span><b>Energy_Stored/</b></span>
       <br/>
-      <span><b>(kWh):<span style={{color:"red"}}>{Refrigerant_temperature}</span></b></span>
+      <span><b>(kWh):<span style={{color:"red"}}>{Math.trunc(Refrigerant_temperature)}</span></b></span>
       </div>
       
   

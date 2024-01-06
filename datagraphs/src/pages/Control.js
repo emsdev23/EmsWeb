@@ -17,6 +17,7 @@ import batteryfull from '../images/smartphone-charger.png';
 import BatteryShedule from './BatteryShedule';
 import Swal from "sweetalert2";
 import './Battery.css';
+import { ipAddress } from '../ipAdress';
 
 // import './Controls.css'
 
@@ -46,7 +47,7 @@ function Control() {
 
 
 
-  const batteryurl=`http://${host}:5000/Batterydata`
+  const batteryurl=`http://${ipAddress}:5000/Batterydata`
 
 
 //  function batteryData() {
@@ -181,7 +182,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://${host}:5000/controlls`, formattedData)
+        axios.post(`http://${ipAddress}:5000/controlls`, formattedData)
           .then((response) => {
             const result = response.data;
             setFormData({
@@ -237,7 +238,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+        axios.post(`http://${ipAddress}:5000/instantaneous`, insformatedData)
           .then((response) => {
             const result = response.data;
             setInsformData({
@@ -311,7 +312,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+        axios.post(`http://${ipAddress}:5000/instantaneous`, insformatedData)
           .then((response) => {
             const result = response.data;
             setInsformData({
@@ -358,7 +359,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+        axios.post(`http://${ipAddress}:5000/instantaneous`, insformatedData)
           .then((response) => {
             const result = response.data;
             setInsformData({
@@ -405,7 +406,7 @@ const disformattedTimestamp = disdate.toLocaleString('en-US', options);
       dangerMode: false,
     }).then((willContinue) => {
       if (willContinue) {
-        axios.post(`http://${host}:5000/instantaneous`, insformatedData)
+        axios.post(`http://${ipAddress}:5000/instantaneous`, insformatedData)
           .then((response) => {
             const result = response.data;
             setInsformData({

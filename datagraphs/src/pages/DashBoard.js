@@ -33,6 +33,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LTOBatteryHourly from './LTOBatteryHourly';
 import HotWaterStorage from './HotWaterStorage';
+import { ipAddress } from '../ipAdress';
 
 
 import InfoTooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
@@ -159,23 +160,23 @@ function DashBoard() {
       ],
     
   }
-  const url=`http://${host}:5000/sollar`
-  const batteryurl=`http://${host}:5000/battery`
-  const wms=`http://${host}:5000/wms`
-  const solarPerformance=`http://${host}:5000/solarPerformance`
-  const sensorurl=`http://${host}:5000/sensorreadings`
-  const meterData=`http://${host}:5000/meterdata`
-  const acmeterenergy=`http://${host}:5000/acmeterenergy`
-  const griddata= `http://localhost:5000/grid`
-  const temparature=`http://${host}:5000/thermaltemp`
-  const rooftopac = `http://${host}:5000/rooftop`
-  const energysaved = `http://${host}:5000/peaksavings`
-  const chillerstatus = `http://${host}:5000/chillerstatusd`
-  const chillerstatusph2 = `http://${host}:5000/chillerstatuse`
-  const powerFactor= `http://${host}:5000/schneider7230readings`
-  const diesel=`http://${host}:5000/dashboard/Deisel`
-  const chargerdate=`http://${host}:5000/dashboard/EvCharger`
-  const thermalApi=`http://${host}:5000/thermal/summaryCard`
+  const url=`http://${ipAddress}:5000/sollar`
+  const batteryurl=`http://${ipAddress}:5000/battery`
+  const wms=`http://${ipAddress}:5000/wms`
+  const solarPerformance=`http://${ipAddress}:5000/solarPerformance`
+  const sensorurl=`http://${ipAddress}:5000/sensorreadings`
+  const meterData=`http://${ipAddress}:5000/meterdata`
+  const acmeterenergy=`http://${ipAddress}:5000/acmeterenergy`
+  const griddata= `http://${ipAddress}:5000/grid`
+  const temparature=`http://${ipAddress}:5000/thermaltemp`
+  const rooftopac = `http://${ipAddress}:5000/rooftop`
+  const energysaved = `http://${ipAddress}:5000/peaksavings`
+  const chillerstatus = `http://${ipAddress}:5000/chillerstatusd`
+  const chillerstatusph2 = `http://${ipAddress}:5000/chillerstatuse`
+  const powerFactor= `http://${ipAddress}:5000/schneider7230readings`
+  const diesel=`http://${ipAddress}:5000/dashboard/Deisel`
+  const chargerdate=`http://${ipAddress}:5000/dashboard/EvCharger`
+  const thermalApi=`http://${ipAddress}:5000/thermal/summaryCard`
  
 
   var totalrooftopgeneration
@@ -347,7 +348,7 @@ function DashBoard() {
 
     // powerfactor 
     const  PowerValue=()=>{
-      axios.get(`http://${host}:5000/schneider7230readings`).then((res)=>{
+      axios.get(`http://${ipAddress}:5000/schneider7230readings`).then((res)=>{
         const dataresponse=res.data
         console.log(dataresponse)
        
@@ -484,6 +485,13 @@ function DashBoard() {
  let CP12_1Status=""
  let CP13_1Status=""
  let CP14_1Status=""
+ let CP11_1Location ="mlcp 3 Rd floor"
+ let CP12_1Location= 'pond area'
+ let CP13_1Location= 'pond area'
+ let CP14_1Location= 'pond area'
+ let LEV1_1Location= "mlcp 4 th floor"
+ let LEV4_1Location="mlcp 4 th floor"
+
 
  for(let i=0;i<EvCharger.length;i++){
   totalEnergy=((EvCharger[i].totalEnergy))
@@ -831,6 +839,7 @@ console.log(totaldaysumvalue)
 
           // pr% calculation values
           const WheeledinsolarPR= totalsolargeneration/((totalwmsirradiation/60000)* 2008.36)
+          console.log(WheeledinsolarPR,"line number 835")
           const rooftopPR=totalrooftopgeneration/((totalsensordata/4000)*1075.8)
           let prpercentage = 0
 
@@ -1869,18 +1878,25 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
     {
       LEV1_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="50px" height="50px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
     } 
+ 
+  <h6 style={{color:"black",marginTop:"3%"}}><b>{LEV1_1Location}</b></h6>
+ 
   </div>
   <div class="col-4">
     <h5 style={{color:"black"}}><b>2</b></h5>
     {
       LEV4_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
     } 
+
+<h6 style={{color:"black",marginTop:"3%"}}><b>{LEV4_1Location}</b></h6>
+
   </div>
   <div class="col-4">
     <h5 style={{color:"black"}}><b>3</b></h5>
     {
       CP11_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
     } 
+    <h6 style={{color:"black",marginTop:"3%"}}><b>{CP11_1Location}</b></h6>
   </div>
 </div>
 <br/>
@@ -1891,18 +1907,21 @@ const longText = " According to CEA Emission Database,2021 the weighted C02 emis
     {
       CP12_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
     } 
+      <h6 style={{color:"black",marginTop:"3%"}}><b>{CP12_1Location}</b></h6>
   </div>
   <div class="col-4">
     <h5 style={{color:"black"}}><b>5</b></h5>
     {
       CP13_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
     } 
+      <h6 style={{color:"black",marginTop:"3%"}}><b>{CP13_1Location}</b></h6>
   </div>
   <div class="col-4">
     <h5 style={{color:"black"}}><b>6</b></h5>
     {
       CP14_1Status==="active"?<img src={EvchargerOn} alt="evcharger" width="100px" height="100px" />:<img src={EvChargerOff} alt="evcharger" width="100px" height="100px" />
     } 
+      <h6 style={{color:"black",marginTop:"3%"}}><b>{CP14_1Location}</b></h6>
   </div>
 </div>
 

@@ -11,6 +11,7 @@ import swal from 'sweetalert';
 import Grid from '@mui/material/Grid';
 import { Link } from "react-router-dom";
 import RoofTopExepectedGeneration from './RoofTopExepectedGeneration';
+import { ipAddress } from '../ipAdress';
 
 
 function RooftopSolar() {
@@ -39,7 +40,7 @@ function RooftopSolar() {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post(`http://${host}:5000/roofTopHourly`, { date: formattedDate });
+          const response = await axios.post(`http://${ipAddress}:5000/roofTopHourly`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
@@ -57,7 +58,7 @@ function RooftopSolar() {
 
       //----------function to get request for initial graph befor date filters------------//
       const RooftopDataFetch=()=>{
-        axios.get(`http://${host}:5000/current/roofTopHourlygraph`).then((res)=>{
+        axios.get(`http://${ipAddress}:5000/current/roofTopHourlygraph`).then((res)=>{
           const response=res.data
           setCurrentRooftopData(response)
         

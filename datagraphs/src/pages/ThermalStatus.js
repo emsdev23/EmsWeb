@@ -6,13 +6,14 @@ import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 function ThermalStatus() {
   const host='43.205.196.66'
   exportingInit(Highcharts);
   exportDataInit(Highcharts);
 
-  const ThermalApi=`http://${host}:5000/thermal/status`
+  const ThermalApi=`http://${ipAddress}:5000/thermal/status`
     const [thermalData, setThermalData] = useState([]);
 
 
@@ -46,7 +47,7 @@ const fetchThermalData = async () => {
   try {
     const formattedStartDate = thermalfilterDate ? new Date(thermalfilterDate.getTime() - thermalfilterDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : '';
 
-    const response = await axios.post(`http://${host}:5000/ThermalStatus/Datefilter`, {
+    const response = await axios.post(`http://${ipAddress}:5000/ThermalStatus/Datefilter`, {
       date: formattedStartDate,
     });
   

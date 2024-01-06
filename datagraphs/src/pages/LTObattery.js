@@ -6,6 +6,7 @@ import swal from 'sweetalert';
 import Swal from "sweetalert2"
 import * as GiIcons from  'react-icons/gi'
 import TableFilte from './TableFilte';
+import { ipAddress } from '../ipAdress';
 
 function LTObattery() {
 
@@ -13,8 +14,8 @@ function LTObattery() {
 
   const [ltoBatteryData,setLtoBatteryData]=useState([])
   const [ltoLogsData,setLtoLogsData]=useState([])
-  const LTOApi=`http://${host}:5000/battery/lto`
-  const LTOLogApi="http://localhost:5000/Logs/LTO"
+  const LTOApi=`http://${ipAddress}:5000/battery/lto`
+  const LTOLogApi=`http://${ipAddress}:5000/Logs/LTO`
   const ActualPassKey=31419
   const [pinNumber,setPinNumber]=useState("")
 
@@ -111,7 +112,7 @@ const handleLTOBatteryControlSubmit = async (event) => {
     dangerMode: false,
   }).then((willContinue) => {
     if (willContinue) {
-      axios.post(`http://${host}:5000/LTOBattery/controll`, formattedData)
+      axios.post(`http://${ipAddress}:5000/LTOBattery/controll`, formattedData)
         .then((response) => {
           const result = response.data;
           setLtoBatteryControlData({

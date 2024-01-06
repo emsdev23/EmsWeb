@@ -5,6 +5,7 @@ import Card from 'react-bootstrap/Card';
 import { colors } from '@mui/material';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ipAddress } from '../ipAdress';
 
 
 const Thermal = () => {
@@ -26,7 +27,7 @@ const Thermal = () => {
        
         try {
           const formattedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10) : ''
-          const response = await axios.post(`http://${host}:5000/thermal/datefilter`, { date: formattedDate });
+          const response = await axios.post(`http://${ipAddress}:5000/thermal/datefilter`, { date: formattedDate });
           setSingledaydata(response.data);
         } catch (error) {
           console.error(error);
@@ -44,7 +45,7 @@ const Thermal = () => {
 
   
     const namelist = () =>{
-     axios.get(`http://${host}:5000/thermal`).then((res)=>setResult(res.data))
+     axios.get(`http://${ipAddress}:5000/thermal`).then((res)=>setResult(res.data))
     }
 
    
