@@ -30,10 +30,21 @@ import LTOAnalytics from './pages/LTOAnalytics';
 // import HotWaterStorage from './pages/HotWaterStorage';
 import ThermalQuarterly from './pages/ThermalQuaterly';
 import Diesel_Analysis from './pages/Diesel_Analysis';
+import TableFilte from './pages/TableFilte';
+import BlockWiseData from './pages/BlockWiseData';
+import TopTenClients from './pages/TopTenClients';
+import Demo from './pages/Demo'
+import DashboardPage2 from './Dashboard/DashboardPage2';
+import DasboardCode from './Dashboard/DasboardCode';
+import New from './Dashboard/New'
+import DashboardPage1 from './Dashboard/DashBoardTopLayer/DashboardPage1';
+import DashBoardCombine from './Dashboard/DashBoardCombine';
+import KvaVsKW from './pages/KvaVsKW';
 
 
 
 function LocationContext(props) {
+  
 
 
   const location = useLocation();
@@ -51,11 +62,16 @@ function LocationContext(props) {
 }
 
 function App() {
+  
   return (
+    <div> 
+      {/*  */}
     <BrowserRouter>
       <LocationContext>
         <div>
           <Routes>
+          
+          {/* DashBoardCombine */}
             <Route path="/" element={<DashBoard />} />
             <Route path="/Analytics" element={<Analytics />} />
             <Route path="/Control/upsbattery" element={<Control />} />
@@ -78,11 +94,27 @@ function App() {
             <Route path="/LTOBattery_Analytics" element={<LTOAnalytics/>}/>
             <Route path="/Thermal_Analtics" element={<ThermalQuarterly/>}/>
             <Route path="/Diesel_Analysis" element={<Diesel_Analysis/>}/>
+            <Route path="/TableFilter" element={<TableFilte/>}/>
+            <Route path="/BlockWiseData" element={<BlockWiseData/>}/>
+            <Route path="/kVAvsKW" element={<KvaVsKW/>}/>
+            <Route path="/TopTenClients" element={<TopTenClients/>}/>
+            <Route path="/NewDashboard" element={<DashBoardCombine/>}/>
+            
+            
+            {/* TopTenClients
+             */}
+           
+            
+            
             
           </Routes>
         </div>
       </LocationContext>
     </BrowserRouter>
+    {/* <div> 
+      <DashBoardCombine/>
+    </div> */}
+    </div>
   );
 }
 
