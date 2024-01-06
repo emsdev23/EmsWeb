@@ -19,6 +19,9 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import BatterySaverIcon from '@mui/icons-material/BatterySaver';
 import HotTubIcon from '@mui/icons-material/HotTub';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import { AiFillSliders } from "react-icons/ai";
+import { VscAccount } from "react-icons/vsc";
+import { MdSpaceDashboard } from "react-icons/md";
 
 
 
@@ -92,6 +95,22 @@ export const SidebarData = [
         path: '/Status/chillersStatus',
         icon: <SevereColdIcon />,
       },
+      {
+        title: 'kVA vs KW',
+        path: '/kVAvsKW',
+        icon: <AiFillSliders />,
+      },
+      {
+        title: 'TopTenClients',
+        path: '/TopTenClients',
+        icon: <VscAccount />,
+      },
+      {
+        title: 'NewDashboard',
+        path: '/NewDashboard',
+        icon: <MdSpaceDashboard />,
+      },
+      
       // {
       //   title: 'ThermalStatus',
       //   path: '/Status/thermalStatus',
@@ -188,5 +207,5 @@ export const SidebarData = [
     path: '/Documentation',
     icon: <IoIcons.IoMdHelpCircle />,
     cName: 'nav-text'
-  }
+  },
 ];

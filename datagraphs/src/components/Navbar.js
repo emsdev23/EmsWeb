@@ -120,12 +120,14 @@ function Navbar() {
           <img src={CeetLog} alt='iitmrp' style={{ width: "100px", height: "50px",marginRight:"50px" }} />
           
         </div>
+        
         <NavIcon onClick={showSidebar}>
           {/* <GiIcons.GiHamburgerMenu color='black' /> */}
           <img src={Menu} alt="menu" width="70px" height="60px"  />
           
         </NavIcon>
-      </Nav>
+        </Nav>
+      
       <hr style={{border:"1px solid black",marginLeft:"50px",marginRight:"50px"}}/>
       <SidebarNav className="sidebar" sidebar={sidebar} style={{ background: "black" }}>
         <SidebarWrap>
